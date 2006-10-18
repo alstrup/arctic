@@ -2,7 +2,7 @@
 -swf arctic.swf
 -main ArcticTest
 -swf-header 800:600:50
--cp ..
+-lib arctic
 
 --next
 # arctic flash9
@@ -10,4 +10,4 @@
 -swf-version 9
 -main ArcticTest
 -swf-header 800:600:50
--cp ..
+-lib arctic
