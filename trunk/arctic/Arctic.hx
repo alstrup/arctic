@@ -52,21 +52,18 @@ class Arctic {
 		stageSize(parent);
 		refresh();
 	}
-	
+
 	public function refresh() {
+		if (base != null) {
+			remove();
+		}
 		#if flash9
-			if (base != null) {
-				parent.removeChild(base);
-			}
 			base = build(gui, parent, parent.width, parent.height);
 		#else flash
-			if (base != null) {
-				base.removeMovieClip();
-			}
 			base = build(gui, parent, parent._width, parent._height);
 		#end
 	}
-	
+
 	public function remove() {
 		#if flash9
 			parent.removeChild(base);
@@ -100,6 +97,7 @@ class Arctic {
 				setSize(clip, child._width + 2 * x, child._height + 2 * y);
 			#end
 			return clip;
+
 		case Background(color, block):
 			var child = build(block, clip, availableWidth, availableHeight);
 			#if flash9
@@ -120,6 +118,7 @@ class Arctic {
 				clip.endFill();
 			#end
 			return clip;
+
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha):
 			var child = build(block, clip, availableWidth, availableHeight);
 			#if flash9
@@ -146,6 +145,7 @@ class Arctic {
 				clip.endFill();
 			#end
 			return clip;
+
 		case Text(html):
 			#if flash9
 				var tf = new flash.text.TextField();
@@ -163,6 +163,7 @@ class Arctic {
 				tf.htmlText = html;
 			#end
 			return clip;
+
 		case Picture(url, w, h, scaling):
 			#if flash9
 				var loader = new flash.display.Loader();
@@ -181,6 +182,7 @@ class Arctic {
 			#end
 			setSize(clip, w / scaling, h / scaling);
 			return clip;
+
 		case Button(block, action):
 			#if flash9
 				var child = build(block, clip, availableWidth, availableHeight);
@@ -211,6 +213,7 @@ class Arctic {
 				};
 			#end
 			return clip;
+
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
 			#if flash9
 				var sel = build(selected, clip, availableWidth, availableHeight);
@@ -244,6 +247,7 @@ class Arctic {
 				};
 			#end
 			return clip;
+
 		case ToggleButtonGroup(buttons, onSelect):
 			var stateChooser = [];
 			var onInitHandler = function (setState) { stateChooser.push(setState); };
@@ -268,7 +272,69 @@ class Arctic {
 				onSelect(index);
 			}
 			var group = build(SelectList(blocks, onSelectHandler), clip, availableWidth, availableHeight);
-			return clip;			
+			return clip;
+
+/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
+			#if flash9
+				// TODO
+			#else flash
+				var txtInput = clip.createTextField(id, clip.getNextHighestDepth(), 0, 0, width, height);
+				if (null != format) {
+					txtInput.setNewTextFormat(format);
+				}
+				if (null != maxChars) {
+					txtInput.maxChars = maxChars;
+				}
+				if (null != restrict) {
+					txtInput.restrict = restrict;
+				}
+				txtInput.text = contents;
+				txtInput.addListener(listener);
+				txtInput.type = "input";
+				txtInput.border = true;
+			#end
+*/
+		case Filler:
+			return clip;
+
+        case ConstrainWidth(minimumWidth, maximumWidth, block) :
+            var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight);
+			#if flash9
+				if (child.width < minimumWidth) {
+					child.width = minimumWidth;
+				}
+				if (child.width > maximumWidth) {
+					child.width = maximumWidth;
+				}
+			#else flash
+				if (child._width < minimumWidth) {
+					child._width = minimumWidth;
+				}
+				if (child._width > maximumWidth) {
+					child._width = maximumWidth;
+				}
+			#end
+            return clip;
+
+        case ConstrainHeight(minimumHeight, maximumHeight, block) :
+			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ) );
+			#if flash9
+				if (child.height < minimumHeight) {
+				   child.height = minimumHeight;
+				}
+				if (child.height > maximumHeight) {
+				   child.height = maximumHeight;
+				}
+			#else flash
+				if (child._height < minimumHeight) {
+				   child._height = minimumHeight;
+				}
+				if (child._height > maximumHeight) {
+				   child._height = maximumHeight;
+				}
+			#end
+            return clip;
+
 		case ColumnStack(columns):
 			// First, see how many fillers we have ourselves
             var numberOfFillers = 0;
@@ -326,27 +392,7 @@ class Arctic {
                 }
             }
 			return clip;
-/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
-			#if flash9
-				// TODO
-			#else flash
-				var txtInput = clip.createTextField(id, clip.getNextHighestDepth(), 0, 0, width, height);
-				if (null != format) {
-					txtInput.setNewTextFormat(format);
-				}
-				if (null != maxChars) {
-					txtInput.maxChars = maxChars;
-				}
-				if (null != restrict) {
-					txtInput.restrict = restrict;
-				}
-				txtInput.text = contents;
-				txtInput.addListener(listener);
-				txtInput.type = "input";
-				txtInput.border = true;
-			#end
-*/
-			return clip;
+
 		case LineStack(blocks):
 			// First, see how many fillers we have ourselves
             var numberOfFillers = 0;
@@ -405,8 +451,7 @@ class Arctic {
             }
 
 			return clip;
-		case Filler:
-			return clip;
+
 		case SelectList(lines, onClick):
 			// First, see how many fillers we have ourselves
             var numberOfFillers = 0;
@@ -481,44 +526,6 @@ class Arctic {
             
             drawScrollBar (childClip);
 			return clip;
-
-        case ConstrainWidth(minimumWidth, maximumWidth, block) :
-            var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight);
-			#if flash9
-				if (child.width < minimumWidth) {
-					child.width = minimumWidth;
-				}
-				if (child.width > maximumWidth) {
-					child.width = maximumWidth;
-				}
-			#else flash
-				if (child._width < minimumWidth) {
-					child._width = minimumWidth;
-				}
-				if (child._width > maximumWidth) {
-					child._width = maximumWidth;
-				}
-			#end
-            return clip;
-
-        case ConstrainHeight(minimumHeight, maximumHeight, block) :
-			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ) );
-			#if flash9
-				if (child.height < minimumHeight) {
-				   child.height = minimumHeight;
-				}
-				if (child.height > maximumHeight) {
-				   child.height = maximumHeight;
-				}
-			#else flash
-				if (child._height < minimumHeight) {
-				   child._height = minimumHeight;
-				}
-				if (child._height > maximumHeight) {
-				   child._height = maximumHeight;
-				}
-			#end
-            return clip;
 		}
 		return clip;
 	}
@@ -545,6 +552,21 @@ class Arctic {
 			return calcMetrics(selected);
 		case ToggleButtonGroup(buttons, onSelect):
 			return calcMetrics(SelectList(buttons, onSelect));
+		case Filler:
+			return { width : 0.0, height : 0.0, growWidth : true, growHeight : true };
+        case ConstrainWidth(minimumWidth, maximumWidth, block) :
+			var m = calcMetrics(block);
+			m.width = Math.min(minimumWidth, Math.max(maximumWidth, m.width));
+			m.growWidth = false;
+			return m;
+        case ConstrainHeight(minimumHeight, maximumHeight, block) :
+			var m = calcMetrics(block);
+			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
+			m.growHeight = false;
+			return m;
+/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
+			return { width : width, height : height, growWidth : false, growHeight : false };
+*/
 		case ColumnStack(columns):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			for (c in columns) {
@@ -557,9 +579,6 @@ class Arctic {
 				}
 			}
 			return m;
-/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
-			return { width : width, height : height, growWidth : false, growHeight : false };
-*/
 		case LineStack(blocks):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			for (c in blocks) {
@@ -572,8 +591,6 @@ class Arctic {
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
 			return m;
-		case Filler:
-			return { width : 0.0, height : 0.0, growWidth : true, growHeight : true };
 		case SelectList(lines, onClick):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			for (c in lines) {
@@ -585,16 +602,6 @@ class Arctic {
 				}
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
-			return m;
-        case ConstrainWidth(minimumWidth, maximumWidth, block) :
-			var m = calcMetrics(block);
-			m.width = Math.min(minimumWidth, Math.max(maximumWidth, m.width));
-			m.growWidth = false;
-			return m;
-        case ConstrainHeight(minimumHeight, maximumHeight, block) :
-			var m = calcMetrics(block);
-			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
-			m.growHeight = false;
 			return m;
 		}
 		
@@ -713,5 +720,4 @@ class Arctic {
             };
 		#end
     }
-
 }
