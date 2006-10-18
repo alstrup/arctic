@@ -1,0 +1,5 @@
+<project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
+    <user name="alstrup"/>
+    <description>Lightweight GUI framework for haXe targetting Flash8 & Flash9</description>
+    <version name="0.1">Initial release, proof of concept</version>
+</project>
