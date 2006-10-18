@@ -420,13 +420,18 @@ class Arctic {
 				#else flash
 					child._y = y;
 				#end
-                children.push(child);
-				#if flash9
-					y += child.height;
-				#else flash
-					y += child._height;
-				#end
-				++i;
+                children.push(child);				
+                switch (l) {
+                    case SelectList(lines, onClick):
+                            y += freeSpace + childMetrics[i].height;        
+                    default :
+                            #if flash9
+					            y += child.height;
+            				#else flash
+			            		y += child._height;
+            				#end
+                }
+   				++i;
 			}
             if (numberOfFillers > 0) { 
                 var availableSpaceForFillers = availableHeight - y;
@@ -434,19 +439,27 @@ class Arctic {
                 var shift = 0.0;
                 y = 0.0;
                 for (i in 0...blocks.length) {
-					if (blocks[i] == Filler) {
-                       shift += spaceForEachFiller;
-					   setSize(children[i], 0, spaceForEachFiller);
-                       y += shift;
-					} else {
-						#if flash9
-							children[i].y += shift;
-							y += children[i].height;
-						#else flash
-							children[i]._y += shift;
-							y += children[i]._height;
-						#end
-					}
+                    switch (blocks[i]) {        
+                        case Filler: 
+                            shift += spaceForEachFiller;
+                            setSize(children[i], 0, spaceForEachFiller);
+                            y += shift;
+                        case SelectList(lines, onClick):
+                            #if flash9
+                                children[i].y += shift;
+                            #else flash
+                                children[i]._y += shift;
+                            #end
+                            y += freeSpace + childMetrics[i].height;        
+                        default :
+                            #if flash9
+							    children[i].y += shift;
+							    y += children[i].height;
+						    #else flash
+							    children[i]._y += shift;
+							    y += children[i]._height;
+						    #end                            
+                    }                       				
                 }
             }
 
@@ -524,7 +537,7 @@ class Arctic {
                 }
              }
             
-            drawScrollBar (childClip);
+            drawScrollBar (childClip, availableWidth, availableHeight);
 			return clip;
 		}
 		return clip;
@@ -650,10 +663,14 @@ class Arctic {
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
     // rendered.
     // This can be seperated out and written as a seperate class - ideally it should use ArcticBlocks to construct itself
-    private function drawScrollBar(clip : MovieClip) {
+    private function drawScrollBar(clip : MovieClip, availableWidth : Float,
+                                                     availableHeight : Float ) {
 		#if flash9
 			// TODO
 		#else flash
+            if (availableHeight >= clip._height) {
+                return;
+            }
             var parent = clip._parent;
       		var depth = parent.getNextHighestDepth();
 	    	var upperChild = parent.createEmptyMovieClip("c" + depth, depth);
@@ -664,12 +681,12 @@ class Arctic {
 		    lowerChild.tabEnabled = true;
 
             var clipRect = new Rectangle<Float>(clip._x, clip._y, 
-                                                     clip._width, clip._height);
+                                               availableWidth, availableHeight);
             clip.scrollRect = clipRect;
             lowerChild.beginFill(0xFFFFFF);
 
             var width = clip._width + 1;
-            var height = clip._height - 20;
+            var height = availableHeight - 20;
             //Drawing lower white square 
             lowerChild.moveTo(width, clip._y + height );
             lowerChild.lineTo(width, clip._y + height );
@@ -687,6 +704,17 @@ class Arctic {
             lowerChild.endFill();
 
             //Lower scroll bar listener Listener 
+			/*lowerChild.onMouseDown = function() {            
+                    var mouseInside = lowerChild.hitTest(flash.Lib.current._xmouse, 
+                                        flash.Lib.current._ymouse, false);
+                    if (mouseInside) {                
+                        if ((clipRect.y + 10) < clip._height) {
+                            clipRect.y += 10;
+                        }
+                        clip.scrollRect = clipRect;
+                    }
+            };*/
+
             lowerChild.onPress=function() {
                  if ((clipRect.y + 10) < clip._height) {
                      clipRect.y += 10;
