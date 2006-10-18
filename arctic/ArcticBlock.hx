@@ -58,7 +58,7 @@ enum ArcticBlock {
 	Filler;
 
 	/**
-	 * Columns are blocks put next to each other horizontally (should align when put in a list).
+	 * Columns are blocks put next to each other horizontally
 	 */
 	ColumnStack(columns : Array< ArcticBlock > );
 

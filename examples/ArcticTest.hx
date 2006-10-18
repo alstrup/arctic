@@ -6,6 +6,7 @@ import flash.MovieClip;
 
 import arctic.Arctic;
 import arctic.ArcticBlock;
+import arctic.ArcticBuilders;
 
 class ArcticTest {
 	static public function main() {
@@ -44,7 +45,7 @@ class ArcticTest {
 						LineStack( [
 							Border( 10, 10, 
 								ColumnStack( [
-									arctic.ArcticBuilders.makeDateView(Date.now()), 
+									ArcticBuilders.makeDateView(Date.now()), 
 									Border( 20, 20, 
 										Text("<b><font face='arial' size='24' color='#ffffff'>Today's appointments</font></b>")
 									)
