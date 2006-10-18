@@ -1,0 +1,15 @@
+# arctic
+-swf arctic.swf
+-xml C:\area9\hench\client\arctic/out0.xml
+-main ArcticTest
+-swf-header 800:600:50
+-cp ..
+
+--next
+# arctic flash9
+-swf arctic9.swf
+-swf-version 9
+-xml C:\area9\hench\client\arctic/out1.xml
+-main ArcticTest
+-swf-header 800:600:50
+-cp ..
