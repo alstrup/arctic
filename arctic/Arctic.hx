@@ -15,6 +15,7 @@ import flash.TextFormat;
 typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight : Bool }
 
 class Arctic {
+
 	public function new(gui0 : ArcticBlock) {
 		gui = gui0;
 		parent = null;
@@ -24,6 +25,9 @@ class Arctic {
 	public var gui : ArcticBlock;
 	public var parent : MovieClip;
 	private var base : MovieClip;
+    
+    //Increasing this value will reduce the speed of the scroll bar and viceversa
+    static  private var SCROLL_DELAY : Int = 100;
 
 	public function display(p : MovieClip, useStageSize : Bool) : MovieClip {
 		if (useStageSize) {
@@ -703,27 +707,21 @@ class Arctic {
             lowerChild.lineTo(width + 2 + 4, clip._y + height + 5 );
             lowerChild.endFill();
 
-            //Lower scroll bar listener Listener 
-			/*lowerChild.onMouseDown = function() {            
-                    var mouseInside = lowerChild.hitTest(flash.Lib.current._xmouse, 
-                                        flash.Lib.current._ymouse, false);
-                    if (mouseInside) {                
-                        if ((clipRect.y + 10) < clip._height) {
-                            clipRect.y += 10;
-                        }
-                        clip.scrollRect = clipRect;
-                    }
-            };*/
+            //Lower scroll bar listener Listener
+			lowerChild.onPress = function() {
+                Reflect.setField(Bool, "isMouseDown", true);
+                scroll(clip, clipRect, true);
+            };
+			lowerChild.onRelease = function() {            
+                Reflect.setField(Bool, "isMouseDown", false);                     
+            };
 
-            lowerChild.onPress=function() {
-                 if ((clipRect.y + 10) < clip._height) {
-                     clipRect.y += 10;
-                     }
-                 clip.scrollRect = clipRect;
+			lowerChild.onReleaseOutside = function() {            
+                Reflect.setField(Bool, "isMouseDown", false);                     
             };
 
             height = clip._y + 4;
-            //Drawing upper white squate
+            //Drawing upper white squate    
             upperChild.beginFill(0xFFFFFF);
             upperChild.moveTo(width,  height );
             upperChild.lineTo(width,  height );
@@ -740,12 +738,51 @@ class Arctic {
             upperChild.lineTo(width + 2 + 8, height + 2);
             upperChild.lineTo(width + 2 + 4, height - 2 );
             upperChild.endFill();
+
             upperChild.onPress=function() {
-                 if (clipRect.y > 0) {
-                    clipRect.y -=10;
-                    clip.scrollRect = clipRect;
-                 }
+                Reflect.setField(Bool, "isMouseDown", true);
+                scroll(clip, clipRect, false);
             };
+			upperChild.onRelease = function() {            
+                Reflect.setField(Bool, "isMouseDown", false);                     
+            };
+			upperChild.onReleaseOutside = function() {            
+                Reflect.setField(Bool, "isMouseDown", false);                     
+            };
+
+
 		#end
     }
+
+
+   		#if flash9
+        	static  function scroll(clip : MovieClip, 
+                                             rect : flash.geom.Rectangle) {
+
+            }
+		#else flash
+            static function scroll(clip : MovieClip, 
+                        rect : flash.geom.Rectangle< Float >, scrollUp : Bool) {  
+                var interval = new haxe.Timer(SCROLL_DELAY);
+                interval.run = function () {
+                    if (scrollUp) {
+                        if ( (rect.y + 10) < clip._height ) {
+                            rect.y += 10;
+                        }
+                    } else {
+                        if (rect.y > 0) {
+                        rect.y -=10;
+                        clip.scrollRect = rect;
+                        }
+                    }
+
+                    clip.scrollRect = rect;
+                    var isMouseDown = Reflect.field(Bool, "isMouseDown");
+                    if ( !isMouseDown ) {
+                        interval.stop();
+                    }
+                }
+            }
+        #end
+
 }
