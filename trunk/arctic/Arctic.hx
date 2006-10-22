@@ -5,10 +5,13 @@ import arctic.ArcticBlock;
 #if flash9
 import flash.display.MovieClip;
 import flash.geom.Rectangle;
-import flash.text.TextFormat;
+import flash.text.TextField;
+import flash.text.TextFieldType;
+import flash.events.FocusEvent;
 #else true
 import flash.MovieClip;
 import flash.geom.Rectangle;
+import flash.TextField;
 import flash.TextFormat;
 #end
 
@@ -219,9 +222,9 @@ class Arctic {
 			return clip;
 
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
-			#if flash9
 				var sel = build(selected, clip, availableWidth, availableHeight);
 				var unsel = build(unselected, clip, availableWidth, availableHeight);
+			#if flash9
 				sel.visible = initialState;
 				unsel.visible = !initialState;
 				var setState = function (newState : Bool) { sel.visible = newState; unsel.visible = !newState; }; 
@@ -235,8 +238,6 @@ class Arctic {
 						}
 					});
 			#else flash
-				var sel = build(selected, clip, availableWidth, availableHeight);
-				var unsel = build(unselected, clip, availableWidth, availableHeight);
 				sel._visible = initialState;
 				unsel._visible = !initialState;
 				var setState = function (newState : Bool) { sel._visible = newState; unsel._visible = !newState; }; 
@@ -252,52 +253,62 @@ class Arctic {
 			#end
 			return clip;
 
-		case ToggleButtonGroup(buttons, onSelect):
-			var stateChooser = [];
-			var onInitHandler = function (setState) { stateChooser.push(setState); };
-			var blocks = [];
-			// Construct the ToggleButton again to make it work as a group
-			for (button in buttons) {
-				switch(button) {
-					case ToggleButton(selected, unselected, initialState, onChange, onInit):
-						// In case of ToggleButtonGroup onChange has to be null.
-						blocks.push(ToggleButton(selected, unselected, false, null, onInitHandler));
-					default:
-				}
-			}
-			var onSelectHandler = function (index : Int) {
-				for (i in 0...stateChooser.length) {
-					if (i != index) {
-						stateChooser[i](false);
-					} else {
-						stateChooser[i](true);
-					}
-				}
-				onSelect(index);
-			}
-			var group = build(SelectList(blocks, onSelectHandler), clip, availableWidth, availableHeight);
-			return clip;
-
-/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
+		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
 			#if flash9
-				// TODO
-			#else flash
-				var txtInput = clip.createTextField(id, clip.getNextHighestDepth(), 0, 0, width, height);
-				if (null != format) {
-					txtInput.setNewTextFormat(format);
+				var txtInput = new flash.text.TextField();
+				if (null != numeric && numeric) { 
+					txtInput.restrict = "0-9";
+					var txtFormat = txtInput.defaultTextFormat;
+					txtFormat.align = "right";
+					txtInput.defaultTextFormat = txtFormat;
 				}
+			#else flash
+				var txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
+				if (null != numeric && numeric) { 
+					txtInput.restrict = "0-9";
+					var txtFormat = txtInput.getTextFormat();
+					txtFormat.align = "right";
+					txtInput.setNewTextFormat(txtFormat);
+				}
+			#end
 				if (null != maxChars) {
 					txtInput.maxChars = maxChars;
 				}
-				if (null != restrict) {
-					txtInput.restrict = restrict;
+				if (null != bgColor) {
+					txtInput.background = true;
+					txtInput.backgroundColor = bgColor;
 				}
-				txtInput.text = contents;
+				txtInput.border = true;
+				var validate = function() {
+					var isValid = validator(txtInput.text);
+					if (isValid) {
+						txtInput.background = (null != bgColor);
+						if (txtInput.background) {
+							txtInput.backgroundColor = bgColor;
+						}
+					} else {
+						txtInput.background = true;
+						txtInput.backgroundColor = 0xff0000;
+					}
+				}
+			#if flash9
+				txtInput.htmlText = html;
+				var listener = function (e:FocusEvent) { validate(); };
+				txtInput.addEventListener(FocusEvent.FOCUS_OUT , listener);
+				txtInput.type = TextFieldType.INPUT;
+				clip.addChild(txtInput);
+			#else flash
+				txtInput.html = true;
+				txtInput.htmlText = html;
+				var listener = {
+					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
+					onChanged : function (txtFld : TextField) {	validate();	}
+				};
 				txtInput.addListener(listener);
 				txtInput.type = "input";
-				txtInput.border = true;
 			#end
-*/
+			return clip;
+
 		case Filler:
 			return clip;
 
@@ -567,8 +578,6 @@ class Arctic {
 			return calcMetrics(block);
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
 			return calcMetrics(selected);
-		case ToggleButtonGroup(buttons, onSelect):
-			return calcMetrics(SelectList(buttons, onSelect));
 		case Filler:
 			return { width : 0.0, height : 0.0, growWidth : true, growHeight : true };
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
@@ -581,9 +590,8 @@ class Arctic {
 			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
 			m.growHeight = false;
 			return m;
-/*		case TextInput(id, contents, listener, width, height, maxChars, restrict, format):
+		case TextInput(html, width, height, validator, maxChars, numeric, bgColor):
 			return { width : width, height : height, growWidth : false, growHeight : false };
-*/
 		case ColumnStack(columns):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			for (c in columns) {

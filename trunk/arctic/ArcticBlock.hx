@@ -32,15 +32,9 @@ enum ArcticBlock {
 	ToggleButton(selected : ArcticBlock, unselected : ArcticBlock, initialState : Bool, onChange : Bool -> Void, ?onInit : (Bool -> Void) -> Void);
 
 	/**
-	 * Group of ToggleButtons on which only one of will be in a selected state at any point of time.
-	 * ONLY ToggleButton is supported in the blocks
+	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
 	 */
-	ToggleButtonGroup(buttons : Array<ArcticBlock>, onSelect : Int -> Void);
-
-	/**
-	 * An input text - TODO: This has to change interface to be platform independent. It can not rely on types like TextFormat
-	 */
-//	TextInput(id : String, contents : String, listener : Dynamic, width : Int, height : Int, ?maxChars : Int, ?restrict : String, ?format : TextFormat );
+	TextInput(html : String, width : Int, height : Int, validator : String -> Bool, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int);
 
     /**
      * The ArcticBlock will be constraint to the dimensions given
