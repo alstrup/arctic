@@ -256,6 +256,8 @@ class Arctic {
 		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
 			#if flash9
 				var txtInput = new flash.text.TextField();
+				txtInput.width = width;
+				txtInput.height = height;
 				if (null != numeric && numeric) { 
 					txtInput.restrict = "0-9";
 					var txtFormat = txtInput.defaultTextFormat;
@@ -271,6 +273,7 @@ class Arctic {
 					txtInput.setNewTextFormat(txtFormat);
 				}
 			#end
+				setSize(clip, width, height);
 				if (null != maxChars) {
 					txtInput.maxChars = maxChars;
 				}
