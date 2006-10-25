@@ -66,4 +66,6 @@ enum ArcticBlock {
 	 * If there is not enough room on the screen for all items, we will show a scroll-bar.
 	 */ 
 	SelectList(lines : Array<ArcticBlock>, onClick : Int -> Void);
+
+    ScrollBar(block : ArcticBlock, availableWidth : Float, availableHeight : Float);
 }
