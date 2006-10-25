@@ -17,6 +17,10 @@ import flash.TextFormat;
 
 typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight : Bool }
 
+typedef ScrollMetrics = { startX : Float, startY : Float, 
+                         endY : Float, scrollHeight : Float, toScroll : Float, 
+                         clipHeight : Float }
+
 class Arctic {
 
 	public function new(gui0 : ArcticBlock) {
@@ -557,6 +561,11 @@ class Arctic {
             
             drawScrollBar (childClip, availableWidth, availableHeight);
 			return clip;
+
+		case ScrollBar(block, availableWidth, availableHeight):
+            var child = build(block, clip, availableWidth, availableHeight);            
+            drawScrollBar(child, availableWidth, availableHeight);
+            return clip;
 		}
 		return clip;
 	}
@@ -631,6 +640,12 @@ class Arctic {
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
 			return m;
+		    case ScrollBar(block, availableWidth, availableHeight):
+                var cm = calcMetrics(block);
+                if (cm.height > availableHeight) {
+                    cm.height = availableHeight;
+                }
+
 		}
 		
 		// The sad fall-back scenario: Create the fucker and ask it, and then destroy it again
@@ -681,7 +696,7 @@ class Arctic {
     private function drawScrollBar(clip : MovieClip, availableWidth : Float,
                                                          availableHeight : Float) {
         #if flash9 
-            //TO DO
+            drawScrollBarForFlash9(clip, availableWidth, availableHeight);
         #else flash
             if (clip._height <= availableHeight) {
                 return;
@@ -731,13 +746,7 @@ class Arctic {
             var scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
             var scrollHandHeight = 10;
             drawLine(scrollHand, 0, 0, 8, scrollHandHeight - 0.5, 0x000000);
-            scrollHand.startX = 1.3;
-            scrollHand.startY = upperChild._height + 0.5;
-            scrollHand.scrollHeight = scrollHeight - scrollHandHeight - 1;
-            scrollHand.toScroll = (clip._height / scrollHand.scrollHeight);
-            scrollHand.clipHeight = clip._height;
-            scrollHand.endY = scrollHand.startY + scrollHand.scrollHeight - 0.5;
-            
+  
             var scrollMet = { startX : 0.0, startY : 0.0, endY : 0.0, 
                             scrollHeight : 0.0, toScroll : 0.0, clipHeight : 0.0 };
             scrollMet.startX = 1.3;
@@ -787,36 +796,31 @@ class Arctic {
                                                   flash.Lib.current._ymouse, false);
 
                 if (mouseInside) {
-                    trace("scrollMet.startY"+scrollMet.startY);
-                    trace("scrollMet.startX"+scrollMet.startX);
-                    trace("scrollHand.startX"+scrollHand.startX);
-                    trace("scrollHand.startY"+scrollHand.startY);
-
                     scrollHand.startDrag(false , scrollMet.startX , 
                                                     scrollMet.startY ,
                                                     scrollMet.startX , 
                                                     scrollHeight );
                     dragged = true;
                     Reflect.setField(Bool, "dragging", true);
-                    scrollTimer(clip, scrollHand, clipRect);
+                    scrollTimer(clip, scrollHand, clipRect, scrollMet);
                 } else if (inScrollOutline) {
                     var scrollToY = flash.Lib.current._ymouse;
                     scrollToY = scrollToY - 139;//scrollBar._y;
                     scrollToY = scrollBar._ymouse;
-                    var startY = scrollHand.startY;
+                    var startY = scrollMet.startY;
                     if (scrollToY < startY ) {
-                        scrollToY = scrollHand.startY;
-                    } else if (scrollToY >= scrollHand.endY) {
-                        scrollToY = scrollHand.endY;
+                        scrollToY = scrollMet.startY;
+                    } else if (scrollToY >= scrollMet.endY) {
+                        scrollToY = scrollMet.endY;
                     }
                     scrollHand._y = scrollToY;
-                    scroll(clip, scrollHand, clipRect);
+                    scroll(clip, scrollHand, clipRect, scrollMet);
                 } else if ( inLowerChild) {
                     Reflect.setField(Bool, "scrollPressed", true);
-                    scrollByOne(clip, scrollHand, clipRect,true);
+                    scrollByOne(clip, scrollHand, clipRect, scrollMet, true);
                 } else if (inUpperChild) {
                     Reflect.setField(Bool, "scrollPressed", true);
-                    scrollByOne(clip, scrollHand, clipRect,false);
+                    scrollByOne(clip, scrollHand, clipRect, scrollMet, false);
                 }
             }
 
@@ -839,70 +843,100 @@ class Arctic {
 
 
     #if flash9
-       static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle) {          
-        }
+       static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, 
+                            rect : Rectangle, scrollMet : ScrollMetrics) {          
     #else flash
-       static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle<Float>) {
+       static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, 
+                        rect : Rectangle<Float>, scrollMet : ScrollMetrics) {
+    #end
             var interval = new haxe.Timer(100);                
             interval.run = function () {
                 var dragged = Reflect.field(Bool, "dragging");
-                scroll(clip, scrollHand, rect);
+                scroll(clip, scrollHand, rect, scrollMet);
                 if ( !dragged ) {
                     interval.stop();
                 }
             }
         }
-    #end
+
 
     #if flash9
-        static public function scrollByOne(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle, 
-                                                                    scrollDown : Bool) {
-        }
-    #else flash
-        static public function scrollByOne(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle < Float >, 
-                                                                        scrollDown : Bool) {
+        static private function scrollByOne(clip : MovieClip, 
+                             scrollHand : MovieClip, rect : Rectangle, 
+                             scrollMet : ScrollMetrics, scrollDown : Bool) {
             var interval = new haxe.Timer(15);                
             interval.run = function () {
                 var scrollPressed = Reflect.field(Bool, "scrollPressed");
                 if (scrollDown) {
-                    if ( (scrollHand._y + 1) <= scrollHand.endY ) {
-                          scrollHand._y = scrollHand._y + 1;
+                    if ( (scrollHand.y + 1) <= scrollMet.endY ) {
+                          scrollHand.y++;
                     }
                 } else {
-                    if ( (scrollHand._y - 1 ) >= scrollHand.startY ) {
-                          scrollHand._y = scrollHand._y - 1;
+                    if ( (scrollHand.y - 1 ) >= scrollMet.startY ) {
+                          scrollHand.y--;
                     }
                 }
-                scroll(clip, scrollHand, rect);
+
+   #else flash
+        static private function scrollByOne(clip : MovieClip, scrollHand : MovieClip, 
+                      rect : Rectangle < Float >, scrollMet : ScrollMetrics,                                                                     scrollDown : Bool) {
+            var interval = new haxe.Timer(15);                
+            interval.run = function () {
+                var scrollPressed = Reflect.field(Bool, "scrollPressed");
+                if (scrollDown) {
+                    if ( (scrollHand._y + 1) <= scrollMet.endY ) {
+                          scrollHand._y++;
+                    }
+                } else {
+                    if ( (scrollHand._y - 1 ) >= scrollMet.startY ) {
+                          scrollHand._y--;
+                    }
+                }
+    #end
+                scroll(clip, scrollHand, rect, scrollMet);
                 if ( !scrollPressed ) {
                     interval.stop();
                 }
             }
         }
-    #end
+
 
 
     #if flash9
-        static private function scroll(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle ) {        }
+        static private function scroll(clip : MovieClip, scrollHand : MovieClip, 
+                rect : Rectangle, scrollMet : ScrollMetrics ) {   
+             if ( (scrollHand.y >= scrollMet.startY )  && (scrollHand.y <= scrollMet.endY)) {
+                var diff = scrollHand.y - scrollMet.startY;
+
     #else flash
-        static private function scroll(clip : MovieClip, scrollHand : MovieClip, rect : Rectangle < Float >) {
-             if ( (scrollHand._y >= scrollHand.startY )  && (scrollHand._y <= scrollHand.endY)) {
-                var diff = scrollHand._y - scrollHand.startY;
-                var increment = scrollHand.toScroll * diff;
-                if (increment < (scrollHand.clipHeight - 10) ) {
+        static private function scroll(clip : MovieClip, scrollHand : MovieClip, 
+                    rect : Rectangle < Float >, scrollMet : ScrollMetrics) {
+             if ( (scrollHand._y >= scrollMet.startY )  && (scrollHand._y <= scrollMet.endY)) {
+                var diff = scrollHand._y - scrollMet.startY;
+    #end
+                var increment = scrollMet.toScroll * diff;
+                if (increment < (scrollMet.clipHeight - 10) ) {
                     rect.y = increment;
                     clip.scrollRect = rect;
                 } else {
-                    rect.y = scrollHand.clipHeight - 10;
+                    rect.y = scrollMet.clipHeight - 10;
                     clip.scrollRect = rect;
                 }
             }
         }
-    #end
+
 
     #if flash9
         static private function drawLine(clip : MovieClip, startX : Float, 
               startY : Float, lineWidth : Float , lineHeight : Float, rgb : Int) { 
+
+            clip.graphics.beginFill(rgb);
+            clip.graphics.moveTo(startX + 0.2,  startY );
+            clip.graphics.lineTo(startX + 0.2,  startY );
+            clip.graphics.lineTo(startX + 0.2 + lineWidth, startY );
+            clip.graphics.lineTo(startX + 0.2 + lineWidth, startY + lineHeight );
+            clip.graphics.lineTo(startX + 0.2, startY + lineHeight );
+            clip.graphics.endFill();
         }
     #else flash
         static private function drawLine(clip : MovieClip, startX : Float, 
@@ -919,5 +953,178 @@ class Arctic {
 
         }
     #end
+
+    #if flash9 
+        private function drawScrollBarForFlash9(clip : MovieClip, availableWidth : Float,
+                                                         availableHeight : Float) {
+            if (clip.height <= availableHeight) {
+                return;
+            }
+            var parent = clip.parent;
+            var scrollBar = new MovieClip();
+            parent.addChild(scrollBar);
+            var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
+            clip.scrollRect = clipRect;
+            var squareHeight = 10;
+
+            var upperChild = new MovieClip();
+            scrollBar.addChild(upperChild);
+
+            // Upper scroll bar handle
+            //Drawing upper white squate    
+            upperChild.graphics.beginFill(0x000000);
+            upperChild.graphics.moveTo(0,  0 );
+            upperChild.graphics.lineTo(0,  0 );
+            upperChild.graphics.lineTo(12, 0 );
+            upperChild.graphics.lineTo(12, squareHeight );
+            upperChild.graphics.lineTo(0, squareHeight );
+            upperChild.graphics.endFill();
+            
+            var height =  7;
+
+            //Drawing upper scrollbar triangle
+            upperChild.graphics.beginFill(0xFFFFFF);
+            upperChild.graphics.moveTo(2 , height );
+            upperChild.graphics.lineTo(2 , height );
+            upperChild.graphics.lineTo(2 + 8 , height );
+            upperChild.graphics.lineTo(2 + 4 , height - 4 );
+            upperChild.graphics.endFill();
+
+            var scrollHeight = availableHeight - (squareHeight * 2);
+
+            var scrollOutline = new MovieClip();
+            scrollBar.addChild(scrollOutline);
+            
+//            drawLine(scrollOutline, 0, 0, 0.2, scrollHeight, 0x000000);
+//            drawLine(scrollOutline, 10, 0, 0.3, scrollHeight, 0x000000);
+            
+            drawLine(scrollOutline, 0, 0, 10, scrollHeight, 0xFFFFFF);
+            scrollOutline.y = upperChild.height;
+
+            var scrollHand = new MovieClip();
+            scrollBar.addChild(scrollHand);
+            var scrollHandHeight = 10;
+            drawLine(scrollHand, 0, 0, 8, scrollHandHeight - 0.5, 0x000000);
+  
+            var scrollMet = { startX : 0.0, startY : 0.0, endY : 0.0, 
+                            scrollHeight : 0.0, toScroll : 0.0, clipHeight : 0.0 };
+            scrollMet.startX = 1.2;
+            scrollMet.startY = upperChild.height + 0.5;
+            scrollMet.scrollHeight = scrollHeight - scrollHandHeight - 1;
+            scrollMet.toScroll = (clip.height / scrollMet.scrollHeight);
+            scrollMet.clipHeight = clip.height;
+            scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
+
+            scrollHand.y = upperChild.height + 0.5;
+            scrollHand.x = 1.2;
+
+            var lowerChild = new MovieClip();
+            scrollBar.addChild(lowerChild);
+
+
+            lowerChild.graphics.beginFill(0x000000);
+
+            //Drawing lower white square 
+            lowerChild.graphics.moveTo(0, 0 );
+            lowerChild.graphics.lineTo(0, 0 );
+            lowerChild.graphics.lineTo(12, 0);
+            lowerChild.graphics.lineTo(12, squareHeight);
+            lowerChild.graphics.lineTo(0,  squareHeight);
+            lowerChild.graphics.endFill();
+            
+            height = 3;
+            //Drawing lower scrollbar triangle
+            lowerChild.graphics.beginFill(0xFFFFFF);
+            lowerChild.graphics.moveTo(2 , height );
+            lowerChild.graphics.lineTo(2, height );
+            lowerChild.graphics.lineTo(2 + 8, height );
+            lowerChild.graphics.lineTo(2 + 4, height + 4 );
+            lowerChild.graphics.endFill();
+            //lowerChild._x = 10;
+            lowerChild.y = availableHeight - 10 ;
+
+    		scrollHand.addEventListener(
+                flash.events.MouseEvent.MOUSE_DOWN, 
+                function (s) {
+                    scrollHand.startDrag(false , new Rectangle(
+                                                    scrollMet.startX , 
+                                                    scrollMet.startY ,
+                                                    scrollMet.startX , 
+                                            scrollMet.scrollHeight) );
+                    Reflect.setField(Bool, "dragging", true);
+                    scrollTimer(clip, scrollHand, clipRect, scrollMet);
+                 } ); 
+
+
+    		scrollHand.addEventListener(
+                flash.events.MouseEvent.MOUSE_UP, 
+                function (s) {
+                    var dragged = Reflect.field(Bool, "dragging");
+                    if (dragged) {
+                        scrollHand.stopDrag();                
+                        Reflect.setField(Bool, "dragging", false);
+                    }
+                 } ); 
+
+
+    		scrollOutline.addEventListener(
+                flash.events.MouseEvent.MOUSE_DOWN, 
+                function (s) {
+                    trace("in scroll outline");
+                    //var scrollToY = scrollBar._ymouse;
+                     var scrollToY = s.localY;
+                    var startY = scrollMet.startY;
+                    if (scrollToY < startY ) {
+                        scrollToY = scrollMet.startY;
+                    } else if (scrollToY >= scrollMet.endY) {
+                        scrollToY = scrollMet.endY;
+                    }
+                    scrollHand.y = scrollToY;
+                    scroll(clip, scrollHand, clipRect, scrollMet);
+                 } ); 
+
+
+
+    		lowerChild.addEventListener(
+                flash.events.MouseEvent.MOUSE_DOWN, 
+                function (s) {
+                    Reflect.setField(Bool, "scrollPressed", true);
+                    scrollByOne(clip, scrollHand, clipRect, scrollMet, true);
+                } ); 
+
+
+    		lowerChild.addEventListener(
+                flash.events.MouseEvent.MOUSE_UP, 
+                function (s) {
+                    var scrollPressed = Reflect.field(Bool, "scrollPressed");
+                    if (scrollPressed) {
+                        Reflect.setField(Bool, "scrollPressed", false);
+                    }            
+                 } ); 
+
+    		upperChild.addEventListener(
+                flash.events.MouseEvent.MOUSE_DOWN, 
+                function (s) {
+                    Reflect.setField(Bool, "scrollPressed", true);
+                    scrollByOne(clip, scrollHand, clipRect, scrollMet, false);
+                } ); 
+
+
+    		upperChild.addEventListener(
+                flash.events.MouseEvent.MOUSE_UP, 
+                function (s) {
+                    var scrollPressed = Reflect.field(Bool, "scrollPressed");
+                    if (scrollPressed) {
+                        Reflect.setField(Bool, "scrollPressed", false);
+                    }            
+                 } ); 
+
+
+            scrollBar.x = availableWidth - 2;
+            scrollBar.y = clip.y;
+
+       }
+        #end
+
 
 }
