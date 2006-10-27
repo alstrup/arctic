@@ -905,12 +905,28 @@ class Arctic {
     #if flash9
         static private function scroll(clip : MovieClip, scrollHand : MovieClip, 
                 rect : Rectangle, scrollMet : ScrollMetrics ) {   
+             if ( scrollHand.y < scrollMet.startY ) {
+             	scrollHand.y = scrollMet.startY;
+             }
+             
+	     if ( scrollHand.y > scrollMet.endY ) {
+             	scrollHand.y = scrollMet.endY;
+             }
+             
              if ( (scrollHand.y >= scrollMet.startY )  && (scrollHand.y <= scrollMet.endY)) {
                 var diff = scrollHand.y - scrollMet.startY;
 
     #else flash
         static private function scroll(clip : MovieClip, scrollHand : MovieClip, 
                     rect : Rectangle < Float >, scrollMet : ScrollMetrics) {
+             if ( scrollHand._y < scrollMet.startY ) {
+             	scrollHand._y = scrollMet.startY;
+             }
+             
+	     if ( scrollHand._y > scrollMet.endY ) {
+             	scrollHand._y = scrollMet.endY;
+             }
+             
              if ( (scrollHand._y >= scrollMet.startY )  && (scrollHand._y <= scrollMet.endY)) {
                 var diff = scrollHand._y - scrollMet.startY;
     #end
