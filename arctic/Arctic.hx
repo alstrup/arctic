@@ -21,6 +21,11 @@ typedef ScrollMetrics = { startX : Float, startY : Float,
                          endY : Float, scrollHeight : Float, toScroll : Float, 
                          clipHeight : Float }
 
+/**
+ * The main class in Arctic which builds a user interface from an ArcticBlock.
+ * Construct the ArcticBlock representing your user interface and call
+ * display() on a movieclip to construct it.
+ */
 class Arctic {
 
 	public function new(gui0 : ArcticBlock) {
@@ -33,9 +38,13 @@ class Arctic {
 	public var parent : MovieClip;
 	private var base : MovieClip;
     
-    //Increasing this value will reduce the speed of the scroll bar and viceversa
+    /// Increasing this value will reduce the speed of the scroll bar and viceversa
     static  private var SCROLL_DELAY : Int = 100;
 
+	/**
+	 * Builds the user interface on the movieclip given. If useStageSize is true
+	 * the user interface will automatically resize to the size of the stage.
+	 */
 	public function display(p : MovieClip, useStageSize : Bool) : MovieClip {
 		if (useStageSize) {
 			stageSize(p);
@@ -60,6 +69,9 @@ class Arctic {
 	}
 
 	public function onResize() {
+		if (base != null) {
+			remove();
+		}
 		stageSize(parent);
 		refresh();
 	}
@@ -84,7 +96,7 @@ class Arctic {
 		base = null;
 	}
 
-    public function build(gui : ArcticBlock, p : MovieClip, 
+    private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float) : MovieClip {
 		#if flash9
 			var clip = new MovieClip();
@@ -98,61 +110,46 @@ class Arctic {
 		switch (gui) {
 		case Border(x, y, block):
 			var child = build(block, clip, availableWidth - 2 * x, availableHeight - 2 * y);
+			var size = getSize(child);
 			#if flash9
 				child.x = x;
 				child.y = y;
-				setSize(clip, child.width + 2 * x, child.height + 2 * y);
 			#else flash
 				child._x = x;
 				child._y = y;
-				setSize(clip, child._width + 2 * x, child._height + 2 * y);
 			#end
+			setSize(clip, size.width + 2 * x, size.height + 2 * y);
 			return clip;
 
-		case Background(color, block):
+		case Background(color, block, alpha, roundRadius):
 			var child = build(block, clip, availableWidth, availableHeight);
+			var size = getSize(child);
 			#if flash9
-				clip.graphics.beginFill(color);
-				clip.graphics.moveTo(0,0);
-				clip.graphics.lineTo(child.width, 0);
-				clip.graphics.lineTo(child.width, child.height);
-				clip.graphics.lineTo(0, child.height);
-				clip.graphics.lineTo(0, 0);
+				clip.graphics.beginFill(color, if (alpha != null) alpha else 100.0);
+				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
-				clip.beginFill(color);
-				clip.moveTo(0,0);
-				clip.lineTo(child._width, 0);
-				clip.lineTo(child._width, child._height);
-				clip.lineTo(0, child._height);
-				clip.lineTo(0, 0);
+				clip.beginFill(color, if (alpha != null) alpha else 100.0);
+				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.endFill();
 			#end
 			return clip;
 
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha):
+		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
 			var child = build(block, clip, availableWidth, availableHeight);
+			var size = getSize(child);
 			#if flash9
 				var matrix = new  flash.geom.Matrix();
-				matrix.createGradientBox(child.width, child.height, 0, child.width * xOffset, child.height * yOffset);
+				matrix.createGradientBox(size.width, size.height, 0, size.width * xOffset, size.height * yOffset);
 				clip.graphics.beginGradientFill(flash.display.GradientType.RADIAL, colors, [100.0, 100.0], [0.0, 255.0], matrix);
-				clip.graphics.moveTo(0,0);
-				clip.graphics.lineTo(child.width, 0);
-				clip.graphics.lineTo(child.width, child.height);
-				clip.graphics.lineTo(0, child.height);
-				clip.graphics.lineTo(0, 0);
+				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
-				var matrix = {	a:child._width, b:0, c:0, 
-								d:0, e:child._height, f: 0, 
-								g:child._width * xOffset, h:child._height * yOffset, i:0}; // Center
+				var matrix = {	a:size.width, b:0, c:0, 
+								d:0, e:size.height, f: 0, 
+								g:size.width * xOffset, h:size.height * yOffset, i:0}; // Center
 				clip.beginGradientFill(type, colors, [100.0, 100.0], [0.0, 255.0], matrix);
-				
-				clip.moveTo(0,0);
-				clip.lineTo(child._width, 0);
-				clip.lineTo(child._width, child._height);
-				clip.lineTo(0, child._height);
-				clip.lineTo(0, 0);
+				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.endFill();
 			#end
 			return clip;
@@ -175,6 +172,69 @@ class Arctic {
 			#end
 			return clip;
 
+		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
+			#if flash9
+				var txtInput = new flash.text.TextField();
+				txtInput.width = width;
+				txtInput.height = height;
+				if (null != numeric && numeric) { 
+					txtInput.restrict = "0-9";
+					var txtFormat = txtInput.defaultTextFormat;
+					txtFormat.align = "right";
+					txtInput.defaultTextFormat = txtFormat;
+				}
+			#else flash
+				var txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
+				if (null != numeric && numeric) { 
+					txtInput.restrict = "0-9";
+					var txtFormat = txtInput.getTextFormat();
+					txtFormat.align = "right";
+					txtInput.setNewTextFormat(txtFormat);
+				}
+			#end
+				txtInput.tabEnabled = true;
+				setSize(clip, width, height);
+				if (null != maxChars) {
+					txtInput.maxChars = maxChars;
+				}
+				if (null != bgColor) {
+					txtInput.background = true;
+					txtInput.backgroundColor = bgColor;
+				}
+				txtInput.border = true;
+				var validate = function() {
+					if (validator == null) {
+						return;
+					}
+					var isValid = validator(txtInput.text);
+					if (isValid) {
+						txtInput.background = (null != bgColor);
+						if (txtInput.background) {
+							txtInput.backgroundColor = bgColor;
+						}
+					} else {
+						txtInput.background = true;
+						txtInput.backgroundColor = 0xff0000;
+					}
+				}
+			#if flash9
+				txtInput.htmlText = html;
+				var listener = function (e:FocusEvent) { validate(); };
+				txtInput.addEventListener(FocusEvent.FOCUS_OUT , listener);
+				txtInput.type = TextFieldType.INPUT;
+				clip.addChild(txtInput);
+			#else flash
+				txtInput.html = true;
+				txtInput.htmlText = html;
+				var listener = {
+					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
+					onChanged : function (txtFld : TextField) {	validate();	}
+				};
+				txtInput.addListener(listener);
+				txtInput.type = "input";
+			#end
+			return clip;
+
 		case Picture(url, w, h, scaling):
 			#if flash9
 				var loader = new flash.display.Loader();
@@ -194,32 +254,35 @@ class Arctic {
 			setSize(clip, w / scaling, h / scaling);
 			return clip;
 
-		case Button(block, action):
-			#if flash9
+		case Button(block, hover, action):
 				var child = build(block, clip, availableWidth, availableHeight);
-				child.addEventListener( flash.events.MouseEvent.MOUSE_UP, function (s) { action(); } ); 
-				child.addEventListener( flash.events.MouseEvent.MOUSE_OVER, 
-					function (s) { 
-						// Maybe we should have different blocks, and switch between them on hover and click's rather than this hard-coded behaviour
-						clip.opaqueBackground = 0x333333;
+				var hover = build(hover, clip, availableWidth, availableHeight);
+			#if flash9
+				hover.visible = false;
+				clip.addEventListener( flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
+				clip.addEventListener( flash.events.MouseEvent.MOUSE_OVER, 
+					function (s) {
+						child.visible = false;
+						hover.visible = true;
 					}
 				);
-				child.addEventListener( flash.events.MouseEvent.MOUSE_OUT, 
+				clip.addEventListener( flash.events.MouseEvent.MOUSE_OUT, 
 					function (s) { 
-						// Maybe we should have different blocks, and switch between them on hover and click's rather than this hard-coded behaviour
-						clip.opaqueBackground = null;
+						child.visible = true;
+						hover.visible = false;
 					}
 				);
 			#else flash
-				var child = build(block, clip, availableWidth, availableHeight);
+				hover._visible = false;
 				clip.onRelease = action;
 				clip.onMouseMove = function() {
 					var mouseInside = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false);
 					if (mouseInside) {
-						// Maybe we should have different blocks, and switch between them on hover and click's rather than this hard-coded behaviour
-						clip.opaqueBackground = 0x333333;
+						child._visible = false;
+						hover._visible = true;
 					} else {
-						clip.opaqueBackground = null;
+						child._visible = true;
+						hover._visible = false;
 					}
 				};
 			#end
@@ -257,309 +320,127 @@ class Arctic {
 			#end
 			return clip;
 
-		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
-			#if flash9
-				var txtInput = new flash.text.TextField();
-				txtInput.width = width;
-				txtInput.height = height;
-				if (null != numeric && numeric) { 
-					txtInput.restrict = "0-9";
-					var txtFormat = txtInput.defaultTextFormat;
-					txtFormat.align = "right";
-					txtInput.defaultTextFormat = txtFormat;
-				}
-			#else flash
-				var txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
-				if (null != numeric && numeric) { 
-					txtInput.restrict = "0-9";
-					var txtFormat = txtInput.getTextFormat();
-					txtFormat.align = "right";
-					txtInput.setNewTextFormat(txtFormat);
-				}
-			#end
-				setSize(clip, width, height);
-				if (null != maxChars) {
-					txtInput.maxChars = maxChars;
-				}
-				if (null != bgColor) {
-					txtInput.background = true;
-					txtInput.backgroundColor = bgColor;
-				}
-				txtInput.border = true;
-				var validate = function() {
-					var isValid = validator(txtInput.text);
-					if (isValid) {
-						txtInput.background = (null != bgColor);
-						if (txtInput.background) {
-							txtInput.backgroundColor = bgColor;
-						}
-					} else {
-						txtInput.background = true;
-						txtInput.backgroundColor = 0xff0000;
-					}
-				}
-			#if flash9
-				txtInput.htmlText = html;
-				var listener = function (e:FocusEvent) { validate(); };
-				txtInput.addEventListener(FocusEvent.FOCUS_OUT , listener);
-				txtInput.type = TextFieldType.INPUT;
-				clip.addChild(txtInput);
-			#else flash
-				txtInput.html = true;
-				txtInput.htmlText = html;
-				var listener = {
-					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
-					onChanged : function (txtFld : TextField) {	validate();	}
-				};
-				txtInput.addListener(listener);
-				txtInput.type = "input";
-			#end
-			return clip;
-
 		case Filler:
+			setSize(clip, availableWidth, availableHeight);
 			return clip;
 
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight);
-			#if flash9
-				if (child.width < minimumWidth) {
-					child.width = minimumWidth;
-				}
-				if (child.width > maximumWidth) {
-					child.width = maximumWidth;
-				}
-			#else flash
-				if (child._width < minimumWidth) {
-					child._width = minimumWidth;
-				}
-				if (child._width > maximumWidth) {
-					child._width = maximumWidth;
-				}
-			#end
+			var size = getSize(child);
+			if (size.width < minimumWidth) {
+				setSize(clip, minimumWidth, size.height);
+			}
+			if (size.width > maximumWidth) {
+				clipSize(clip, maximumWidth, size.height);
+			}
             return clip;
 
         case ConstrainHeight(minimumHeight, maximumHeight, block) :
 			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ) );
-			#if flash9
-				if (child.height < minimumHeight) {
-				   child.height = minimumHeight;
-				}
-				if (child.height > maximumHeight) {
-				   child.height = maximumHeight;
-				}
-			#else flash
-				if (child._height < minimumHeight) {
-				   child._height = minimumHeight;
-				}
-				if (child._height > maximumHeight) {
-				   child._height = maximumHeight;
-				}
-			#end
+			var size = getSize(child);
+			if (size.height < minimumHeight) {
+				setSize(clip, size.width, minimumHeight);
+			}
+			if (size.height > maximumHeight) {
+				clipSize(clip, size.width, maximumHeight);
+			}
             return clip;
 
-		case ColumnStack(columns):
-			// First, see how many fillers we have ourselves
-            var numberOfFillers = 0;
+		case ColumnStack(blocks):
+			// The number of children which wants to grow (including our own fillers)
+			var numberOfWideChildren = 0;
 			var childMetrics = [];
 			var width = 0.0;
-			for (c in columns) {
-				if (c == Filler) {
-                  numberOfFillers++; 
-				}
-				var m = calcMetrics(c);
+			for (r in blocks) {
+				var m = calcMetrics(r);
 				childMetrics.push(m);
+				if (m.growWidth) {
+					numberOfWideChildren++;
+				}
 				width += m.width;
 			}
-			
+
 			// Next, determine how much space children get
             var freeSpace = availableWidth - width;
+			if (freeSpace < 0) {
+				// Hmm, we should do a scrollbar instead
+				freeSpace = 0;
+			}
+			if (numberOfWideChildren > 0) {
+				freeSpace = freeSpace / numberOfWideChildren;
+			} else {
+				freeSpace = 0;
+			}
 
 			var x = 0.0;
 			var i = 0;
             var children = [];
-            for (c in columns) {
-                var child = build(c, clip, freeSpace + childMetrics[i].width, availableHeight);
+			for (l in blocks) {
+				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
+                var child = build(l, clip, w, availableHeight);
 				#if flash9
 					child.x = x;
 				#else flash
 					child._x = x;
 				#end
-                children.push(child);
-				#if flash9
-					x += child.width;
-				#else flash
-					x += child._width;
-				#end
-				++i;
-            }
-            if (numberOfFillers > 0) { 
-                var availableSpaceForFillers = availableWidth - x;
-                var spaceForEachFiller = Math.max(0, availableSpaceForFillers / numberOfFillers);
-                var shift = 0.0;
-                x = 0.0;
-                for (i in 0...columns.length) { 
-					if (columns[i] == Filler) {
-						shift += spaceForEachFiller;
-						setSize(children[i], spaceForEachFiller, 0);
-						x += shift;
-					} else {
-						#if flash9
-							children[i].x += shift;
-							x += children[i].width;
-						#else flash
-						   children[i]._x += shift;
-						   x += children[i]._width;
-						#end
-					}
-                }
-            }
+                children.push(child);				
+				x += w;
+   				++i;
+			}
+			
 			return clip;
 
 		case LineStack(blocks):
-			// First, see how many fillers we have ourselves
-            var numberOfFillers = 0;
+			// The number of children which wants to grow (including our own fillers)
+			var numberOfTallChildren = 0;
 			var childMetrics = [];
 			var height = 0.0;
 			for (r in blocks) {
-				if (r == Filler) {
-                  numberOfFillers++; 
-				}
 				var m = calcMetrics(r);
 				childMetrics.push(m);
+				if (m.growHeight) {
+					numberOfTallChildren++;
+				}
 				height += m.height;
 			}
 
 			// Next, determine how much space children get
             var freeSpace = availableHeight - height;
+			if (freeSpace < 0) {
+				// Hmm, we should do a scrollbar instead
+				freeSpace = 0;
+			}
+			if (numberOfTallChildren > 0) {
+				freeSpace = freeSpace / numberOfTallChildren;
+			} else {
+				freeSpace = 0;
+			}
 
 			var y = 0.0;
 			var i = 0;
             var children = [];
 			for (l in blocks) {
-                var child = build(l, clip, availableWidth, freeSpace + childMetrics[i].height);
+				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpace else 0;
+                var child = build(l, clip, availableWidth, h);
 				#if flash9
 					child.y = y;
 				#else flash
 					child._y = y;
 				#end
                 children.push(child);				
-                switch (l) {
-                    case SelectList(lines, onClick):
-                            y += freeSpace + childMetrics[i].height;        
-                    default :
-                            #if flash9
-					            y += child.height;
-            				#else flash
-			            		y += child._height;
-            				#end
-                }
+				y += h;
    				++i;
 			}
-            if (numberOfFillers > 0) { 
-                var availableSpaceForFillers = availableHeight - y;
-                var spaceForEachFiller = availableSpaceForFillers / numberOfFillers;
-                var shift = 0.0;
-                y = 0.0;
-                for (i in 0...blocks.length) {
-                    switch (blocks[i]) {        
-                        case Filler: 
-                            shift += spaceForEachFiller;
-                            setSize(children[i], 0, spaceForEachFiller);
-                            y += shift;
-                        case SelectList(lines, onClick):
-                            #if flash9
-                                children[i].y += shift;
-                            #else flash
-                                children[i]._y += shift;
-                            #end
-                            y += freeSpace + childMetrics[i].height;        
-                        default :
-                            #if flash9
-							    children[i].y += shift;
-							    y += children[i].height;
-						    #else flash
-							    children[i]._y += shift;
-							    y += children[i]._height;
-						    #end                            
-                    }                       				
-                }
-            }
 
-			return clip;
-
-		case SelectList(lines, onClick):
-			// First, see how many fillers we have ourselves
-            var numberOfFillers = 0;
-			var childMetrics = [];
-			var height = 0.0;
-			for (r in lines) {
-				if (r == Filler) {
-                  numberOfFillers++; 
-				}
-				var m = calcMetrics(r);
-				childMetrics.push(m);
-				height += m.height;
-			}
-
-			// Next, determine how much space children get
-            var freeSpace = availableHeight - height;
-
-			var y = 0.0;
-			var i = 0;
-            var children = [];
-            var selectListWidth = availableWidth - 10;
-			#if flash9
-				var childClip = new MovieClip();
-				clip.addChild(childClip);
-			#else flash
-				var depth = clip.getNextHighestDepth();
-				var childClip = clip.createEmptyMovieClip("c" + depth, depth);
-			#end
-			for (l in lines) {
-                var child = build(l, childClip, selectListWidth, freeSpace + childMetrics[i].height);
+			if (availableHeight - height < 0) {
+				var size = getSize(clip);
+				// Scrollbar
 				#if flash9
-					child.y = y;
-					var li = i;
-					// TODO: For some reason, this closure does not work - it always returns the last value
-					var f = function(s) { onClick(li); };
-					child.addEventListener(flash.events.MouseEvent.MOUSE_UP, f);
+					drawScrollBar(clip, size.width, availableHeight);
 				#else flash
-					child._y = y;
-					var li = i;
-					child.onRelease = function() { onClick(li); };
+					drawScrollBar(clip, size.width, availableHeight);
 				#end
-                children.push(child);
-				#if flash9
-					y += child.height;
-				#else flash
-					y += child._height;
-				#end
-				++i;
 			}
-
-            if ( (numberOfFillers > 0) && (y < availableHeight)) { 
-                var availableSpaceForFillers = availableHeight - y;
-                var spaceForEachFiller = availableSpaceForFillers / numberOfFillers;
-                var shift = 0.0;
-                y = 0.0;
-                for (i in 0...lines.length) {
-					if (lines[i] == Filler) {
-						shift += spaceForEachFiller;
-						setSize(children[i], 0, spaceForEachFiller);
-						y += shift;
-					} else {
-						#if flash9
-							children[i].y += shift;
-							y += children[i].height;
-						#else flash
-							children[i]._y += shift;
-							y += children[i]._height;
-						#end
-                   }
-                }
-             }
-            
-            drawScrollBar (childClip, availableWidth, availableHeight);
 			return clip;
 
 		case ScrollBar(block, availableWidth, availableHeight):
@@ -570,7 +451,6 @@ class Arctic {
 		return clip;
 	}
 
-	
 	private function calcMetrics(c : ArcticBlock) : Metrics {
 		switch (c) {
 		case Border(x, y, block):
@@ -578,15 +458,15 @@ class Arctic {
 			m.width += 2 * x;
 			m.height += 2 * y;
 			return m;
-		case Background(color, block):
+		case Background(color, block, alpha, roundRadius):
 			return calcMetrics(block);
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha):
+		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
 			return calcMetrics(block);
 		case Text(html):
 			// Fall-through to creation
 		case Picture(url, w, h, scaling):
 			return { width : w, height : h, growWidth : false, growHeight : false };
-		case Button(block, action):
+		case Button(block, hover, action):
 			return calcMetrics(block);
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
 			return calcMetrics(selected);
@@ -611,6 +491,7 @@ class Arctic {
 				m.width += cm.width;
 				m.height = Math.max(cm.height, m.height);
 				m.growWidth = m.growWidth || cm.growWidth;
+				// A filler in should not impact height growth in this situation
 				if (c != Filler) {
 					m.growHeight = m.growHeight || cm.growHeight;
 				}
@@ -622,44 +503,35 @@ class Arctic {
 				var cm = calcMetrics(c);
 				m.width = Math.max(cm.width, m.width);
 				m.height += cm.height;
+				// A filler in should not impact width growth in this situation
 				if (c != Filler) {
 					m.growWidth = m.growWidth || cm.growWidth;
 				}
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
 			return m;
-		case SelectList(lines, onClick):
-			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			for (c in lines) {
-				var cm = calcMetrics(c);
-				m.width = Math.max(cm.width, m.width);
-				m.height += cm.height;
-				if (c != Filler) {
-					m.growWidth = m.growWidth || cm.growWidth;
-				}
-				m.growHeight = m.growHeight || cm.growHeight;
+	    case ScrollBar(block, availableWidth, availableHeight):
+			var cm = calcMetrics(block);
+			if (cm.height > availableHeight) {
+				cm.height = availableHeight;
 			}
-			return m;
-		    case ScrollBar(block, availableWidth, availableHeight):
-                var cm = calcMetrics(block);
-                if (cm.height > availableHeight) {
-                    cm.height = availableHeight;
-                }
-
+			return cm;
 		}
-		
+
 		// The sad fall-back scenario: Create the fucker and ask it, and then destroy it again
 		#if flash9
 			var tempMovie = new MovieClip();
 			parent.addChild(tempMovie);
 			var mc = build(c, tempMovie, 0, 0);
-			var m = { width : mc.width, height : mc.height, growWidth: false, growHeight: false };
+			var size = getSize(mc);
+			var m = { width : size.width, height : size.height, growWidth: false, growHeight: false };
 			parent.removeChild(tempMovie);
 		#else flash
 			var d = parent.getNextHighestDepth();
 			var tempMovie = parent.createEmptyMovieClip("c" + d, d);
 			var mc = build(c, tempMovie, 0, 0);
-			var m = { width : mc._width, height : mc._height, growWidth: false, growHeight: false };
+			var size = getSize(mc);
+			var m = { width : size.width, height : size.height, growWidth: false, growHeight: false };
 			mc.removeMovieClip();
 		#end
 		return m;
@@ -680,6 +552,34 @@ class Arctic {
 		#end
 	}
 	
+	static public function clipSize(clip : MovieClip, width : Float, height : Float) {
+		#if flash9
+			if (clip.width > width || clip.height > height) {
+				// We need to make it smaller - do a scrollRect
+				clip.scrollRect = new Rectangle(0.0, 0.0, width, height);
+				return;
+			}
+		#else flash
+			if (clip._width > width || clip._height > height) {
+				// We need to make it smaller - do a scrollRect
+				clip.scrollRect = new Rectangle<Float>(0.0, 0.0, width, height);
+				return;
+			}
+		#end
+		setSize(clip, width, height);
+	}
+	
+	static public function getSize(clip : MovieClip) : { width: Float, height : Float } {
+		if (clip.scrollRect != null) {
+			return { width : clip.scrollRect.width, height : clip.scrollRect.height };
+		}
+		#if flash9
+			return { width: clip.width, height : clip.height };
+		#else flash
+			return { width: clip._width, height : clip._height };
+		#end
+	}
+	
 	/// A helper function which sets the size of the clip to the size of the stage
 	static public function stageSize(clip : MovieClip) {
 		#if flash9
@@ -688,7 +588,7 @@ class Arctic {
 			setSize(clip, flash.Stage.width, flash.Stage.height);
 		#end
 	}
-	
+
     // This method draws a scrollbar given a movie clip. 
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
     // rendered.
@@ -948,7 +848,6 @@ class Arctic {
 
             clip.graphics.beginFill(rgb);
             clip.graphics.moveTo(startX + 0.2,  startY );
-            clip.graphics.lineTo(startX + 0.2,  startY );
             clip.graphics.lineTo(startX + 0.2 + lineWidth, startY );
             clip.graphics.lineTo(startX + 0.2 + lineWidth, startY + lineHeight );
             clip.graphics.lineTo(startX + 0.2, startY + lineHeight );
@@ -961,7 +860,6 @@ class Arctic {
             //Drawing lower scrollbar triangle
             clip.beginFill(rgb);
             clip.moveTo(startX + 0.2,  startY );
-            clip.lineTo(startX + 0.2,  startY );
             clip.lineTo(startX + 0.2 + lineWidth, startY );
             clip.lineTo(startX + 0.2 + lineWidth, startY + lineHeight );
             clip.lineTo(startX + 0.2, startY + lineHeight );

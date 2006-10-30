@@ -3,6 +3,12 @@ package arctic;
 import arctic.ArcticBlock;
 
 class ArcticBuilders {
+
+	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?size : Float) : ArcticBlock {
+		var t = Border(5, 5, Text(wrapWithDefaultFont(text, size)));
+		return Button(t, Background(0xffffff, t, 70.0, if (size != null) size / 4 else 5.0), onClick);
+	}
+
 	static public function makeDateView(date : Date) : ArcticBlock {
 		var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 		var days = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
@@ -13,30 +19,47 @@ class ArcticBuilders {
 		return Background(0x000000, Border(1, 1, Background(0xFFFCA9, ConstrainWidth(75, 75, ConstrainHeight(75, 75, Text(text))))));
 	}
 	
-	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void) : ArcticBlock {
+	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int) : ArcticBlock {
 		var stateChooser = [];
-		var onInit = function (setState) { 
+		var currentRadio = defaultSelected;
+		if (currentRadio == null) {
+			currentRadio = 0;
+		}
+		var onInit = function (setState) {
+			if (stateChooser.length == texts.length) {
+				// Called again on reconsturction: We clear out the old functions
+				stateChooser = [];
+			}
 			stateChooser.push(setState); 
-			// Select the first entry by default
-			if (1 == stateChooser.length) {
-				stateChooser[0](true);
+			if (stateChooser.length - 1 == currentRadio) {
+				setState(true);
 			}
 		};
-		var toggleButtons : Array<ArcticBlock> = [];
-		for (text in texts) {
-			// TODO : Draw standard radio button graphics instead of using 'O' and 'Ø'
-			var selected   = ColumnStack([Border(1, 1, Text("<font color='#000000' face='arial' size='8'><b>Ø</b></font>")),
-									      Border(1, 1, Text(text))]);
-			var unselected = ColumnStack([Border(1, 1, Text("<font color='#000000' face='arial' size='8'><b>O</b></font>")),
-									      Border(1, 1, Text(text))]);
-			toggleButtons.push(ToggleButton(selected, unselected, false, null, onInit));
-		}
 		var onSelectHandler = function (index : Int) {
 			for (i in 0...stateChooser.length) {
 				stateChooser[i](i == index);
 			}
-			onSelect(index);
+			currentRadio = index;
+			if (onSelect != null) {
+				onSelect(index);
+			}
 		}
-		return SelectList(toggleButtons, onSelectHandler);
+
+		var toggleButtons : Array<ArcticBlock> = [];
+		var i = 0;
+		for (text in texts) {
+			// TODO : Draw standard radio button graphics instead of using 'O' and 'Ø'
+			var selected = Border(1, 1, Text(wrapWithDefaultFont("<b>Ø</b> " + text, 12)));
+			var unselected = Border(1, 1, Text(wrapWithDefaultFont("<b>O</b> " + text, 12)));
+			var l = i;
+			var sel = function (b) { onSelectHandler(l); };
+			toggleButtons.push(ToggleButton(selected, unselected, false, sel, onInit));
+			++i;
+		}
+		return LineStack(toggleButtons);
+	}
+	
+	static public function wrapWithDefaultFont(text : String, ?size : Float) : String {
+		return "<font face='arial'" + (if (size != null) { " size='" + size + "'"; } else "" ) + ">" + text + "</font>";
 	}
 }

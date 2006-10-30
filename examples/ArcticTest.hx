@@ -28,7 +28,10 @@ class ArcticTest {
 						ColumnStack( [
 							Border(10, 35, Text("<font face='arial' size='28'>" + c.time + "</font>") ),
 							Border(5, 5, Picture("images/" + c.icon + ".jpg", 80, 100, 1.0) ),
-							Text("<font face='arial' size='18'><b>" + c.name + "</b><br/><font size='16'>" + c.reason + "</font></font>"),
+							LineStack( [
+								Text("<font face='arial' size='18'><b>" + c.name + "</b><br/><font size='16'>" + c.reason + "</font></font>"),
+								TextInput("<font face='arial'>Test</font>", 400, 20, null) 
+							] ),
 							Filler
 						] )
 					)
@@ -51,28 +54,39 @@ class ArcticTest {
 									)
 								] )
 							),
-							SelectList( consultationBlocks, function(line0 : Int) { me.line = line0; }),
+							LineStack( consultationBlocks ),
+							ArcticBuilders.makeRadioButtonGroup([ "Visit", "Reschedule" ], function(i : Int) { me.radioChoice = i; }),
 							ColumnStack( [
 								Filler,
-								Button( Text("<font face='arial' size='24' color='#ffffff'>Continue</font>"), function() { me.next(); })
+								ArcticBuilders.makeSimpleButton("Continue",  function() { me.next(); }, 25)
 							] )
 							]
 						)
 					)
 				)
 			);
+		radioChoice = 0;
+		
+		var bug = Border(5, 5, Background(0x555555, LineStack( [ 
+				ArcticBuilders.makeRadioButtonGroup( [ "1", "2" ], null),
+				LineStack([Filler, ColumnStack([Filler, Text("Disco"), Filler]), Filler]),
+				ArcticBuilders.makeRadioButtonGroup( [ "3", "4" ], null),
+				Filler,
+				ArcticBuilders.makeRadioButtonGroup( [ "5", "6" ], null),
+				Filler
+			] ) ) );
 		
 		arctic = new Arctic(gui);
 		var root = arctic.display(parent_, true);
 	}
 
 	public function next() {
-		trace("Selected " + line);
+		trace("Selected radio choice" + radioChoice);
 		arctic.remove();
 		arctic = null;
 	}
 	
-	public var line : Int;
+	public var radioChoice : Int;
 	
 	public var arctic : Arctic;
 }

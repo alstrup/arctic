@@ -1,3 +1,23 @@
-- Implement scrollbar in SelectList
-- Implement text input
-- Implement radio group in ArcticBuilders instead of as a ArcticBlock
+- Change scrollbar to have size according to content
+
+- Fix bug with textinputs which do not accept clicks on Flash 8
+
+- Fix formatting of new text in textinput to match original content
+
+- Change radio group to use bullets rather than bad characters
+
+New features to consider:
+
+- Resizable bitmap with aspect-ratio preservation
+
+- Calendar widget
+
+- Nice default, light-weight look for buttons & more
+
+- Slider
+
+- Progress-bar
+
+- Combo-box
+
+- Simple audio/video player
