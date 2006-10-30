@@ -6,10 +6,10 @@ package arctic;
  */
 enum ArcticBlock {
 	/// A solid background
-	Background(color : Int, block : ArcticBlock);
+	Background(color : Int, block : ArcticBlock, ?alpha : Float, ?roundRadius : Float);
 
 	/// A gradient background
-	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>);
+	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Float);
 
 	/// Add some space around the block
 	Border(x : Float, y : Float, block : ArcticBlock);
@@ -17,24 +17,26 @@ enum ArcticBlock {
 	/// A text (in the subset of HTML which Flash understands)
 	Text(html : String);
 
+	/**
+	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
+	 */
+	TextInput(html : String, width : Float, height : Float, validator : String -> Bool, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int);
+
 	/// A static picture
 	Picture(url : String, width : Float, height : Float, scaling : Float);
 
-	/// A button
-	Button(block : ArcticBlock, action : Void -> Void);
+	/**
+	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
+	 */
+	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void);
 
 	/**
 	 * Toggle button(selected/unselected)
 	 * Though technically the ArcticBlock can be of any type, the most appropriate ones are Text & Picture.
 	 * Notice that the selected and unselected blocks should have the exact same size, because we do not
-	 * a relayout when the state is changed.
+	 * do a relayout when the state is changed.
 	 */ 
 	ToggleButton(selected : ArcticBlock, unselected : ArcticBlock, initialState : Bool, onChange : Bool -> Void, ?onInit : (Bool -> Void) -> Void);
-
-	/**
-	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
-	 */
-	TextInput(html : String, width : Int, height : Int, validator : String -> Bool, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int);
 
     /**
      * The ArcticBlock will be constraint to the dimensions given
@@ -60,12 +62,6 @@ enum ArcticBlock {
 	 * A bunch of blocks stacked on top of each other.
 	 */
 	LineStack(blocks : Array<ArcticBlock>);
-
-	/**
-	 * A bunch of lines, put in a list where each item is stacked on top of each other.
-	 * If there is not enough room on the screen for all items, we will show a scroll-bar.
-	 */ 
-	SelectList(lines : Array<ArcticBlock>, onClick : Int -> Void);
 
     ScrollBar(block : ArcticBlock, availableWidth : Float, availableHeight : Float);
 }
