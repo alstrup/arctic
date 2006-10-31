@@ -6,7 +6,7 @@ class ArcticBuilders {
 
 	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?size : Float) : ArcticBlock {
 		var t = Border(5, 5, Text(wrapWithDefaultFont(text, size)));
-		return Button(t, Background(0xffffff, t, 70.0, if (size != null) size / 4 else 5.0), onClick);
+		return Button(t, Background(0xf0f0f0, t, 70.0, if (size != null) size / 4 else 5.0), onClick);
 	}
 
 	static public function makeDateView(date : Date) : ArcticBlock {
@@ -19,11 +19,14 @@ class ArcticBuilders {
 		return Background(0x000000, Border(1, 1, Background(0xFFFCA9, ConstrainWidth(75, 75, ConstrainHeight(75, 75, Text(text))))));
 	}
 	
-	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int) : ArcticBlock {
+	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int, ?size: Float) : ArcticBlock {
 		var stateChooser = [];
 		var currentRadio = defaultSelected;
 		if (currentRadio == null) {
 			currentRadio = 0;
+		}
+		if (size == null) {
+			size = 12;
 		}
 		var onInit = function (setState) {
 			if (stateChooser.length == texts.length) {
@@ -49,8 +52,8 @@ class ArcticBuilders {
 		var i = 0;
 		for (text in texts) {
 			// TODO : Draw standard radio button graphics instead of using 'O' and 'Ø'
-			var selected = Border(1, 1, Text(wrapWithDefaultFont("<b>Ø</b> " + text, 12)));
-			var unselected = Border(1, 1, Text(wrapWithDefaultFont("<b>O</b> " + text, 12)));
+			var selected = Border(1, 1, Text(wrapWithDefaultFont("<b>Ø</b> " + text, size)));
+			var unselected = Border(1, 1, Text(wrapWithDefaultFont("<b>O</b> " + text, size)));
 			var l = i;
 			var sel = function (b) { onSelectHandler(l); };
 			toggleButtons.push(ToggleButton(selected, unselected, false, sel, onInit));
