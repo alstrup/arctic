@@ -1,18 +1,21 @@
 - Change scrollbar to have size according to content
 
-- Fix bug with textinputs which do not accept clicks on Flash 8
-
 - Fix formatting of new text in textinput to match original content
 
 - Change radio group to use bullets rather than bad characters
+
+- Fix resize problem that occurs from time to time
+
 
 New features to consider:
 
 - Resizable bitmap with aspect-ratio preservation
 
+- Table (or grid-layout)
+
 - Calendar widget
 
-- Nice default, light-weight look for buttons & more
+- Nice default, light-weight look for widgets
 
 - Slider
 

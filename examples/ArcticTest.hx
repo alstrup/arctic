@@ -14,6 +14,58 @@ class ArcticTest {
 	}
 	
 	public function new(parent_ : MovieClip) {
+		parent = parent_;
+		
+		showHelloWorld1();
+	}
+
+	public function showHelloWorld1() {
+		// To make a screen, first build the data structure representing the contents
+		var me = this;
+		var helloWorld = ArcticBuilders.makeSimpleButton("Hello world",  function() { me.showHelloWorld2(); }, 50);
+		// Then construct the arctic object
+		arctic = new Arctic(helloWorld);
+		// And finally display on the given movieclip
+		var root = arctic.display(parent, true);
+	}
+	
+	public function showHelloWorld2() {
+		// Clear out the old screen
+		arctic.remove();
+		
+		// To make a nicer screen, we use a background and some more layout
+		var me = this;
+		var helloWorld = GradientBackground( "radial", [ 0xffceff, 0xff77ee], 0.2, 0.4,
+							LineStack( [ 
+								Filler, 
+								ColumnStack( [
+									Filler,
+									Text("<font face='arial' size='40'>Hello world!</font>"),
+									Filler ]
+								),
+								Filler,
+								ColumnStack( [
+									Filler,
+									ArcticBuilders.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25)
+								] )
+							] )
+						);
+		// Then construct the arctic object
+		arctic = new Arctic(helloWorld);
+		// And finally display on the given movieclip
+		var root = arctic.display(parent, true);
+	}
+	
+	public function nextWorld() {
+		// This is called when "Continue" is clicked above
+		arctic.remove();
+		showAppointments();
+	}
+	
+	public function showAppointments() {
+		// Again, build the screen as a data structure of ArcticBlocks, through a couple of intermediate data structures
+		// This illustrates the "lego"-construction of user interfaces when you use Arctic
+
 		var now = Date.now();
 		var consultation = [
 			{ name: "Mike Olson", icon: "head1", date: now, time: "08:30", reason: "Has developed a rash" },
@@ -30,7 +82,7 @@ class ArcticTest {
 							Border(5, 5, Picture("images/" + c.icon + ".jpg", 80, 100, 1.0) ),
 							LineStack( [
 								Text("<font face='arial' size='18'><b>" + c.name + "</b><br/><font size='16'>" + c.reason + "</font></font>"),
-								TextInput("<font face='arial'>Test</font>", 400, 20, null) 
+								TextInput("<font face='arial'>Write comments here</font>", 400, 20, null) 
 							] ),
 							Filler
 						] )
@@ -55,10 +107,12 @@ class ArcticTest {
 								] )
 							),
 							LineStack( consultationBlocks ),
-							ArcticBuilders.makeRadioButtonGroup([ "Visit", "Reschedule" ], function(i : Int) { me.radioChoice = i; }),
+							Border( 10, 10,
+								ArcticBuilders.makeRadioButtonGroup([ "Visit", "Reschedule" ], function(i : Int) { me.radioChoice = i; }, 0, 20)
+							),
 							ColumnStack( [
 								Filler,
-								ArcticBuilders.makeSimpleButton("Continue",  function() { me.next(); }, 25)
+								ArcticBuilders.makeSimpleButton("Continue",  function() { me.screen1next(); }, 25)
 							] )
 							]
 						)
@@ -66,27 +120,34 @@ class ArcticTest {
 				)
 			);
 		radioChoice = 0;
-		
-		var bug = Border(5, 5, Background(0x555555, LineStack( [ 
-				ArcticBuilders.makeRadioButtonGroup( [ "1", "2" ], null),
-				LineStack([Filler, ColumnStack([Filler, Text("Disco"), Filler]), Filler]),
-				ArcticBuilders.makeRadioButtonGroup( [ "3", "4" ], null),
-				Filler,
-				ArcticBuilders.makeRadioButtonGroup( [ "5", "6" ], null),
-				Filler
-			] ) ) );
-		
+
 		arctic = new Arctic(gui);
-		var root = arctic.display(parent_, true);
+		var root = arctic.display(parent, true);
 	}
 
-	public function next() {
-		trace("Selected radio choice" + radioChoice);
+	public function screen1next() {
 		arctic.remove();
-		arctic = null;
+		
+		if (radioChoice == 0) {
+			visit();
+		} else {
+			reschedule();
+		}
 	}
 	
+	public function visit() {
+		trace("Visit");
+	}
+	
+	public function reschedule() {
+		trace("Reschedule");
+	}
+
+	public var arctic : Arctic;
 	public var radioChoice : Int;
 	
-	public var arctic : Arctic;
+	public var parent : MovieClip;
+	public var screen1 : ArcticBlock;
+	public var screen2 : ArcticBlock;
+	public var screen3 : ArcticBlock;
 }
