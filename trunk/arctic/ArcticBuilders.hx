@@ -48,12 +48,25 @@ class ArcticBuilders {
 			}
 		}
 
+		// Callback fns for the CustomBlock to draw Radio button
+		var calcMetrics = function(state : Bool) : Metrics {
+			return { width: 15, height : 15, growHeight : false, growWidth : false };
+		}
+		var build = function(state : Bool, parentMc : Dynamic, availableWidth : Float, availableHeight : Float) : Dynamic {
+			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, 6.0, 0x000000);
+			if (state) {
+				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, 3.0, 0x000000, 0x000000);
+			}
+			return parentMc;
+		}
+		
 		var toggleButtons : Array<ArcticBlock> = [];
 		var i = 0;
 		for (text in texts) {
-			// TODO : Draw standard radio button graphics instead of using 'O' and 'Ø'
-			var selected = Border(1, 1, Text(wrapWithDefaultFont("<b>Ø</b> " + text, size)));
-			var unselected = Border(1, 1, Text(wrapWithDefaultFont("<b>O</b> " + text, size)));
+			var selected = Border(1, 1, ColumnStack([CustomBlock(true, calcMetrics, build),
+													 Text(wrapWithDefaultFont(text, size))]));
+			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, calcMetrics, build),
+													   Text(wrapWithDefaultFont(text, size))]));
 			var l = i;
 			var sel = function (b) { onSelectHandler(l); };
 			toggleButtons.push(ToggleButton(selected, unselected, false, sel, onInit));

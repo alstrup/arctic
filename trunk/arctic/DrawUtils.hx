@@ -207,4 +207,28 @@ static public function drawArrow(mc: MovieClip, startX, startY, endX, endY, arro
 
 #end
 
+// Draws a circle with optional filling
+static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int)
+{
+	#if flash9
+		mc.graphics.lineStyle(1, color);
+		if (null != fillColor) {
+			mc.graphics.beginFill(fillColor);
+		}
+		mc.graphics.drawCircle(x, y, radius);
+		if (null != fillColor) {
+			mc.graphics.endFill();
+		}
+	#else flash
+		mc.lineStyle(1, color);
+		if (null != fillColor) {
+			mc.beginFill(fillColor);
+		}
+		DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
+		if (null != fillColor) {
+			mc.endFill();
+		}
+	#end
+}
+
 }
