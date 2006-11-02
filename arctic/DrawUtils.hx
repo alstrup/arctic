@@ -208,12 +208,12 @@ static public function drawArrow(mc: MovieClip, startX, startY, endX, endY, arro
 #end
 
 // Draws a circle with optional filling
-static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int)
+static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float)
 {
 	#if flash9
 		mc.graphics.lineStyle(1, color);
 		if (null != fillColor) {
-			mc.graphics.beginFill(fillColor);
+			mc.graphics.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
 		}
 		mc.graphics.drawCircle(x, y, radius);
 		if (null != fillColor) {
@@ -222,9 +222,31 @@ static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius :
 	#else flash
 		mc.lineStyle(1, color);
 		if (null != fillColor) {
-			mc.beginFill(fillColor);
+			mc.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
 		}
 		DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
+		if (null != fillColor) {
+			mc.endFill();
+		}
+	#end
+}
+
+static public function drawRectangle(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, cornerRadius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float) {
+	#if flash9
+		mc.graphics.lineStyle(1, color);
+		if (null != fillColor) {
+			mc.graphics.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
+		}
+		drawRect(mc, x, y, w, h, cornerRadius);
+		if (null != fillColor) {
+			mc.graphics.endFill();
+		}
+	#else flash
+		mc.lineStyle(1, color);
+		if (null != fillColor) {
+			mc.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
+		}
+		drawRect(mc, x, y, w, h, cornerRadius);
 		if (null != fillColor) {
 			mc.endFill();
 		}
