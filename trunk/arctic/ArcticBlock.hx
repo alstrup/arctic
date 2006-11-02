@@ -1,5 +1,13 @@
 package arctic;
 
+#if flash9
+typedef ArcticMovieClip = flash.display.MovieClip
+#else flash
+typedef ArcticMovieClip = flash.MovieClip
+#end
+
+typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight : Bool }
+
 /**
  * Arctic is an embedded Domain Specific Language for making user interfaces.
  * A user interface is built from ArcticBlocks.
@@ -64,4 +72,26 @@ enum ArcticBlock {
 	LineStack(blocks : Array<ArcticBlock>);
 
     ScrollBar(block : ArcticBlock, availableWidth : Float, availableHeight : Float);
+	
+	/**
+	 * A custom block. This is an escape mechanism which allows you to extend Arctic
+	 * with your own basic blocks. Parameters:
+	 * 
+	 *  data: an optional payload.
+	 *  calcMetricsFunc: a function which has to calculate the metrics of the block.
+	 *       This is the size of the block, and bools defining whether the block
+	 *       wants to grow in width and/or height.
+	 *  buildFunc: This is called with the optional data payload as first parameter,
+	 *       the parent display object (i.e. MovieClip) and the available height
+	 *       and width for the element. It should return the resulting display
+	 *       object (movie clip). 
+	 * 
+	 * Notice that you have to build the custom blocks such that their work with
+	 * both Flash 8 and 9.
+	 */
+	CustomBlock( data : Dynamic, 
+				calcMetricsFunc : Dynamic -> Metrics, 
+				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip
+				);
+	
 }

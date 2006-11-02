@@ -2,10 +2,6 @@
 
 - Fix formatting of new text in textinput to match original content
 
-- Change radio group to use bullets rather than bad characters
-
-- Fix resize problem that occurs from time to time
-
 
 New features to consider:
 
@@ -24,3 +20,12 @@ New features to consider:
 - Combo-box
 
 - Simple audio/video player
+
+
+
+----
+
+Rename:
+- Arctic -> ArcticView
+- ArcticBuilders -> Arctic
+- move enum ArcticBlock into Arctic
