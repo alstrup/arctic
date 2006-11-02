@@ -5,8 +5,8 @@ import flash.MovieClip;
 #end
 
 import arctic.Arctic;
+import arctic.ArcticView;
 import arctic.ArcticBlock;
-import arctic.ArcticBuilders;
 
 class ArcticTest {
 	static public function main() {
@@ -22,16 +22,16 @@ class ArcticTest {
 	public function showHelloWorld1() {
 		// To make a screen, first build the data structure representing the contents
 		var me = this;
-		var helloWorld = ArcticBuilders.makeSimpleButton("Hello world",  function() { me.showHelloWorld2(); }, 50);
+		var helloWorld = Arctic.makeSimpleButton("Hello world",  function() { me.showHelloWorld2(); }, 50);
 		// Then construct the arctic object
-		arctic = new Arctic(helloWorld);
+		arcticView = new ArcticView( helloWorld );
 		// And finally display on the given movieclip
-		var root = arctic.display(parent, true);
+		var root = arcticView.display(parent, true);
 	}
 	
 	public function showHelloWorld2() {
 		// Clear out the old screen
-		arctic.destroy();
+		arcticView.destroy();
 		
 		// To make a nicer screen, we use a background and some more layout
 		var me = this;
@@ -46,19 +46,19 @@ class ArcticTest {
 								Filler,
 								ColumnStack( [
 									Filler,
-									ArcticBuilders.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25)
+									Arctic.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25)
 								] )
 							] )
 						);
 		// Then construct the arctic object
-		arctic = new Arctic(helloWorld);
+		arcticView = new ArcticView(helloWorld);
 		// And finally display on the given movieclip
-		var root = arctic.display(parent, true);
+		var root = arcticView.display(parent, true);
 	}
 	
 	public function nextWorld() {
 		// This is called when "Continue" is clicked above
-		arctic.destroy();
+		arcticView.destroy();
 
 		// Again, build the screen as a data structure of ArcticBlocks, through a couple of intermediate data structures
 		// This illustrates the "lego"-construction of user interfaces when you use Arctic
@@ -97,7 +97,7 @@ class ArcticTest {
 						LineStack( [
 							Border( 10, 10, 
 								ColumnStack( [
-									ArcticBuilders.makeDateView(Date.now()), 
+									Arctic.makeDateView(Date.now()), 
 									Border( 20, 20, 
 										Text("<b><font face='arial' size='24' color='#ffffff'>Today's appointments</font></b>")
 									)
@@ -105,11 +105,11 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								ArcticBuilders.makeRadioButtonGroup([ "Visit", "Reschedule" ], function(i : Int) { me.radioChoice = i; }, 0, 20)
+								Arctic.makeRadioButtonGroup([ "See custom block", "See draggable blocks" ], function(i : Int) { me.radioChoice = i; }, 0, 20)
 							),
 							ColumnStack( [
 								Filler,
-								ArcticBuilders.makeSimpleButton("Continue",  function() { me.screen1next(); }, 25)
+								Arctic.makeSimpleButton("Continue",  function() { me.screen1next(); }, 25)
 							] )
 							]
 						)
@@ -118,26 +118,26 @@ class ArcticTest {
 			);
 		radioChoice = 0;
 
-		arctic = new Arctic(gui);
-		var root = arctic.display(parent, true);
+		arcticView = new ArcticView(gui);
+		var root = arcticView.display(parent, true);
 	}
 
 	public function screen1next() {
-		arctic.destroy();
+		arcticView.destroy();
 		
 		if (radioChoice == 0) {
-			visit();
+			customBlock();
 		} else {
-			reschedule();
+			draggable();
 		}
 	}
 	
-	public function visit() {
-		arctic.destroy();
-		
+	public function customBlock() {
+		// A custom block needs two functions. One to tell Arctic the size and desired resizing behaviour:
 		var calcMetrics = function(data : Int) : Metrics {
 			return { width: 100, height : 100, growHeight : false, growWidth : false };
 		}
+		// And another one which should paint & construct the block when ready
 		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float) : ArcticMovieClip {
 			#if flash9
 				parentMc.graphics.beginFill(data);
@@ -160,24 +160,37 @@ class ArcticTest {
 		var custom = Background( 0x000000,
 						Border( 10, 10, 
 							LineStack( [ 
+								// The first custom block is inserted here - the payload data is the color of our custom block
 								CustomBlock( 0xff0000, calcMetrics, build ), 
 								// Notice that we give it null as metrics here
-								// Then, arctic will build the block to get the metrics
+								// Then, arctic will build the block behind the scenes to get the metrics
 								CustomBlock( 0xffff00, null, build), 
+								// The final one
 								CustomBlock( 0x00ff00, calcMetrics, build) 
 							] )
 						)
 					);
 			
-		arctic = new Arctic(custom);
-		var root = arctic.display(parent, true);
+		arcticView = new ArcticView(custom);
+		var root = arcticView.display(parent, true);
 	}
 	
-	public function reschedule() {
-		trace("Reschedule");
+	public function draggable() {
+		// Small example showing the different kinds of draggable blocks possible in Arctic
+		var makeText = function (text) {
+			return Background(0x202020, Border(5, 5, Text("<font size='20' color='#ffffff'>" + text + "</font>")));
+		}
+		var drag = LineStack( [
+					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area") ) ),
+					Background(0xa0a080, Arctic.makeDragable(true, true, true, makeText("I can be dragged within my area") ) ),
+					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area") ) ),
+					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere") )
+				] );
+		arcticView = new ArcticView(drag);
+		var root = arcticView.display(parent, true);
 	}
 
-	public var arctic : Arctic;
+	public var arcticView : ArcticView;
 	public var radioChoice : Int;
 	
 	public var parent : MovieClip;
