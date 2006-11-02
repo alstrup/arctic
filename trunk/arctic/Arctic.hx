@@ -22,13 +22,13 @@ class Arctic {
 				+ "<br><p align='center'><b>" + day + "</b></font>";
 		return Background(0x000000, Border(1, 1, Background(0xFFFCA9, ConstrainWidth(75, 75, ConstrainHeight(75, 75, Text(text))))));
 	}
-
 	
-	/** Make a block dragable by the mouse in the given directions.
+	/**
+	 * Make a block dragable by the mouse in the given directions.
 	 * If stayWithinSize is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * This block can be used to make many things, including dialogs.
-	 * onDrag is called whenever we drag.
+	 * onDrag is called whenever we drag with the total X and Y offsets.
 	 */
 	static public function makeDragable(stayWithinSize : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
 					block : ArcticBlock, ?onDrag : Float -> Float -> Void) {
@@ -37,7 +37,7 @@ class Arctic {
 		var dragY = 0.0;
 		var ourOnInit = function (onDragFun) {
 			onDragFun(dragX, dragY);
-		}
+		};
 		var ourOnDrag = function (dx : Float, dy : Float) : Void {
 			dragX = dx;
 			dragY = dy;
@@ -48,14 +48,47 @@ class Arctic {
 		return Dragable(stayWithinSize, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
 	}
 	
-	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int, ?size: Float) : ArcticBlock {
+	/// Add a check-box in front on the given block
+	static public function makeCheckBox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
+		// Local closured variables to remember state
+		var selected = defaultSelected;
+		if (selected == null) {
+			selected = false;
+		}
+		var ourOnInit = function (onCheckFun) {
+			onCheckFun(selected);
+		};
+		var ourOnCheck = function (state : Bool) : Void {
+			selected = state;
+			if (onCheck != null) {
+				onCheck(selected);
+			}
+		}
+
+		// Callback fn for the CustomBlock to draw Radio button
+		var build = function(state : Bool, parentMc : Dynamic, availableWidth : Float, availableHeight : Float) : Dynamic {
+			var size = 12;
+			DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
+			if (state) {
+				size -= 4;
+				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
+			}
+			return parentMc;
+		}
+
+		var notSelectedBlock = ColumnStack( [ CustomBlock(false, null, build), block ] );
+		var selectedBlock = ColumnStack( [ CustomBlock(true, null, build), block ] );
+		return ToggleButton(selectedBlock, notSelectedBlock, selected, ourOnCheck, ourOnInit);
+	}
+	
+	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int, ?textSize: Float) : ArcticBlock {
 		var stateChooser = [];
 		var currentRadio = defaultSelected;
 		if (currentRadio == null) {
 			currentRadio = 0;
 		}
-		if (size == null) {
-			size = 12;
+		if (textSize == null) {
+			textSize = 12;
 		}
 		var onInit = function (setState) {
 			if (stateChooser.length == texts.length) {
@@ -77,14 +110,12 @@ class Arctic {
 			}
 		}
 
-		// Callback fns for the CustomBlock to draw Radio button
-		var calcMetrics = function(state : Bool) : Metrics {
-			return { width: 15, height : 15, growHeight : false, growWidth : false };
-		}
+		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, parentMc : Dynamic, availableWidth : Float, availableHeight : Float) : Dynamic {
-			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, 6.0, 0x000000);
+			var radius = 6;
+			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
 			if (state) {
-				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, 3.0, 0x000000, 0x000000);
+				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
 			}
 			return parentMc;
 		}
@@ -92,10 +123,10 @@ class Arctic {
 		var toggleButtons : Array<ArcticBlock> = [];
 		var i = 0;
 		for (text in texts) {
-			var selected = Border(1, 1, ColumnStack([CustomBlock(true, calcMetrics, build),
-													 Text(wrapWithDefaultFont(text, size))]));
-			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, calcMetrics, build),
-													   Text(wrapWithDefaultFont(text, size))]));
+			var selected = Border(1, 1, ColumnStack([CustomBlock(true, null, build),
+													 Text(wrapWithDefaultFont(text, textSize))]));
+			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, null, build),
+													   Text(wrapWithDefaultFont(text, textSize))]));
 			var l = i;
 			var sel = function (b) { onSelectHandler(l); };
 			toggleButtons.push(ToggleButton(selected, unselected, false, sel, onInit));
