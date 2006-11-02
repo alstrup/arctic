@@ -1,0 +1,14 @@
+# arctic
+-swf arctic.swf
+-main ArcticTest
+-swf-header 800:600:50
+-cp ..
+
+--next
+# arctic flash9
+-swf arctic9.swf
+-swf-version 9
+-main ArcticTest
+-debug
+-swf-header 800:600:50
+-cp ..

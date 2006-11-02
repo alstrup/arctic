@@ -1,0 +1,5 @@
+<project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
+    <user name="asgeralstrup"/>
+    <description>Lightweight GUI framework for haXe targetting Flash8 and Flash9</description>
+    <version name="0.3.0">Rename Arctic -> ArcticView, ArcticBuilders -> Arctic. Add Dragable block</version>
+</project>
