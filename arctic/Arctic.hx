@@ -15,8 +15,6 @@ import flash.TextField;
 import flash.TextFormat;
 #end
 
-typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight : Bool }
-
 typedef ScrollMetrics = { startX : Float, startY : Float, 
                          endY : Float, scrollHeight : Float, toScroll : Float, 
                          clipHeight : Float }
@@ -32,11 +30,13 @@ class Arctic {
 		gui = gui0;
 		parent = null;
 		base = null;
+		useStageSize = false;
 	}
 
 	public var gui : ArcticBlock;
 	public var parent : MovieClip;
 	private var base : MovieClip;
+	private var useStageSize : Bool;
     
     /// Increasing this value will reduce the speed of the scroll bar and viceversa
     static  private var SCROLL_DELAY : Int = 100;
@@ -45,7 +45,8 @@ class Arctic {
 	 * Builds the user interface on the movieclip given. If useStageSize is true
 	 * the user interface will automatically resize to the size of the stage.
 	 */
-	public function display(p : MovieClip, useStageSize : Bool) : MovieClip {
+	public function display(p : MovieClip, useStageSize0 : Bool) : MovieClip {
+		useStageSize = useStageSize0;
 		if (useStageSize) {
 			stageSize(p);
 		}
@@ -58,7 +59,7 @@ class Arctic {
 				p.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
 				p.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
-				var resizeHandler = function( event : flash.events.Event ) { t.onResize();}; 
+				resizeHandler = function( event : flash.events.Event ) { t.onResize();}; 
 				p.stage.addEventListener( flash.events.Event.RESIZE, resizeHandler ); 
 			#else flash
 				flash.Stage.scaleMode = "noScale";
@@ -68,6 +69,25 @@ class Arctic {
         return base;
 	}
 
+	#if flash9
+	private var resizeHandler : Dynamic;
+	#end
+	
+	/**
+	 * This removes and destroys the view.
+	 */
+	public function destroy() {
+		remove();
+		gui = null;
+		if (useStageSize) {
+			#if flash9
+				parent.stage.removeEventListener(flash.events.Event.RESIZE, resizeHandler);
+			#else flash
+				flash.Stage.removeListener(this);
+			#end
+		}
+	}
+	
 	public function onResize() {
 		if (base != null) {
 			remove();
@@ -87,7 +107,14 @@ class Arctic {
 		#end
 	}
 
-	public function remove() {
+	/**
+	 * Removes the visual element - notice, however that if usestage is true, the view is reconstructed on resize.
+	 * Use destroy() if you want to get rid of this display for good
+	 */
+	private function remove() {
+		if (base == null) {
+			return;
+		}
 		#if flash9
 			parent.removeChild(base);
 		#else flash
@@ -447,7 +474,11 @@ class Arctic {
             var child = build(block, clip, availableWidth, availableHeight);            
             drawScrollBar(child, availableWidth, availableHeight);
             return clip;
+
+		case CustomBlock(data, calcMetricsFun, buildFun):
+			return buildFun(data, clip, availableWidth, availableHeight);
 		}
+		
 		return clip;
 	}
 
@@ -516,6 +547,10 @@ class Arctic {
 				cm.height = availableHeight;
 			}
 			return cm;
+		case CustomBlock(data, calcMetricsFun, buildFun):
+			if (calcMetricsFun != null) {
+				return calcMetricsFun(data);
+			}
 		}
 
 		// The sad fall-back scenario: Create the fucker and ask it, and then destroy it again

@@ -31,7 +31,7 @@ class ArcticTest {
 	
 	public function showHelloWorld2() {
 		// Clear out the old screen
-		arctic.remove();
+		arctic.destroy();
 		
 		// To make a nicer screen, we use a background and some more layout
 		var me = this;
@@ -58,11 +58,8 @@ class ArcticTest {
 	
 	public function nextWorld() {
 		// This is called when "Continue" is clicked above
-		arctic.remove();
-		showAppointments();
-	}
-	
-	public function showAppointments() {
+		arctic.destroy();
+
 		// Again, build the screen as a data structure of ArcticBlocks, through a couple of intermediate data structures
 		// This illustrates the "lego"-construction of user interfaces when you use Arctic
 
@@ -126,7 +123,7 @@ class ArcticTest {
 	}
 
 	public function screen1next() {
-		arctic.remove();
+		arctic.destroy();
 		
 		if (radioChoice == 0) {
 			visit();
@@ -136,7 +133,44 @@ class ArcticTest {
 	}
 	
 	public function visit() {
-		trace("Visit");
+		arctic.destroy();
+		
+		var calcMetrics = function(data : Int) : Metrics {
+			return { width: 100, height : 100, growHeight : false, growWidth : false };
+		}
+		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float) : ArcticMovieClip {
+			#if flash9
+				parentMc.graphics.beginFill(data);
+				parentMc.graphics.moveTo(50, 0);
+				parentMc.graphics.lineTo(100, 100);
+				parentMc.graphics.lineTo(0, 100);
+				parentMc.graphics.lineTo(50, 0);
+				parentMc.graphics.endFill();
+			#else flash
+				parentMc.beginFill(data);
+				parentMc.moveTo(50, 0);
+				parentMc.lineTo(100, 100);
+				parentMc.lineTo(0, 100);
+				parentMc.lineTo(50, 0);
+				parentMc.endFill();
+			#end
+			return parentMc;
+		}
+		
+		var custom = Background( 0x000000,
+						Border( 10, 10, 
+							LineStack( [ 
+								CustomBlock( 0xff0000, calcMetrics, build ), 
+								// Notice that we give it null as metrics here
+								// Then, arctic will build the block to get the metrics
+								CustomBlock( 0xffff00, null, build), 
+								CustomBlock( 0x00ff00, calcMetrics, build) 
+							] )
+						)
+					);
+			
+		arctic = new Arctic(custom);
+		var root = arctic.display(parent, true);
 	}
 	
 	public function reschedule() {
