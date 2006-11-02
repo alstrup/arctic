@@ -823,10 +823,9 @@ class ArcticView {
             scrollMet.startX = 1.3;
             scrollMet.startY = upperChild._height + 0.5;
             scrollMet.scrollHeight = scrollHeight - scrollHandHeight - 1;
-            scrollMet.toScroll = (clip._height / scrollMet.scrollHeight);
+            scrollMet.toScroll = ( (clip._height - availableHeight) / scrollMet.scrollHeight);
             scrollMet.clipHeight = clip._height;
             scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
-
             scrollHand._y = upperChild._height + 0.5;
             scrollHand._x = 1.3;
 
@@ -1002,11 +1001,11 @@ class ArcticView {
                 var diff = scrollHand._y - scrollMet.startY;
     #end
                 var increment = scrollMet.toScroll * diff;
-                if (increment < (scrollMet.clipHeight - 10) ) {
+                if (increment < (scrollMet.clipHeight - rect.height) ) {
                     rect.y = increment;
                     clip.scrollRect = rect;
                 } else {
-                    rect.y = scrollMet.clipHeight - 10;
+                    rect.y = scrollMet.clipHeight - rect.height;
                     clip.scrollRect = rect;
                 }
             }
@@ -1096,7 +1095,7 @@ class ArcticView {
             scrollMet.startX = 1.2;
             scrollMet.startY = upperChild.height + 0.5;
             scrollMet.scrollHeight = scrollHeight - scrollHandHeight - 1;
-            scrollMet.toScroll = (clip.height / scrollMet.scrollHeight);
+            scrollMet.toScroll = ((clip.height - availableHeight)  / scrollMet.scrollHeight);
             scrollMet.clipHeight = clip.height;
             scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
 
