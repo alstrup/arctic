@@ -204,20 +204,9 @@ class ArcticView {
 				var txtInput = new flash.text.TextField();
 				txtInput.width = width;
 				txtInput.height = height;
-				if (null != numeric && numeric) { 
-					txtInput.restrict = "0-9";
-					var txtFormat = txtInput.defaultTextFormat;
-					txtFormat.align = "right";
-					txtInput.defaultTextFormat = txtFormat;
-				}
 			#else flash
 				var txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
-				if (null != numeric && numeric) { 
-					txtInput.restrict = "0-9";
-					var txtFormat = txtInput.getTextFormat();
-					txtFormat.align = "right";
-					txtInput.setNewTextFormat(txtFormat);
-				}
+				txtInput.html = true;
 			#end
 				txtInput.tabEnabled = true;
 				setSize(clip, width, height);
@@ -244,14 +233,24 @@ class ArcticView {
 						txtInput.backgroundColor = 0xff0000;
 					}
 				}
+				txtInput.htmlText = html;
+				// Retreive the format of the initial text
+				var txtFormat = txtInput.getTextFormat();
+				if (null != numeric && numeric) {
+					txtInput.restrict = "0-9";
+					txtFormat.align = "right";
+				}
 			#if flash9
+				txtInput.defaultTextFormat = txtFormat;
+				// Set the text again to enforce the formatting
 				txtInput.htmlText = html;
 				var listener = function (e:FocusEvent) { validate(); };
 				txtInput.addEventListener(FocusEvent.FOCUS_OUT , listener);
 				txtInput.type = TextFieldType.INPUT;
 				clip.addChild(txtInput);
 			#else flash
-				txtInput.html = true;
+				txtInput.setNewTextFormat(txtFormat);
+				// Set the text again to enforce the formatting
 				txtInput.htmlText = html;
 				var listener = {
 					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.

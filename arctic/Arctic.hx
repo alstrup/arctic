@@ -135,7 +135,8 @@ class Arctic {
 		return LineStack(toggleButtons);
 	}
 	
-	static public function wrapWithDefaultFont(text : String, ?size : Float) : String {
-		return "<font face='arial'" + (if (size != null) { " size='" + size + "'"; } else "" ) + ">" + text + "</font>";
+	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String) : String {
+		return "<font face='arial'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
+			   (if (color != null) { " color='" + color + "'"; } else "" ) + ">" + text + "</font>";
 	}
 }
