@@ -31,6 +31,7 @@ class ArcticView {
 		parent = null;
 		base = null;
 		useStageSize = false;
+		updates = new Hash<ArcticBlock>();
 	}
 
 	public var gui : ArcticBlock;
@@ -107,6 +108,10 @@ class ArcticView {
 		#end
 	}
 
+	public function update(id : String, block : ArcticBlock) {
+		updates.set(id, block);
+	}
+	
 	/**
 	 * Removes the visual element - notice, however that if usestage is true, the view is reconstructed on resize.
 	 * Use destroy() if you want to get rid of this display for good
@@ -118,6 +123,7 @@ class ArcticView {
 		#if flash9
 			parent.removeChild(base);
 		#else flash
+			base.unloadMovie();
 			base.removeMovieClip();
 		#end
 		base = null;
@@ -136,6 +142,12 @@ class ArcticView {
 		
 		switch (gui) {
 		case Border(x, y, block):
+			if (availableWidth < 2 * x) {
+				x = availableWidth / 2;
+			}
+			if (availableHeight < 2 * y) {
+				y = availableHeight / 2;
+			}
 			var child = build(block, clip, availableWidth - 2 * x, availableHeight - 2 * y);
 			var size = getSize(child);
 			#if flash9
@@ -417,6 +429,15 @@ class ArcticView {
 			return clip;
 
 		case LineStack(blocks):
+			#if flash9
+				var child = new MovieClip();
+				clip.addChild(child);
+			#else flash
+				var d = clip.getNextHighestDepth();
+				var child = clip.createEmptyMovieClip("c" + d, d);
+			#end
+			child.tabEnabled = false;
+
 			// The number of children which wants to grow (including our own fillers)
 			var numberOfTallChildren = 0;
 			var childMetrics = [];
@@ -435,6 +456,7 @@ class ArcticView {
 			if (freeSpace < 0) {
 				// Hmm, we should do a scrollbar instead
 				freeSpace = 0;
+				availableWidth -= 12;
 			}
 			if (numberOfTallChildren > 0) {
 				freeSpace = freeSpace / numberOfTallChildren;
@@ -447,31 +469,32 @@ class ArcticView {
             var children = [];
 			for (l in blocks) {
 				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpace else 0;
-                var child = build(l, clip, availableWidth, h);
+                var line = build(l, child, availableWidth, h);
 				#if flash9
-					child.y = y;
+					line.y = y;
 				#else flash
-					child._y = y;
+					line._y = y;
 				#end
-                children.push(child);				
+                children.push(line);				
 				y += h;
    				++i;
 			}
 
 			if (availableHeight - height < 0) {
-				var size = getSize(clip);
+				availableWidth += 12;
+				var size = getSize(child);
 				// Scrollbar
 				#if flash9
-					drawScrollBar(clip, size.width, availableHeight);
+					drawScrollBar(clip, child, availableWidth, availableHeight);
 				#else flash
-					drawScrollBar(clip, size.width, availableHeight);
+					drawScrollBar(clip, child, availableWidth, availableHeight);
 				#end
 			}
 			return clip;
 		
 		case ScrollBar(block, availableWidth, availableHeight):
             var child = build(block, clip, availableWidth, availableHeight);            
-            drawScrollBar(child, availableWidth, availableHeight);
+            drawScrollBar(clip, child, availableWidth, availableHeight);
             return clip;
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
@@ -593,6 +616,14 @@ class ArcticView {
 				onInit(setOffset);
 			}
 			return clip;
+		
+		case Id(id, block) :
+			if (updates.exists(id)) {
+				var child = build(updates.get(id), clip, availableWidth, availableHeight);
+				return clip;
+			}
+			var child = build(block, clip, availableWidth, availableHeight);
+			return clip;
 
 		case CustomBlock(data, calcMetricsFun, buildFun):
 			return buildFun(data, clip, availableWidth, availableHeight);
@@ -677,6 +708,11 @@ class ArcticView {
 				}
 			}
 			return m;
+		case Id(id, block) :
+			if (updates.exists(id)) {
+				return calcMetrics(updates.get(id));
+			}
+			return calcMetrics(block);
 		case CustomBlock(data, calcMetricsFun, buildFun):
 			if (calcMetricsFun != null) {
 				return calcMetricsFun(data);
@@ -759,19 +795,21 @@ class ArcticView {
 		#end
 	}
 
+	/// We record updates of blocks here.
+	private var updates : Hash<ArcticBlock>;
+	
     // This method draws a scrollbar given a movie clip. 
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
     // rendered.
     // This can be seperated out and written as a seperate class - ideally it should use ArcticBlocks to construct itself
-    private function drawScrollBar(clip : MovieClip, availableWidth : Float,
+    private function drawScrollBar(parent : MovieClip, clip : MovieClip, availableWidth : Float,
                                                          availableHeight : Float) {
         #if flash9 
-            drawScrollBarForFlash9(clip, availableWidth, availableHeight);
+            drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight);
         #else flash
             if (clip._height <= availableHeight) {
                 return;
             }
-            var parent = clip._parent;
             var d = parent.getNextHighestDepth();
             var scrollBar = parent.createEmptyMovieClip("c" + d, d);
             var clipRect = new Rectangle<Float>(0, 0 , 
@@ -905,7 +943,7 @@ class ArcticView {
                 }            
             }
 
-            scrollBar._x = availableWidth - 2;
+            scrollBar._x = availableWidth - 11;
             scrollBar._y = clip._y;
         #end
        }
@@ -1038,12 +1076,11 @@ class ArcticView {
     #end
 
     #if flash9 
-        private function drawScrollBarForFlash9(clip : MovieClip, availableWidth : Float,
+        private function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
                                                          availableHeight : Float) {
             if (clip.height <= availableHeight) {
                 return;
             }
-            var parent = clip.parent;
             var scrollBar = new MovieClip();
             parent.addChild(scrollBar);
             var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
@@ -1202,7 +1239,7 @@ class ArcticView {
                  } ); 
 
 
-            scrollBar.x = availableWidth - 2;
+            scrollBar.x = availableWidth - 11;
             scrollBar.y = clip.y;
 
        }

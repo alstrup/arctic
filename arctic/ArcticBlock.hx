@@ -91,6 +91,11 @@ enum ArcticBlock {
 			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
 
 	/**
+	 * Name this block so that we can get to it, and update it.
+	 */
+	Id(name : String, block : ArcticBlock);
+
+	/**
 	 * A custom block. This is an escape mechanism which allows you to extend Arctic
 	 * with your own basic blocks. Parameters:
 	 * 

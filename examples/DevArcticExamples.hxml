@@ -13,3 +13,20 @@
 -debug
 -swf-header 800:600:50
 -cp ..
+
+--next
+# DynamicExample
+-swf dynamicexample.swf
+-main DynamicExample
+-debug
+-swf-header 800:600:50
+-cp ..
+
+--next
+# DynamicExample flash9
+-swf dynamicexample9.swf
+-swf-version 9
+-main DynamicExample
+-debug
+-swf-header 800:600:50
+-cp ..
