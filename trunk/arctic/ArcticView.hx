@@ -442,11 +442,13 @@ class ArcticView {
 			var numberOfTallChildren = 0;
 			var childMetrics = [];
 			var height = 0.0;
+			var growChildrensHeight = 0.0;  // How high are the children that grow?
 			for (r in blocks) {
 				var m = calcMetrics(r);
 				childMetrics.push(m);
 				if (m.growHeight) {
 					numberOfTallChildren++;
+					growChildrensHeight += m.height;
 				}
 				height += m.height;
 			}
@@ -454,9 +456,12 @@ class ArcticView {
 			// Next, determine how much space children get
             var freeSpace = availableHeight - height;
 			if (freeSpace < 0) {
-				// Hmm, we should do a scrollbar instead
-				freeSpace = 0;
-				availableWidth -= 12;
+				// Hm, there is not enough room. 
+				// We need to see if the free children can absorb it
+				if (-freeSpace > growChildrensHeight) {
+					// We need to add a scrollbar ourselves so make room for it
+					availableWidth -= 12;
+				}
 			}
 			if (numberOfTallChildren > 0) {
 				freeSpace = freeSpace / numberOfTallChildren;
@@ -469,6 +474,7 @@ class ArcticView {
             var children = [];
 			for (l in blocks) {
 				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpace else 0;
+				h = Math.max(0, h);
                 var line = build(l, child, availableWidth, h);
 				#if flash9
 					line.y = y;
@@ -815,6 +821,7 @@ class ArcticView {
             var clipRect = new Rectangle<Float>(0, 0 , 
                                                    availableWidth, availableHeight);
             clip.scrollRect = clipRect;
+			parent.scrollRect = clipRect;
             var squareHeight = 10;
 
             d = scrollBar.getNextHighestDepth();
@@ -1085,6 +1092,7 @@ class ArcticView {
             parent.addChild(scrollBar);
             var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
             clip.scrollRect = clipRect;
+            parent.scrollRect = clipRect;
             var squareHeight = 10;
 
             var upperChild = new MovieClip();
