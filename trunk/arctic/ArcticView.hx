@@ -455,25 +455,26 @@ class ArcticView {
 
 			// Next, determine how much space children get
             var freeSpace = availableHeight - height;
-			if (freeSpace < 0) {
+//			if (freeSpace < 0) {
 				// Hm, there is not enough room. 
 				// We need to see if the free children can absorb it
 				if (-freeSpace > growChildrensHeight) {
 					// We need to add a scrollbar ourselves so make room for it
 					availableWidth -= 12;
+					// But make sure the children are reduced
+//					freeSpace = -growChildrensHeight;
 				}
-			}
+//			}
+			var freeSpacePerChild = 0.0;
 			if (numberOfTallChildren > 0) {
-				freeSpace = freeSpace / numberOfTallChildren;
-			} else {
-				freeSpace = 0;
+				freeSpacePerChild = freeSpace / numberOfTallChildren;
 			}
 
 			var y = 0.0;
 			var i = 0;
             var children = [];
 			for (l in blocks) {
-				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpace else 0;
+				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
 				h = Math.max(0, h);
                 var line = build(l, child, availableWidth, h);
 				#if flash9
@@ -486,8 +487,10 @@ class ArcticView {
    				++i;
 			}
 
-			if (availableHeight - height < 0) {
-				availableWidth += 12;
+			if (freeSpace < 0) {
+				if (-freeSpace > growChildrensHeight) {
+					availableWidth += 12;
+				}
 				var size = getSize(child);
 				// Scrollbar
 				#if flash9
@@ -529,20 +532,24 @@ class ArcticView {
 			}; 
 			var dragX = -1.0;
 			var dragY = -1.0;
-			#if flash9
-				var firstTime = true;
-				var mouseMove = function(s) {
-					if (!clip.visible) {
-						return;
-					}
-					var motion = false;
+			
+			var doDrag = function (dx : Float, dy : Float) {
+				if (!sideMotion) {
+					dx = 0;
+				}
+				if (!upDownMotion) {
+					dy = 0;
+				}
+				var motion = false;
 					if (sideMotion) {
-						var dx = clip.stage.mouseX - dragX;
-						
 						while (Math.abs(dx) > 0) {
 							var newTotalDx = totalDx + dx;
 							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
-								child.x += dx;
+								#if flash9
+									child.x += dx;
+								#else
+									child._x += dx;
+								#end
 								totalDx = newTotalDx;
 								motion = true;
 								break;
@@ -556,11 +563,14 @@ class ArcticView {
 						}
 					}
 					if (upDownMotion) {
-						var dy = clip.stage.mouseY - dragY;
 						while (Math.abs(dy) > 0) {
 							var newTotalDy = totalDy + dy;
 							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
-								child.y += dy;
+								#if flash9
+									child.y += dy;
+								#else
+									child._y += dy;
+								#end
 								totalDy = newTotalDy;
 								motion = true;
 								break;
@@ -578,6 +588,17 @@ class ArcticView {
 							onDrag(totalDx, totalDy);
 						}
 					}
+			}
+			
+			#if flash9
+				var firstTime = true;
+				var mouseMove = function(s) {
+					if (!clip.visible) {
+						return;
+					}
+					var dx = clip.stage.mouseX - dragX;
+					var dy = clip.stage.mouseY - dragY;
+					doDrag(dx, dy);
 					dragX = clip.stage.mouseX;
 					dragY = clip.stage.mouseY;
 				}
@@ -603,7 +624,19 @@ class ArcticView {
 							}
 						}
 					}
-				); 
+				);
+				// Ideally, it should be on the parent, but limited to the area relevant
+				// (except for dragables that should not stay within where we probably do 
+				// not want mouse wheel events to move anything)
+				clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+					function (s) {
+						if (upDownMotion) {
+							doDrag(0, -10 * s.delta);
+						} else if (sideMotion) {
+							doDrag(-10 * s.delta, 0);
+						}
+					}
+				);
 			#else flash
 				clip.onMouseDown = function() {
 					if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
