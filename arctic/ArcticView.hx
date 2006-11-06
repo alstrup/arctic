@@ -527,49 +527,78 @@ class ArcticView {
 				totalDx = dx;
 				totalDy = dy;
 			}; 
-			var dragX = 0.0;
-			var dragY = 0.0;
+			var dragX = -1.0;
+			var dragY = -1.0;
 			#if flash9
 				var firstTime = true;
 				var mouseMove = function(s) {
 					if (!clip.visible) {
 						return;
 					}
+					var motion = false;
 					if (sideMotion) {
-						var dx = flash.Lib.current.mouseX - dragX;
-						var newTotalDx = totalDx + dx;
-						if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
-							child.x += dx;
-							totalDx = newTotalDx;
+						var dx = clip.stage.mouseX - dragX;
+						
+						while (Math.abs(dx) > 0) {
+							var newTotalDx = totalDx + dx;
+							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
+								child.x += dx;
+								totalDx = newTotalDx;
+								motion = true;
+								break;
+							}
+							// We just try a smaller drag
+							if (dx > 0) {
+								dx--;
+							} else {
+								dx++;
+							}
 						}
 					}
 					if (upDownMotion) {
-						var dy = flash.Lib.current.mouseY - dragY;
-						var newTotalDy = totalDy + dy;
-						if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
-							child.y += dy;
-							totalDy = newTotalDy;
+						var dy = clip.stage.mouseY - dragY;
+						while (Math.abs(dy) > 0) {
+							var newTotalDy = totalDy + dy;
+							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
+								child.y += dy;
+								totalDy = newTotalDy;
+								motion = true;
+								break;
+							}
+							// We just try a smaller drag
+							if (dy > 0) {
+								dy--;
+							} else {
+								dy++;
+							}
 						}
 					}
-					if (onDrag != null) {
-						onDrag(totalDx, totalDy);
+					if (motion) {
+						if (onDrag != null) {
+							onDrag(totalDx, totalDy);
+						}
 					}
-					dragX = flash.Lib.current.mouseX;
-					dragY = flash.Lib.current.mouseY;
+					dragX = clip.stage.mouseX;
+					dragY = clip.stage.mouseY;
 				}
 				var mouseUp = 
 					function(s) {
-						flash.Lib.current.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+						if (dragX == -1) {
+							return;
+						}
+						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+						dragX = -1;
+						dragY = -1;
 					};
 				clip.addEventListener( flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
 						if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
-							dragX = flash.Lib.current.mouseX;
-							dragY = flash.Lib.current.mouseY;
+							dragX = clip.stage.mouseX;
+							dragY = clip.stage.mouseY;
 							
-							flash.Lib.current.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+							clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 							if (firstTime) {
-								flash.Lib.current.addEventListener( flash.events.MouseEvent.MOUSE_UP, mouseUp );
+								clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_UP, mouseUp );
 								firstTime = false;
 							}
 						}
