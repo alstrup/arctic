@@ -16,7 +16,7 @@ class ArcticTest {
 	public function new(parent_ : MovieClip) {
 		parent = parent_;
 		
-		showHelloWorld2();
+		showHelloWorld1();
 	}
 
 	public function showHelloWorld1() {

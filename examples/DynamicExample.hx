@@ -24,12 +24,12 @@ class DynamicExample  {
 		// To make a screen, first build the data structure representing the contents
 		var me = this;
 		rows = [];
-		var screen = Background(0xf08000, 
+		var screen = Border (10, 10, Background(0xf08000, 
 			LineStack( [ 
 				Id("elements", Filler), 
 				Arctic.makeSimpleButton("Add row",  function() { me.addRow(); }, 50),
 				Arctic.makeSimpleButton("Close",  function() { me.remove(); }, 50) 
-			] ) );
+			] ) ) );
 		// Then construct the arctic object
 		arcticView = new ArcticView( screen );
 		// And finally display on the given movieclip
