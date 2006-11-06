@@ -888,7 +888,12 @@ class ArcticView {
 
             d = scrollBar.getNextHighestDepth();
             var scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
-            var scrollHandHeight = 10;
+            var scrollHandHeight = 10.0;
+            if ((clip._height - availableHeight) < scrollHeight) {
+                scrollHandHeight = scrollHeight - (clip._height - availableHeight);
+            }
+            var dragHeight = scrollHeight - scrollHandHeight + 10;
+
             drawLine(scrollHand, 0, 0, 8, scrollHandHeight - 0.5, 0x000000);
   
             var scrollMet = { startX : 0.0, startY : 0.0, endY : 0.0, 
@@ -942,7 +947,7 @@ class ArcticView {
                     scrollHand.startDrag(false , scrollMet.startX , 
                                                     scrollMet.startY ,
                                                     scrollMet.startX , 
-                                                    scrollHeight );
+                                                    dragHeight );
                     dragged = true;
                     Reflect.setField(Bool, "dragging", true);
                     scrollTimer(clip, scrollHand, clipRect, scrollMet);
