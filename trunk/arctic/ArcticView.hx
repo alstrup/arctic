@@ -455,16 +455,14 @@ class ArcticView {
 
 			// Next, determine how much space children get
             var freeSpace = availableHeight - height;
-//			if (freeSpace < 0) {
+			if (freeSpace < 0) {
 				// Hm, there is not enough room. 
 				// We need to see if the free children can absorb it
 				if (-freeSpace > growChildrensHeight) {
 					// We need to add a scrollbar ourselves so make room for it
 					availableWidth -= 12;
-					// But make sure the children are reduced
-//					freeSpace = -growChildrensHeight;
 				}
-//			}
+			}
 			var freeSpacePerChild = 0.0;
 			if (numberOfTallChildren > 0) {
 				freeSpacePerChild = freeSpace / numberOfTallChildren;
@@ -490,14 +488,14 @@ class ArcticView {
 			if (freeSpace < 0) {
 				if (-freeSpace > growChildrensHeight) {
 					availableWidth += 12;
+					var size = getSize(child);
+					// Scrollbar
+					#if flash9
+						drawScrollBar(clip, child, availableWidth, availableHeight);
+					#else flash
+						drawScrollBar(clip, child, availableWidth, availableHeight);
+					#end
 				}
-				var size = getSize(child);
-				// Scrollbar
-				#if flash9
-					drawScrollBar(clip, child, availableWidth, availableHeight);
-				#else flash
-					drawScrollBar(clip, child, availableWidth, availableHeight);
-				#end
 			}
 			return clip;
 		
@@ -547,7 +545,7 @@ class ArcticView {
 							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
 								#if flash9
 									child.x += dx;
-								#else
+								#else flash
 									child._x += dx;
 								#end
 								totalDx = newTotalDx;
@@ -568,7 +566,7 @@ class ArcticView {
 							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
 								#if flash9
 									child.y += dy;
-								#else
+								#else flash
 									child._y += dy;
 								#end
 								totalDy = newTotalDy;
@@ -647,25 +645,9 @@ class ArcticView {
 								if (!clip._visible) {
 									return;
 								}
-								if (sideMotion) {
-									var dx = flash.Lib.current._xmouse - dragX;
-									var newTotalDx = totalDx + dx;
-									if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
-										child._x += dx;
-										totalDx = newTotalDx;
-									}
-								}
-								if (upDownMotion) {
-									var dy = flash.Lib.current._ymouse - dragY;
-									var newTotalDy = totalDy + dy;
-									if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
-										child._y += dy;
-										totalDy = newTotalDy;
-									}
-								}
-								if (onDrag != null) {
-									onDrag(totalDx, totalDy);
-								}
+								var dx = flash.Lib.current._xmouse - dragX;
+								var dy = flash.Lib.current._ymouse - dragY;
+								doDrag(dx, dy);
 								dragX = flash.Lib.current._xmouse;
 								dragY = flash.Lib.current._ymouse;
 							};
@@ -678,6 +660,19 @@ class ArcticView {
 						}
 					}
 				};
+				var mouseWheelListener = { onMouseWheel : function ( delta : Float ) {
+						if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+							if (upDownMotion) {
+								doDrag(0, -10 * delta);
+							} else if (sideMotion) {
+								doDrag(-10 * delta, 0);
+							}
+						}
+					}
+				};
+				// TODO: We should remove this one again when the clip dies
+				flash.Mouse.addListener(mouseWheelListener);
+				
 			#end
 
 			if (null != onInit) {
