@@ -2,7 +2,6 @@ Bug-fixes:
 - Change scrollbar to have size according to content
 - Change scrollbar to listen to mouse wheel
 - Scrollbar clipping trouble
-- Dragging when mouse is outside flash area in flash9
 
 New features to consider, in order of priority:
 - Extend LineStack with ability to define visible item
