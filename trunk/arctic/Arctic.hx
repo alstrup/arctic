@@ -128,6 +128,9 @@ class Arctic {
 			return parentMc;
 		}
 		
+		var selFn = function(i) : Bool -> Void {
+			return function (b) { onSelectHandler(i); };
+		}
 		var toggleButtons : Array<ArcticBlock> = [];
 		var i = 0;
 		for (text in texts) {
@@ -135,9 +138,7 @@ class Arctic {
 													 Text(wrapWithDefaultFont(text, textSize))]));
 			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, null, build),
 													   Text(wrapWithDefaultFont(text, textSize))]));
-			var l = i;
-			var sel = function (b) { onSelectHandler(l); };
-			toggleButtons.push(ToggleButton(selected, unselected, false, sel, onInit));
+			toggleButtons.push(ToggleButton(selected, unselected, false, selFn(i), onInit));
 			++i;
 		}
 		return LineStack(toggleButtons);

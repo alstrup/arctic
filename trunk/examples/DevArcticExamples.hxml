@@ -4,6 +4,8 @@
 -debug
 -swf-header 800:600:50
 -cp ..
+--flash-strict
+
 
 --next
 # ArcticTest flash9
@@ -13,6 +15,8 @@
 -debug
 -swf-header 800:600:50
 -cp ..
+--flash-strict
+
 
 --next
 # DynamicExample
@@ -21,6 +25,8 @@
 -debug
 -swf-header 800:600:50
 -cp ..
+--flash-strict
+
 
 --next
 # DynamicExample flash9
@@ -30,3 +36,5 @@
 -debug
 -swf-header 800:600:50
 -cp ..
+--flash-strict
+
