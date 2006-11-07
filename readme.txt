@@ -1,7 +1,7 @@
 Arctic is a simple haXe GUI framework which allows you to create user
 interfaces for flash applications. It is unique by supporting both Flash 8
 and Flash 9 targets using the same client code. It is licensed under the BSD
-license.
+license, without the advertisement clause.
 
 The user interface is constructed from ArcticBlocks which is a simple enum.
 'Call-backs' are done using function arguments.
