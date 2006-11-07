@@ -13,6 +13,7 @@ import flash.MovieClip;
 import flash.geom.Rectangle;
 import flash.TextField;
 import flash.TextFormat;
+import flash.Mouse;
 #end
 
 typedef ScrollMetrics = { startX : Float, startY : Float, 
@@ -318,6 +319,10 @@ class ArcticView {
 				var child = build(block, clip, availableWidth, availableHeight);
 				var hover = build(hover, clip, availableWidth, availableHeight);
 			#if flash9
+				child.buttonMode = true;
+				child.mouseChildren = false;
+				hover.buttonMode = true;
+				hover.mouseChildren = false;
 				hover.visible = false;
 				clip.addEventListener( flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
 				clip.addEventListener( flash.events.MouseEvent.MOUSE_OVER, 
@@ -352,6 +357,10 @@ class ArcticView {
 				var sel = build(selected, clip, availableWidth, availableHeight);
 				var unsel = build(unselected, clip, availableWidth, availableHeight);
 			#if flash9
+				unsel.buttonMode = true;
+				unsel.mouseChildren = false;
+				sel.buttonMode = true;
+				sel.mouseChildren = false;
 				sel.visible = initialState;
 				unsel.visible = !initialState;
 				var setState = function (newState : Bool) { sel.visible = newState; unsel.visible = !newState; }; 
@@ -669,7 +678,11 @@ class ArcticView {
 						}
 					}
 				};
-				var mouseWheelListener = { onMouseWheel : function ( delta : Float ) {
+				var mouseWheelListener : flash.MouseListener = { 
+					onMouseDown : function() {},
+					onMouseMove : function() {},
+					onMouseUp : function() {},
+					onMouseWheel : function ( delta : Float, target ) {
 						if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
 							if (upDownMotion) {
 								doDrag(0, -10 * delta);
@@ -959,7 +972,7 @@ class ArcticView {
 			}
 		#end
 	}
-
+	
 	/// We record updates of blocks here.
 	private var updates : Hash<ArcticBlock>;
 	
