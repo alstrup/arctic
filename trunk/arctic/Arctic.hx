@@ -32,16 +32,16 @@ class Arctic {
 	
 	/**
 	 * Make a block dragable by the mouse in the given directions.
-	 * If stayWithinSize is true, the movement is constrained to the available area
+	 * If stayWithinBlock is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * This block can be used to make many things, including dialogs.
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
 	 */
-	static public function makeDragable(stayWithinSize : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
-					block : ArcticBlock, ?onDrag : Float -> Float -> Void) {
+	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
+					block : ArcticBlock, ?onDrag : Float -> Float -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
 		// Local closured variables to remember drag offset
-		var dragX = 0.0;
-		var dragY = 0.0;
+		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
+		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
 		var ourOnInit = function (onDragFun) {
 			onDragFun(dragX, dragY);
 		};
@@ -52,7 +52,7 @@ class Arctic {
 				onDrag(dx, dy);
 			}
 		}
-		return Dragable(stayWithinSize, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
+		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
 	}
 
 	/// Add a check-box in front on the given block
