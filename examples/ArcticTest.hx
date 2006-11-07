@@ -44,10 +44,13 @@ class ArcticTest {
 									Filler ]
 								),
 								Filler,
-								ColumnStack( [
-									Filler,
-									Arctic.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25)
-								] )
+								Cursor(
+									ColumnStack( [
+										Filler,
+										Arctic.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25)
+									] ),
+									Text("Cursor")
+								)
 							] )
 						);
 		// Then construct the arctic object

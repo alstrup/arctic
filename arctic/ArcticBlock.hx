@@ -91,6 +91,11 @@ enum ArcticBlock {
 			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
 
 	/**
+	 * Set the cursor shape to a block when within a given block.
+	 */
+	Cursor(block : ArcticBlock, cursor : ArcticBlock);
+
+	/**
 	 * Name this block so that we can get to it, and update it.
 	 */
 	Id(name : String, block : ArcticBlock);
