@@ -101,6 +101,7 @@ class ArcticView {
 		if (base != null) {
 			remove();
 		}
+		movieClips = [];
 		#if flash9
 			base = build(gui, parent, parent.width, parent.height);
 		#else flash
@@ -120,17 +121,29 @@ class ArcticView {
 		if (base == null) {
 			return;
 		}
+		for (m in movieClips) {
+			#if flash9
+				m.parent.removeChild(m);
+			#else flash
+				m.removeMovieClip();
+			#end
+		}
+		movieClips = [];
 		#if flash9
 			parent.removeChild(base);
 		#else flash
-			base.unloadMovie();
 			base.removeMovieClip();
 		#end
 		base = null;
 	}
+	
+	// We collect all generated movieclips here, so we can be sure to remove all when done
+	private var movieClips : Array<ArcticMovieClip>;
 
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float) : MovieClip {
+
+//		trace("build " + availableWidth + "," + availableHeight + ": " + gui);
 		#if flash9
 			var clip = new MovieClip();
 			p.addChild(clip);
@@ -138,6 +151,7 @@ class ArcticView {
 			var d = p.getNextHighestDepth();
 			var clip = p.createEmptyMovieClip("c" + d, d);
 		#end
+		movieClips.push(clip);
 		clip.tabEnabled = false;
 		
 		switch (gui) {
@@ -436,6 +450,7 @@ class ArcticView {
 				var d = clip.getNextHighestDepth();
 				var child = clip.createEmptyMovieClip("c" + d, d);
 			#end
+			movieClips.push(child);
 			child.tabEnabled = false;
 
 			// The number of children which wants to grow (including our own fillers)
@@ -484,7 +499,7 @@ class ArcticView {
 				y += h;
    				++i;
 			}
-
+			
 			if (freeSpace < 0) {
 				if (-freeSpace > growChildrensHeight) {
 					availableWidth += 12;
@@ -670,7 +685,7 @@ class ArcticView {
 						}
 					}
 				};
-				// TODO: We should remove this one again when the clip dies
+				// TODO: We should remove this one again when the clip dies -
 				flash.Mouse.addListener(mouseWheelListener);
 				
 			#end
@@ -680,6 +695,13 @@ class ArcticView {
 			}
 			return clip;
 		
+		case Cursor(block, cursor) :
+			var child = build(block, clip, availableWidth, availableHeight);
+			
+			// TODO: Register onMouseMove and check if the cursor is within this block or not
+			
+			return clip;
+
 		case Id(id, block) :
 			if (updates.exists(id)) {
 				var child = build(updates.get(id), clip, availableWidth, availableHeight);
@@ -696,6 +718,12 @@ class ArcticView {
 	}
 
 	private function calcMetrics(c : ArcticBlock) : Metrics {
+		var m = doCalcMetrics(c);
+//		trace(m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + ":" + c);
+		return m;
+	}
+	
+	private function doCalcMetrics(c) {
 		switch (c) {
 		case Border(x, y, block):
 			var m = calcMetrics(block);
@@ -771,6 +799,8 @@ class ArcticView {
 				}
 			}
 			return m;
+		case Cursor(block, cursor) :
+			return calcMetrics(block);
 		case Id(id, block) :
 			if (updates.exists(id)) {
 				return calcMetrics(updates.get(id));
@@ -780,6 +810,7 @@ class ArcticView {
 			if (calcMetricsFun != null) {
 				return calcMetricsFun(data);
 			}
+			// Fall through to creation
 		}
 
 		// The sad fall-back scenario: Create the fucker and ask it, and then destroy it again
