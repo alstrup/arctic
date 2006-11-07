@@ -75,11 +75,13 @@ class ArcticView {
 	#end
 	
 	/**
-	 * This removes and destroys the view.
+	 * This removes and destroys the view. You have to use this to clean up
+	 * properly.
 	 */
 	public function destroy() {
 		remove();
 		gui = null;
+		showMouse();
 		if (useStageSize) {
 			#if flash9
 				parent.stage.removeEventListener(flash.events.Event.RESIZE, resizeHandler);
@@ -102,6 +104,7 @@ class ArcticView {
 			remove();
 		}
 		movieClips = [];
+		showMouse();
 		#if flash9
 			base = build(gui, parent, parent.width, parent.height);
 		#else flash
@@ -109,6 +112,11 @@ class ArcticView {
 		#end
 	}
 
+	/**
+	 * Use this to change the named block to the new block. You have to
+	 * call refresh yourself afterwards to update the screen. See the
+	 * dynamic example to see how this is done.
+	 */
 	public function update(id : String, block : ArcticBlock) {
 		updates.set(id, block);
 	}
@@ -129,11 +137,11 @@ class ArcticView {
 			#end
 		}
 		movieClips = [];
-		#if flash9
+/*		#if flash9
 			parent.removeChild(base);
 		#else flash
 			base.removeMovieClip();
-		#end
+		#end*/
 		base = null;
 	}
 	
@@ -533,13 +541,7 @@ class ArcticView {
 					dx = Math.min(availableWidth - childSize.width, dx);
 					dy = Math.min(availableHeight - childSize.height, dy);
 				}
-				#if flash9
-					child.x += dx;
-					child.y += dy;
-				#else flash
-					child._x += dx;
-					child._y += dy;
-				#end
+				moveClip(child, dx, dy);
 				totalDx = dx;
 				totalDy = dy;
 			}; 
@@ -558,11 +560,7 @@ class ArcticView {
 						while (Math.abs(dx) > 0) {
 							var newTotalDx = totalDx + dx;
 							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
-								#if flash9
-									child.x += dx;
-								#else flash
-									child._x += dx;
-								#end
+								moveClip(child, dx, 0);
 								totalDx = newTotalDx;
 								motion = true;
 								break;
@@ -579,11 +577,7 @@ class ArcticView {
 						while (Math.abs(dy) > 0) {
 							var newTotalDy = totalDy + dy;
 							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
-								#if flash9
-									child.y += dy;
-								#else flash
-									child._y += dy;
-								#end
+								moveClip(child, 0, dy);
 								totalDy = newTotalDy;
 								motion = true;
 								break;
@@ -695,13 +689,57 @@ class ArcticView {
 			}
 			return clip;
 		
-		case Cursor(block, cursor) :
+		case Cursor(block, cursor, keepNormalCursor) :
 			var child = build(block, clip, availableWidth, availableHeight);
-			
-			// TODO: Register onMouseMove and check if the cursor is within this block or not
+			var cursorMc = build(cursor, clip, 0, 0);
+			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
+			#if flash9
+			cursorMc.visible = child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
+			clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, 
+				function (s) {
+					if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+						cursorMc.visible = true;
+						cursorMc.x = clip.mouseX;
+						cursorMc.y = clip.mouseY;
+						showMouse(keep);
+						return;
+					} else {
+						cursorMc.visible = false;
+						showMouse();
+					}
+				}
+			);
+			#else flash
+			cursorMc._visible = child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse);
+
+			if (clip.onMouseMove == null) {
+				clip.onMouseMove = function() {
+					if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+						cursorMc._visible = true;
+						cursorMc._x = clip._xmouse;
+						cursorMc._y = clip._ymouse;
+						showMouse(keep);
+						return;
+					} else {
+						cursorMc._visible = false;
+						showMouse();
+					}
+				};
+			}
+			#end
 			
 			return clip;
 
+		case Offset(dx, dy, block) :
+			var child = build(block, clip, availableWidth, availableHeight);
+			moveClip(child, dx, dy);
+			return clip;
+			
+		case OnTop(base, overlay) :
+			var child = build(base, clip, availableWidth, availableHeight);
+			var over = build(overlay, clip, availableWidth, availableHeight);
+			return clip;
+		 
 		case Id(id, block) :
 			if (updates.exists(id)) {
 				var child = build(updates.get(id), clip, availableWidth, availableHeight);
@@ -799,8 +837,18 @@ class ArcticView {
 				}
 			}
 			return m;
-		case Cursor(block, cursor) :
+		case Cursor(block, cursor, keepNormalCursor) :
 			return calcMetrics(block);
+		case Offset(dx, dy, block):
+			return calcMetrics(block);
+		case OnTop(base, overlay) :
+			var m1 = calcMetrics(base);
+			var m2 = calcMetrics(overlay);
+			m1.width = Math.max(m1.width, m2.width);
+			m1.height = Math.max(m1.height, m2.height);
+			m1.growWidth = m1.growWidth || m2.growWidth;
+			m1.growHeight = m1.growHeight || m2.growHeight;
+			return m1;
 		case Id(id, block) :
 			if (updates.exists(id)) {
 				return calcMetrics(updates.get(id));
@@ -886,6 +934,29 @@ class ArcticView {
 			setSize(clip, clip.stage.stageWidth, clip.stage.stageHeight);
 		#else flash
 			setSize(clip, flash.Stage.width, flash.Stage.height);
+		#end
+	}
+	
+	/// Move a movieclip
+	static public function moveClip(clip : MovieClip, dx : Float, dy : Float) {
+		#if flash9
+			clip.x += dx;
+			clip.y += dy;
+		#else flash
+			clip._x += dx;
+			clip._y += dy;
+		#end
+	}
+	
+	/// Turn the normal cursor on or off
+	static public function showMouse(?show : Bool) {
+		#if flash9
+		#else flash
+			if (show == null || show) {
+				flash.Mouse.show();
+			} else {
+				flash.Mouse.hide();
+			}
 		#end
 	}
 

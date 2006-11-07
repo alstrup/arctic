@@ -91,10 +91,23 @@ enum ArcticBlock {
 			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
 
 	/**
-	 * Set the cursor shape to a block when within a given block.
+	 * Set the cursor shape to a block when the mouse is within the given block.
+	 * If you want the cursor block to be in ADDITION to the normal cursor, set
+	 * keepNormalCursor to true. Per default, the normal cursor is hidden when
+	 * the custom cursor is visible.
 	 */
-	Cursor(block : ArcticBlock, cursor : ArcticBlock);
+	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Bool);
 
+	/**
+	 * Translate a block in some direction - notice layout does not take this into account.
+	 */
+	Offset(xOffset : Float, yOffset : Float, block : ArcticBlock);
+
+	/**
+	 * Place a block on top of another block (overlay).
+	 */
+	OnTop(base : ArcticBlock, overlay : ArcticBlock);
+	 
 	/**
 	 * Name this block so that we can get to it, and update it.
 	 */

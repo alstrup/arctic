@@ -8,11 +8,18 @@ import arctic.ArcticBlock;
  */
 class Arctic {
 
+	/// A text button
 	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?size : Float) : ArcticBlock {
 		var t = Border(5, 5, Text(wrapWithDefaultFont(text, size)));
 		return Button(t, Background(0xf0f0f0, t, 70.0, if (size != null) size / 4 else 5.0), onClick);
 	}
+	
+	/// Associate a tooltip with a block
+	static public function makeTooltip(block : ArcticBlock, text : String) : ArcticBlock {
+		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, Text(wrapWithDefaultFont(text))), 100, 3)), true);
+	}
 
+	/// A block which looks like a page in a tear-off calendar on the given date
 	static public function makeDateView(date : Date) : ArcticBlock {
 		var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 		var days = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
@@ -28,7 +35,7 @@ class Arctic {
 	 * If stayWithinSize is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * This block can be used to make many things, including dialogs.
-	 * onDrag is called whenever we drag with the total X and Y offsets.
+	 * onDrag is called whenever we drag, telling the total X and Y offsets.
 	 */
 	static public function makeDragable(stayWithinSize : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
 					block : ArcticBlock, ?onDrag : Float -> Float -> Void) {
@@ -47,7 +54,7 @@ class Arctic {
 		}
 		return Dragable(stayWithinSize, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
 	}
-	
+
 	/// Add a check-box in front on the given block
 	static public function makeCheckBox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
 		// Local closured variables to remember state
@@ -81,6 +88,7 @@ class Arctic {
 		return ToggleButton(selectedBlock, notSelectedBlock, selected, ourOnCheck, ourOnInit);
 	}
 	
+	/// Make a radio-group to choose between the given texts
 	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int, ?textSize: Float) : ArcticBlock {
 		var stateChooser = [];
 		var currentRadio = defaultSelected;
