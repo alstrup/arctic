@@ -1,0 +1,20 @@
+Bug-fixes:
+- Change scrollbar to have size according to content for Flash 9
+- Change scrollbar to listen to mouse wheel
+- Change scrollbar in Flash 9 to work outside of the window as well
+- Event listeners are not cleaned up properly
+- Make tooltip have a delay, and make sure they do not go outside the stage
+- Get the hand cursor going for Flash 9
+- Radio-group does not work anymore in Flash 9
+
+New features to consider, in order of priority:
+- Extend LineStack with ability to define the initial visible item
+- Change update to be more efficient and animate
+- Nice default, light-weight look for widgets
+- Progress-bar
+- Add horizontal scrollbar (and extend columnstack to add one if needed)
+- Table (or grid-layout)
+- Resizable bitmap with aspect-ratio preservation
+- Calendar widget
+- Combo-box
+- Simple audio/video player

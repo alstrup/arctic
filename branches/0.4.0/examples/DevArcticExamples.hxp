@@ -1,0 +1,11 @@
+﻿<haxe selected="0">
+  <output name="ArcticTest" mode="swf" out="arctictest.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
+  <output name="ArcticTest flash9" mode="swf9" out="arctictest9.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
+  <output name="DynamicExample" mode="swf" out="dynamicexample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
+  <output name="DynamicExample flash9" mode="swf9" out="dynamicexample9.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
+  <files path="/" />
+</haxe>
