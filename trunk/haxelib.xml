@@ -1,5 +1,5 @@
-<project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
+<project name="arctic" url="http://code.google.com/p/arctic/" license="BSD without advertisement clause">
     <user name="asgeralstrup"/>
-    <description>Lightweight GUI framework for haXe targetting Flash8 and Flash9</description>
-    <version name="0.4.0">Initial dynamic GUI support, custom cursors, tooltips, many bug-fixes</version>
+    <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
+    <version name="0.4.1">Fix radio group on Flash 9, fix hand cursor on Flash 9, make Arctic work with --flash-strict, do not require advertisement clause</version>
 </project>
