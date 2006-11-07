@@ -185,9 +185,9 @@ class ArcticTest {
 			return Background(0x202020, Border(5, 5, Text("<font size='20' color='#ffffff'>" + text + "</font>")));
 		}
 		var drag = LineStack( [
-					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area") ) ),
-					Background(0xa0a080, Arctic.makeDragable(true, true, true, makeText("I can be dragged within my area") ) ),
-					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area") ) ),
+					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area"), 300 ) ),
+					Background(0xa0a080, Arctic.makeDragable(true, true, true, makeText("I can be dragged within my area"), 100, 100 ) ),
+					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), 0, 200 ) ),
 					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere") )
 				] );
 		arcticView = new ArcticView(drag);

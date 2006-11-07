@@ -8,6 +8,11 @@ Bug-fixes:
 - Make tooltip have a delay, and make sure they do not go outside the stage
 
 New features to consider, in order of priority:
+  // A slider has it's own coordinate system
+- Slider( totalHeight, onChange, ?initialPos, ?dragBarHeight )
+   = Dragable( Handle )
+- Scrollbar = LineStack(Button, Slider, Button);
+
 - Change update to be more efficient and animate
 - Nice default, light-weight look for widgets
 - Progress-bar

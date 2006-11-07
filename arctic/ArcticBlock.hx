@@ -80,7 +80,7 @@ enum ArcticBlock {
 
 	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
     ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);
-	
+
 	/**
 	 * Make a block dragable by the mouse in the given directions.
 	 * If stayWithinSize is true, the movement is constrained to the available area
@@ -88,7 +88,7 @@ enum ArcticBlock {
 	 * This block can be used to make many things, including dialogs. Use the wrapper 
 	 * Arctic.makeDragable if you want to preserve the drag distance across resizes.
 	 */
-	Dragable(stayWithinSize : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
+	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
 			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
 
 	/**
@@ -108,7 +108,7 @@ enum ArcticBlock {
 	 * Place a block on top of another block (overlay).
 	 */
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
-	 
+
 	/**
 	 * Name this block so that we can get to it, and update it.
 	 */
@@ -138,5 +138,5 @@ enum ArcticBlock {
 				calcMetricsFunc : Dynamic -> Metrics, 
 				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip
 				);
-	
+
 }
