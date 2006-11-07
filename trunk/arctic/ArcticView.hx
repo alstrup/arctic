@@ -459,7 +459,7 @@ class ArcticView {
 			
 			return clip;
 
-		case LineStack(blocks):
+		case LineStack(blocks, ensureVisibleIndex):
 			#if flash9
 				var child = new MovieClip();
 				clip.addChild(child);
@@ -500,6 +500,7 @@ class ArcticView {
 				freeSpacePerChild = freeSpace / numberOfTallChildren;
 			}
 
+			var ensureY = 0.0;
 			var y = 0.0;
 			var i = 0;
             var children = [];
@@ -512,6 +513,9 @@ class ArcticView {
 				#else flash
 					line._y = y;
 				#end
+				if (i == ensureVisibleIndex) {
+					ensureY = y;
+				}
                 children.push(line);				
 				y += h;
    				++i;
@@ -523,9 +527,9 @@ class ArcticView {
 					var size = getSize(child);
 					// Scrollbar
 					#if flash9
-						drawScrollBar(clip, child, availableWidth, availableHeight);
+						drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
 					#else flash
-						drawScrollBar(clip, child, availableWidth, availableHeight);
+						drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
 					#end
 				}
 			}
@@ -533,7 +537,7 @@ class ArcticView {
 		
 		case ScrollBar(block, availableWidth, availableHeight):
             var child = build(block, clip, availableWidth, availableHeight);            
-            drawScrollBar(clip, child, availableWidth, availableHeight);
+            drawScrollBar(clip, child, availableWidth, availableHeight, 0);
             return clip;
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
@@ -820,7 +824,7 @@ class ArcticView {
 				}
 			}
 			return m;
-		case LineStack(blocks):
+		case LineStack(blocks, ensureVisibleIndex):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			for (c in blocks) {
 				var cm = calcMetrics(c);
@@ -981,17 +985,19 @@ class ArcticView {
     // rendered.
     // This can be seperated out and written as a seperate class - ideally it should use ArcticBlocks to construct itself
     private function drawScrollBar(parent : MovieClip, clip : MovieClip, availableWidth : Float,
-                                                         availableHeight : Float) {
+                                                         availableHeight : Float, ensureYVisible : Float) {
         #if flash9 
-            drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight);
+            drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight, ensureYVisible);
         #else flash
             if (clip._height <= availableHeight) {
                 return;
             }
-            var d = parent.getNextHighestDepth();
+
+			// TODO: Implement support for ensureYVisible
+
+			var d = parent.getNextHighestDepth();
             var scrollBar = parent.createEmptyMovieClip("c" + d, d);
-            var clipRect = new Rectangle<Float>(0, 0 , 
-                                                   availableWidth, availableHeight);
+            var clipRect = new Rectangle<Float>(0, 0, availableWidth, availableHeight);
             clip.scrollRect = clipRect;
 			parent.scrollRect = clipRect;
             var squareHeight = 10;
@@ -1019,6 +1025,7 @@ class ArcticView {
             upperChild.lineTo(2 + 4 , height - 4 );
             upperChild.endFill();
 
+			// The slider background part
             var scrollHeight = availableHeight - (squareHeight * 2);
 
             d = scrollBar.getNextHighestDepth();
@@ -1029,6 +1036,7 @@ class ArcticView {
 
             scrollOutline._y = upperChild._height;
 
+			// The slider hand
             d = scrollBar.getNextHighestDepth();
             var scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
             var scrollHandHeight = 10.0;
@@ -1047,9 +1055,10 @@ class ArcticView {
             scrollMet.toScroll = ( (clip._height - availableHeight) / scrollMet.scrollHeight);
             scrollMet.clipHeight = clip._height;
             scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
-            scrollHand._y = upperChild._height + 0.5;
-            scrollHand._x = 1.3;
+            scrollHand._y = scrollMet.startY;
+            scrollHand._x = scrollMet.startX;
 
+			// The lower button
             d = scrollBar.getNextHighestDepth();
             var lowerChild = scrollBar.createEmptyMovieClip("scrollBarLowerChild" + d, d);
 
@@ -1074,6 +1083,7 @@ class ArcticView {
             //lowerChild._x = 10;
             lowerChild._y = availableHeight - 10 ;
 
+			// Behaviour
             var dragged = false;
             scrollBar.onMouseDown = function () {
                 var mouseInside = scrollHand.hitTest(flash.Lib.current._xmouse, 
@@ -1196,15 +1206,15 @@ class ArcticView {
     #if flash9
         static private function scroll(clip : MovieClip, scrollHand : MovieClip, 
                 rect : Rectangle, scrollMet : ScrollMetrics ) {   
-             if ( scrollHand.y < scrollMet.startY ) {
-             	scrollHand.y = scrollMet.startY;
-             }
+            if ( scrollHand.y < scrollMet.startY ) {
+				scrollHand.y = scrollMet.startY;
+            }
              
-	     if ( scrollHand.y > scrollMet.endY ) {
-             	scrollHand.y = scrollMet.endY;
-             }
+			if ( scrollHand.y > scrollMet.endY ) {
+				scrollHand.y = scrollMet.endY;
+            }
              
-             if ( (scrollHand.y >= scrollMet.startY )  && (scrollHand.y <= scrollMet.endY)) {
+            if ( (scrollHand.y >= scrollMet.startY )  && (scrollHand.y <= scrollMet.endY)) {
                 var diff = scrollHand.y - scrollMet.startY;
 
     #else flash
@@ -1261,10 +1271,13 @@ class ArcticView {
 
     #if flash9 
         private function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
-                                                         availableHeight : Float) {
+                                                         availableHeight : Float, ensureYVisible : Float) {
             if (clip.height <= availableHeight) {
                 return;
             }
+			
+			// TODO: Implement support for ensureYVisible
+			
             var scrollBar = new MovieClip();
             parent.addChild(scrollBar);
             var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);

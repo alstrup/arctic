@@ -38,13 +38,13 @@ class DynamicExample  {
 	}
 	
 	private function addRow() {
-		rows.push("Another line");
+		rows.push("Another line " + rows.length);
 		var elements = [];
 		for (r in rows) {
 			elements.push(Text(r));
 		}
 		elements.push(Filler);
-		arcticView.update("elements", LineStack(elements));
+		arcticView.update("elements", LineStack(elements, rows.length - 1) );
 		arcticView.refresh();
 	}
 	

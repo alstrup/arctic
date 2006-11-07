@@ -73,9 +73,10 @@ enum ArcticBlock {
 
 	/**
 	 * A bunch of blocks stacked on top of each other. The width is the maximum width
-	 * of the blocks.
+	 * of the blocks. If you want to make sure a specific block is visible, pass the
+	 * index number of the block in the array as second parameter.
 	 */
-	LineStack(blocks : Array<ArcticBlock>);
+	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Int);
 
 	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
     ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);
