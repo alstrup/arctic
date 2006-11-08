@@ -105,6 +105,7 @@ class ArcticView {
 			remove();
 		}
 		movieClips = [];
+		idMovieClip = new Hash<ArcticMovieClip>();
 		showMouse();
 		#if flash9
 			base = build(gui, parent, parent.width, parent.height);
@@ -123,6 +124,15 @@ class ArcticView {
 	}
 	
 	/**
+	* Get access to the raw movieclip for the named element.
+	* Notice! This movieclip is destroyed on resize, and thus you have to
+	* do call this method again to do the special stuff you do again.
+	*/
+	public function getRawMovieClip(id : String) : ArcticMovieClip {
+		return idMovieClip.get(id);
+	}
+	
+	/**
 	 * Removes the visual element - notice, however that if usestage is true, the view is reconstructed on resize.
 	 * Use destroy() if you want to get rid of this display for good
 	 */
@@ -138,6 +148,7 @@ class ArcticView {
 			#end
 		}
 		movieClips = [];
+		idMovieClip = new Hash<ArcticMovieClip>();
 /*		#if flash9
 			parent.removeChild(base);
 		#else flash
@@ -149,6 +160,12 @@ class ArcticView {
 	// We collect all generated movieclips here, so we can be sure to remove all when done
 	private var movieClips : Array<ArcticMovieClip>;
 
+	/// We record updates of blocks here.
+	private var updates : Hash<ArcticBlock>;
+	
+	/// And the movieclips for ids here
+	private var idMovieClip : Hash<ArcticMovieClip>;
+	
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float) : MovieClip {
 
@@ -682,7 +699,7 @@ class ArcticView {
 						}
 					}
 				};
-				var mouseWheelListener : flash.MouseListener = { 
+				var mouseWheelListener = { 
 					onMouseDown : function() {},
 					onMouseMove : function() {},
 					onMouseUp : function() {},
@@ -760,9 +777,11 @@ class ArcticView {
 		case Id(id, block) :
 			if (updates.exists(id)) {
 				var child = build(updates.get(id), clip, availableWidth, availableHeight);
+				idMovieClip.set(id, child);
 				return clip;
 			}
 			var child = build(block, clip, availableWidth, availableHeight);
+			idMovieClip.set(id, child);
 			return clip;
 
 		case CustomBlock(data, calcMetricsFun, buildFun):
@@ -976,9 +995,6 @@ class ArcticView {
 			}
 		#end
 	}
-	
-	/// We record updates of blocks here.
-	private var updates : Hash<ArcticBlock>;
 	
     // This method draws a scrollbar given a movie clip. 
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
