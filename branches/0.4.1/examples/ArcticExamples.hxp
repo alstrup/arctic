@@ -1,0 +1,7 @@
+﻿<haxe selected="0">
+  <output name="ArcticTest" mode="swf" out="ArcticTest.swf" class="ArcticTest" lib="" cmd="" main="True" debug="False">-swf-header 800:600:50
+-lib arctic</output>
+  <output name="ArcticTest flash9" mode="swf9" out="ArcticTest9.swf" class="ArcticTest" lib="" cmd="" main="True" debug="False">-swf-header 800:600:50
+-lib arctic</output>
+  <files path="/" />
+</haxe>

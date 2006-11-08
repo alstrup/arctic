@@ -1,0 +1,13 @@
+# ArcticTest
+-swf ArcticTest.swf
+-main ArcticTest
+-swf-header 800:600:50
+-lib arctic
+
+--next
+# ArcticTest flash9
+-swf ArcticTest9.swf
+-swf-version 9
+-main ArcticTest
+-swf-header 800:600:50
+-lib arctic
