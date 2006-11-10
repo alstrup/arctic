@@ -15,161 +15,62 @@ import flash.geom.Point;
  */
 class DrawUtils {
 
-/*-------------------------------------------------------------
-	mc.drawRect is a method for drawing rectangles and
-	rounded rectangles. Regular rectangles are
-	sufficiently easy that I often just rebuilt the
-	method in any file I needed it in, but the rounded
-	rectangle was something I was needing more often,
-	hence the method. The rounding is very much like
-	that of the rectangle tool in Flash where if the
-	rectangle is smaller in either dimension than the
-	rounding would permit, the rounding scales down to
-	fit.
--------------------------------------------------------------*/
-static public function drawRect(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, cornerRadius : Float) {
-
-	// ==============
-	// mc.drawRect() - by Ric Ewing (ric@formequalsfunction.com) - version 1.1 - 4.7.2002
-	// 
-	// x, y = top left corner of rect
-	// w = width of rect
-	// h = height of rect
-	// cornerRadius = [optional] radius of rounding for corners (defaults to 0)
-	// ==============
-	
-	// if the user has defined cornerRadius our task is a bit more complex. :)
-	if (null != cornerRadius && cornerRadius > 0) {
-		// init vars
-		var theta, angle, cx, cy, px, py;
-		// make sure that w + h are larger than 2*cornerRadius
-		if (cornerRadius>Math.min(w, h)/2) {
-			cornerRadius = Math.min(w, h)/2;
+	/// Contributed by Zjnue Brzavi <zjnue.brzavi@googlemail.com>
+	static public function drawRect(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, ?cornerRadius : Float) {
+		var angle, sideSign, cnrSign, strtX, strtY, nextX, nextY, cnrX, cnrY, endX, endY;
+		if (cornerRadius != null && cornerRadius > 0) {
+			strtX = x + cornerRadius;
+			strtY = y;
+			#if flash9
+				mc.graphics.moveTo(strtX,strtY);
+			#else flash
+				mc.moveTo(strtX,strtY);
+			#end
+			for (i in 0...4) {
+				angle = (Math.PI/4) - (i*Math.PI/2);
+				sideSign = if (Math.cos(angle) >= 0) 1 else -1;
+				cnrSign = if (Math.sin(angle) >= 0) 1 else -1;
+				if ((i%2)== 0) {
+					nextX = strtX + sideSign * (w-2*cornerRadius);
+					nextY = strtY;
+					cnrX = nextX + sideSign * cornerRadius;
+					cnrY = strtY;
+					endX = cnrX;
+					endY = cnrY + cnrSign * cornerRadius;
+				} else {
+					nextY = strtY + sideSign * (h-2*cornerRadius);
+					nextX = strtX;
+					cnrY = nextY + sideSign * cornerRadius;
+					cnrX = strtX;
+					endY = cnrY;
+					endX = cnrX + cnrSign * cornerRadius;
+				}
+				#if flash9
+					mc.graphics.lineTo(nextX,nextY);
+					mc.graphics.curveTo(cnrX,cnrY,endX,endY);
+				#else flash
+					mc.lineTo(nextX,nextY);
+					mc.curveTo(cnrX,cnrY,endX,endY);
+				#end
+				strtX = endX;
+				strtY = endY;
+			}
+		} else {
+			#if flash9
+				mc.graphics.moveTo(x, y);
+				mc.graphics.lineTo(x+w, y);
+				mc.graphics.lineTo(x+w, y+h);
+				mc.graphics.lineTo(x, y+h);
+				mc.graphics.lineTo(x, y);
+			#else flash
+				mc.moveTo(x, y);
+				mc.lineTo(x+w, y);
+				mc.lineTo(x+w, y+h);
+				mc.lineTo(x, y+h);
+				mc.lineTo(x, y);
+			#end
 		}
-		// theta = 45 degrees in radians
-		theta = Math.PI/4;
-		// draw top line
-		#if flash9
-			mc.graphics.moveTo(x+cornerRadius, y);
-			mc.graphics.lineTo(x+w-cornerRadius, y);
-		#else flash
-			mc.moveTo(x+cornerRadius, y);
-			mc.lineTo(x+w-cornerRadius, y);
-		#end
-		//angle is currently 90 degrees
-		angle = -Math.PI/2;
-		// draw tr corner in two parts
-		cx = x+w-cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+w-cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-		#end
-		angle += theta;
-		cx = x+w-cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+w-cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-			// draw right line
-			mc.graphics.lineTo(x+w, y+h-cornerRadius);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-			// draw right line
-			mc.lineTo(x+w, y+h-cornerRadius);
-		#end
-		// draw br corner
-		angle += theta;
-		cx = x+w-cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+h-cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+w-cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+h-cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-		#end
-		angle += theta;
-		cx = x+w-cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+h-cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+w-cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+h-cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-			// draw bottom line
-			mc.graphics.lineTo(x+cornerRadius, y+h);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-			// draw bottom line
-			mc.lineTo(x+cornerRadius, y+h);
-		#end
-		// draw bl corner
-		angle += theta;
-		cx = x+cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+h-cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+h-cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-		#end
-		angle += theta;
-		cx = x+cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+h-cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+h-cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-			// draw left line
-			mc.graphics.lineTo(x, y+cornerRadius);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-			// draw left line
-			mc.lineTo(x, y+cornerRadius);
-		#end
-		// draw tl corner
-		angle += theta;
-		cx = x+cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-		#end
-		angle += theta;
-		cx = x+cornerRadius+(Math.cos(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		cy = y+cornerRadius+(Math.sin(angle+(theta/2))*cornerRadius/Math.cos(theta/2));
-		px = x+cornerRadius+(Math.cos(angle+theta)*cornerRadius);
-		py = y+cornerRadius+(Math.sin(angle+theta)*cornerRadius);
-		#if flash9
-			mc.graphics.curveTo(cx, cy, px, py);
-		#else flash
-			mc.curveTo(cx, cy, px, py);
-		#end
-	} else {
-		// cornerRadius was not defined or = 0. This makes it easy.
-		#if flash9
-			mc.graphics.moveTo(x, y);
-			mc.graphics.lineTo(x+w, y);
-			mc.graphics.lineTo(x+w, y+h);
-			mc.graphics.lineTo(x, y+h);
-			mc.graphics.lineTo(x, y);
-		#else flash
-			mc.moveTo(x, y);
-			mc.lineTo(x+w, y);
-			mc.lineTo(x+w, y+h);
-			mc.lineTo(x, y+h);
-			mc.lineTo(x, y);
-		#end
 	}
-}
 
 #if flash9
 #else flash

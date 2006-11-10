@@ -82,7 +82,7 @@ class ArcticTest {
 							Border(5, 5, Picture("images/" + c.icon + ".jpg", 80, 100, 1.0) ),
 							LineStack( [
 								Text("<font face='arial' size='18'><b>" + c.name + "</b><br/><font size='16'>" + c.reason + "</font></font>"),
-								TextInput("<font face='arial'>Write comments here</font>", 400, 20, null) 
+								TextInput("<font face='arial'>Write comments here</font>", 400, 20, function (s) { trace(s); return true; }) 
 							] ),
 							Filler
 						] )
@@ -182,7 +182,7 @@ class ArcticTest {
 	public function draggable() {
 		// Small example showing the different kinds of draggable blocks possible in Arctic
 		var makeText = function (text) {
-			return Background(0x202020, Border(5, 5, Text("<font size='20' color='#ffffff'>" + text + "</font>")));
+			return Background(0x202020, Border(5, 5, Text("<font size='20' face='arial' color='#ffffff'>" + text + "</font>")), 100, 5);
 		}
 		var drag = LineStack( [
 					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area"), 300 ) ),
