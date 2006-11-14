@@ -170,6 +170,7 @@ class Scrollbar {
 
             scrollBar._x = availableWidth - 11;
             scrollBar._y = clip._y;
+            moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
         #end
        }
 
@@ -273,6 +274,36 @@ class Scrollbar {
             }
         }
 
+    #if flash9
+        static private function moveToY(clip : MovieClip, scrollHand : MovieClip, 
+                          rect : Rectangle , scrollMet : ScrollMetrics,
+                                                      ensureYVisible : Float ) {
+    #else flash
+        static private function moveToY(clip : MovieClip, scrollHand : MovieClip, 
+                          rect : Rectangle < Float >, scrollMet : ScrollMetrics,
+                                                      ensureYVisible : Float ) {
+    #end
+            var visibleY = rect.y + rect.height;
+            var moveToY = rect.y;
+            if ( (ensureYVisible >= rect.y) && (ensureYVisible <= visibleY) ) {
+                return;
+            }
+
+            if (ensureYVisible < rect.y) {
+                moveToY = ensureYVisible;
+            }
+            if (ensureYVisible > visibleY) {
+                moveToY = ensureYVisible - rect.height;
+            }           
+            var diff = moveToY / scrollMet.toScroll;
+            rect.y = moveToY;
+            clip.scrollRect = rect;
+    #if flash9
+            scrollHand.y = scrollMet.startY + diff ;
+    #else flash 
+            scrollHand._y = scrollMet.startY + diff ;
+    #end
+            }
 
     #if flash9 
         private static function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
@@ -442,7 +473,7 @@ class Scrollbar {
 
             scrollBar.x = availableWidth - 11;
             scrollBar.y = clip.y;
-
+            moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
        }
         #end
 }
