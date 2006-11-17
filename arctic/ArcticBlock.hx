@@ -79,6 +79,11 @@ enum ArcticBlock {
 	 * index number of the block in the array as second parameter.
 	 */
 	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Int);
+	
+	/**
+	 * A 2-d grid of block.
+	 */
+	Grid(blocks: Array<Array<ArcticBlock>>);
 
 	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
     ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);

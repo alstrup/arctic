@@ -531,6 +531,9 @@ class ArcticView {
 				y += h;
    				++i;
 			}
+			if (i == ensureVisibleIndex) {
+				ensureY = y;
+			}
 			
 			if (freeSpace < 0) {
 				if (-freeSpace > growChildrensHeight) {
@@ -544,6 +547,71 @@ class ArcticView {
 					#end
 				}
 			}
+			return clip;
+		
+		case Grid(cells):
+			#if flash9
+				var child = new MovieClip();
+				clip.addChild(child);
+			#else flash
+				var d = clip.getNextHighestDepth();
+				var child = clip.createEmptyMovieClip("c" + d, d);
+			#end
+			movieClips.push(child);
+			child.tabEnabled = false;
+
+			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
+			var columnWidths = [];
+			var lineHeights = [];
+			var y = 0;
+			for (line in cells) {
+				var x = 0;
+				var lineHeight = 0.0;
+				for (block in line) {
+					var m = calcMetrics(block);
+					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
+					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
+					if (columnWidths.length < x) {
+						columnWidths.push(m.width);
+					} else {
+						if (columnWidths[x] < m.width) {
+							columnWidths[x] = m.width;
+						}
+					}
+					lineHeight = Math.max(lineHeight, m.height);
+					++x;
+				}
+				if (lineHeights.length < y) {
+					lineHeights.push(lineHeight);
+				} else {
+					if (lineHeights[y] < lineHeight) {
+						lineHeights[y] = lineHeight;
+					}
+				}
+				++y;
+			}
+			
+			y = 0;
+			var yc = 0.0;
+			for (line in cells) {
+				var xc = 0.0;
+				var x = 0;
+				for (block in line) {
+					var b = build(block, child, columnWidths[x], lineHeights[y]);
+					#if flash9
+						b.x = xc;
+						b.y = yc;
+					#else flash
+						b._x = xc;
+						b._y = yc;
+					#end
+					xc += columnWidths[x];
+					++x;
+				}
+				yc += lineHeights[y];
+				++y;
+			}
+		
 			return clip;
 		
 		case ScrollBar(block, availableWidth, availableHeight):
@@ -831,7 +899,7 @@ class ArcticView {
 				m.width += cm.width;
 				m.height = Math.max(cm.height, m.height);
 				m.growWidth = m.growWidth || cm.growWidth;
-				// A filler in should not impact height growth in this situation
+				// A filler here should in itself not impact height growth in this situation
 				if (c != Filler) {
 					m.growHeight = m.growHeight || cm.growHeight;
 				}
@@ -843,13 +911,50 @@ class ArcticView {
 				var cm = calcMetrics(c);
 				m.width = Math.max(cm.width, m.width);
 				m.height += cm.height;
-				// A filler in should not impact width growth in this situation
+				// A filler here should in itself not impact width growth in this situation
 				if (c != Filler) {
 					m.growWidth = m.growWidth || cm.growWidth;
 				}
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
 			return m;
+
+		case Grid(cells):
+			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
+			trace(gridMetrics);
+			var columnWidths = [];
+			var lineHeights = [];
+			var y = 0;
+			for (line in cells) {
+				var x = 0;
+				var lineHeight = 0.0;
+				for (block in line) {
+					var m = calcMetrics(block);
+					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
+					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
+					if (columnWidths.length < x) {
+						columnWidths.push(m.width);
+					} else {
+						if (columnWidths[x] < m.width) {
+							columnWidths[x] = m.width;
+						}
+					}
+					lineHeight = Math.max(lineHeight, m.height);
+					++x;
+				}
+				if (lineHeights.length < y) {
+					lineHeights.push(lineHeight);
+				} else {
+					if (lineHeights[y] < lineHeight) {
+						lineHeights[y] = lineHeight;
+					}
+				}
+				++y;
+			}
+			gridMetrics.width = Lambda.fold( columnWidths.iterator(), function (a : Float, b : Float) { return a + b; }, 0.0);
+			gridMetrics.height = Lambda.fold( lineHeights.iterator(), function (a : Float, b : Float) { return a + b; }, 0.0);
+			return gridMetrics;
+		
 	    case ScrollBar(block, availableWidth, availableHeight):
 			var cm = calcMetrics(block);
 			if (cm.height > availableHeight) {
