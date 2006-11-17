@@ -33,7 +33,7 @@ class DynamicExample  {
 		// Then construct the arctic object
 		arcticView = new ArcticView( screen );
 		// And finally display on the given movieclip
-		ArcticView.setSize(parent, 100, 100);
+//		ArcticView.setSize(parent, 100, 100);
 		var root = arcticView.display(parent, true);
 	}
 	
@@ -44,13 +44,26 @@ class DynamicExample  {
 			elements.push(Text(r));
 		}
 		elements.push(Filler);
-		arcticView.update("elements", LineStack(elements, rows.length - 1) );
+		arcticView.update("elements", LineStack(elements, rows.length) );
 		arcticView.refresh();
 	}
 	
 	private function remove() {
 		arcticView.destroy();
 		arcticView = null;
+		
+		grid();
+	}
+	
+	private function grid() {
+		var screen = Background(0x808080, Border( 1, 1, Grid( [ 
+			[ Text("First cell"), Text("Second cell"), Filler ],
+			[ Text("Second line"), Filler, Text("Last") ]
+		]) ) );
+		
+		// Then construct the arctic object
+		arcticView = new ArcticView( screen );
+		var root = arcticView.display(parent, true);
 	}
 	
 	private var rows : Array<String>;
