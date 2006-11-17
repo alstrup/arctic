@@ -164,15 +164,7 @@ class ArcticView {
                     availableWidth : Float, availableHeight : Float) : MovieClip {
 
 //		trace("build " + availableWidth + "," + availableHeight + ": " + gui);
-		#if flash9
-			var clip = new MovieClip();
-			p.addChild(clip);
-		#else flash
-			var d = p.getNextHighestDepth();
-			var clip = p.createEmptyMovieClip("c" + d, d);
-		#end
-		movieClips.push(clip);
-		clip.tabEnabled = false;
+		var clip = makeClip(p);
 		
 		switch (gui) {
 		case Border(x, y, block):
@@ -471,15 +463,7 @@ class ArcticView {
 			return clip;
 
 		case LineStack(blocks, ensureVisibleIndex):
-			#if flash9
-				var child = new MovieClip();
-				clip.addChild(child);
-			#else flash
-				var d = clip.getNextHighestDepth();
-				var child = clip.createEmptyMovieClip("c" + d, d);
-			#end
-			movieClips.push(child);
-			child.tabEnabled = false;
+			var child = makeClip(clip);
 
 			// The number of children which wants to grow (including our own fillers)
 			var numberOfTallChildren = 0;
@@ -538,27 +522,14 @@ class ArcticView {
 			if (freeSpace < 0) {
 				if (-freeSpace > growChildrensHeight) {
 					availableWidth += 12;
-					var size = getSize(child);
 					// Scrollbar
-					#if flash9
-						Scrollbar.drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
-					#else flash
-						Scrollbar.drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
-					#end
+					Scrollbar.drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
 				}
 			}
 			return clip;
 		
 		case Grid(cells):
-			#if flash9
-				var child = new MovieClip();
-				clip.addChild(child);
-			#else flash
-				var d = clip.getNextHighestDepth();
-				var child = clip.createEmptyMovieClip("c" + d, d);
-			#end
-			movieClips.push(child);
-			child.tabEnabled = false;
+			var child = makeClip(clip);
 
 			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			var columnWidths = [];
@@ -1013,6 +984,19 @@ class ArcticView {
 			mc.removeMovieClip();
 		#end
 		return m;
+	}
+	
+	private function makeClip(p : MovieClip) : MovieClip {
+		#if flash9
+			var clip = new MovieClip();
+			p.addChild(clip);
+		#else flash
+			var d = p.getNextHighestDepth();
+			var clip = p.createEmptyMovieClip("c" + d, d);
+		#end
+		movieClips.push(clip);
+		clip.tabEnabled = false;
+		return clip;
 	}
 	
 	/**
