@@ -1,0 +1,23 @@
+Bug-fixes:
+- Change scrollbar to listen to mouse wheel
+- Change scrollbar drag in Flash 9 to work outside of the window as well
+
+- Event listeners are not cleaned up properly
+- Make tooltip have a delay, and make sure they do not go outside the stage
+- Add filling behaviour to grid
+
+New features to consider, in order of priority:
+  // A slider has it's own coordinate system
+- Slider( totalHeight, onChange, ?initialPos, ?dragBarHeight )
+   = Dragable( Handle )
+- Scrollbar = LineStack(Button, Slider, Button);
+
+- Change update to be more efficient and animate
+- Nice default, light-weight look for widgets
+- Progress-bar
+- Add horizontal scrollbar (and extend columnstack to add one if needed)
+- Table (or grid-layout)
+- Resizable bitmap with aspect-ratio preservation
+- Calendar widget
+- Combo-box
+- Simple audio/video player

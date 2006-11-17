@@ -1,0 +1,5 @@
+<project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
+    <user name="asgeralstrup"/>
+    <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
+    <version name="0.4.2">Nicer DrawUtils.drawRect contributed by Zjnue Brzavi, ensure visible in LineStack implemented, no-resizing grid layout added</version>
+</project>
