@@ -171,6 +171,30 @@ class Scrollbar {
             scrollBar._x = availableWidth - 11;
             scrollBar._y = clip._y;
             moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
+            
+            var mouseWheelListener = { 
+					onMouseDown : function() {},
+					onMouseMove : function() {},
+					onMouseUp : function() {},
+					onMouseWheel : function ( delta : Float, target ) {
+						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+                            var scrollDown = false;
+
+                            if (delta > 0) {
+                                scrollDown = false;
+                            }
+
+                            if (delta < 0) {
+                                scrollDown = true;
+                                delta*= -1;
+                            }
+                            var intDelta : Int = cast(delta, Int);
+                            moveBy(clip, scrollHand, clipRect, scrollMet, 
+                                                          scrollDown, intDelta);
+						}
+					}
+				};
+			flash.Mouse.addListener(mouseWheelListener);
         #end
        }
 
@@ -194,39 +218,63 @@ class Scrollbar {
 
 
     #if flash9
-        static private function scrollByOne(clip : MovieClip, 
+        static private function moveBy(clip : MovieClip, 
                              scrollHand : MovieClip, rect : Rectangle, 
-                             scrollMet : ScrollMetrics, scrollDown : Bool) {
-            var interval = new haxe.Timer(15);                
-            interval.run = function () {
-                var scrollPressed = Reflect.field(Bool, "scrollPressed");
+                         scrollMet : ScrollMetrics, scrollDown : Bool, unit : Int) {
                 if (scrollDown) {
-                    if ( (scrollHand.y + 1) <= scrollMet.endY ) {
-                          scrollHand.y++;
+                    if ( (scrollHand.y + unit) <= scrollMet.endY ) {
+                          scrollHand.y += unit;
+                    } else {
+                        scrollHand.y = scrollMet.endY;
                     }
                 } else {
-                    if ( (scrollHand.y - 1 ) >= scrollMet.startY ) {
-                          scrollHand.y--;
+                    if ( (scrollHand.y - unit ) >= scrollMet.startY ) {
+                          scrollHand.y -= unit;
+                    } else {
+                        scrollHand.y = scrollMet.startY;
                     }
                 }
 
    #else flash
-        static private function scrollByOne(clip : MovieClip, scrollHand : MovieClip, 
-                      rect : Rectangle < Float >, scrollMet : ScrollMetrics,                                                                     scrollDown : Bool) {
-            var interval = new haxe.Timer(15);                
-            interval.run = function () {
-                var scrollPressed = Reflect.field(Bool, "scrollPressed");
-                if (scrollDown) {
-                    if ( (scrollHand._y + 1) <= scrollMet.endY ) {
-                          scrollHand._y++;
-                    }
+        static private function moveBy(clip : MovieClip, scrollHand : MovieClip, 
+                      rect : Rectangle < Float >, scrollMet : ScrollMetrics,
+                                              scrollDown : Bool, unit : Int) {
+            if (scrollDown) {
+                if ( (scrollHand._y + unit) <= scrollMet.endY ) {
+                    scrollHand._y += unit;
                 } else {
-                    if ( (scrollHand._y - 1 ) >= scrollMet.startY ) {
-                          scrollHand._y--;
-                    }
+                    scrollHand._y = scrollMet.endY;
                 }
+            } else {
+                if ( (scrollHand._y - unit ) >= scrollMet.startY ) {
+                    scrollHand._y -= unit;
+                } else {
+                    scrollHand._y = scrollMet.startY;
+                }
+            }
     #end
                 scroll(clip, scrollHand, rect, scrollMet);
+        }
+
+
+
+    #if flash9
+        static private function scrollByOne(clip : MovieClip, 
+                             scrollHand : MovieClip, rect : Rectangle, 
+                             scrollMet : ScrollMetrics, scrollDown : Bool) {
+   #else flash
+        static private function scrollByOne(clip : MovieClip, scrollHand : MovieClip, 
+              rect : Rectangle < Float >, scrollMet : ScrollMetrics,
+                                                            scrollDown : Bool) {
+        
+   #end
+            var interval = new haxe.Timer(15);                
+            interval.run = function () {
+                var scrollPressed = false;
+                if (Reflect.hasField(Bool, "scrollPressed")) {
+                   scrollPressed = Reflect.field(Bool, "scrollPressed");
+                }
+                moveBy ( clip, scrollHand, rect, scrollMet, scrollDown, 1);
                 if ( !scrollPressed ) {
                     interval.stop();
                 }
