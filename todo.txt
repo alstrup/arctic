@@ -2,7 +2,6 @@ Bug-fixes:
 - Change scrollbar to listen to mouse wheel
 - Change scrollbar drag in Flash 9 to work outside of the window as well
 
-- Event listeners are not cleaned up properly
 - Make tooltip have a delay, and make sure they do not go outside the stage
 - Add filling behaviour to grid
 

@@ -55,18 +55,19 @@ class ArcticView {
 				p.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
 				p.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
-				resizeHandler = function( event : flash.events.Event ) { t.onResize();}; 
-				p.stage.addEventListener( flash.events.Event.RESIZE, resizeHandler ); 
+				var resizeHandler = function( event : flash.events.Event ) { t.onResize();}; 
+				addStageEventListener(p.stage, flash.events.Event.RESIZE, resizeHandler ); 
 			#else flash
-				flash.Stage.scaleMode = "noScale";
 				flash.Stage.addListener(this);
+				flash.Stage.scaleMode = "noScale";
+				flash.Stage.align = "TL";
 			#end
 		}
         return base;
 	}
 
 	#if flash9
-	private var resizeHandler : Dynamic;
+	private var stageEventHandlers : Array<{ obj: flash.events.EventDispatcher, event : String, handler : Dynamic } >;
 	#end
 	
 	/**
@@ -77,9 +78,14 @@ class ArcticView {
 		remove();
 		gui = null;
 		showMouse();
+		
+		#if flash9
+			for (e in stageEventHandlers) {
+				e.obj.removeEventListener(e.event, e.handler);
+			}
+		#end
 		if (useStageSize) {
 			#if flash9
-				parent.stage.removeEventListener(flash.events.Event.RESIZE, resizeHandler);
 			#else flash
 				flash.Stage.removeListener(this);
 			#end
@@ -102,6 +108,7 @@ class ArcticView {
 		idMovieClip = new Hash<ArcticMovieClip>();
 		showMouse();
 		#if flash9
+			stageEventHandlers = [];
 			base = build(gui, parent, parent.width, parent.height);
 		#else flash
 			base = build(gui, parent, parent._width, parent._height);
@@ -190,7 +197,7 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, availableHeight);
 			var size = getSize(child);
 			#if flash9
-				clip.graphics.beginFill(color, if (alpha != null) alpha else 100.0);
+				clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
 				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
@@ -202,18 +209,45 @@ class ArcticView {
 
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
 			var child = build(block, clip, availableWidth, availableHeight);
+			if (colors == null || colors.length == 0) {
+				// Hm, this must be a mistake, but what the heck
+				return clip;
+			}
 			var size = getSize(child);
+			var ratios = [];
+			var alphas = [];
+			var dt = 255 / (colors.length - 1);
+			var r = 0.0;
+			for (i in 0...colors.length) {
+				ratios.push(r);
+				r += dt;
+				if (alpha == null) {
+					#if flash9
+						alphas.push(1.0);
+					#else flash
+						alphas.push(100.0);
+					#end
+				}
+			}
 			#if flash9
 				var matrix = new  flash.geom.Matrix();
 				matrix.createGradientBox(size.width, size.height, 0, size.width * xOffset, size.height * yOffset);
-				clip.graphics.beginGradientFill(flash.display.GradientType.RADIAL, colors, [100.0, 100.0], [0.0, 255.0], matrix);
+				if (alpha != null) {
+					alphas = [];
+					for (a in alpha) {
+						alphas.push(a / 100.0);
+					}
+				}
+				clip.graphics.beginGradientFill(flash.display.GradientType.RADIAL, colors, alphas, ratios, matrix);
 				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
-				var matrix = {	a:size.width, b:0, c:0, 
-								d:0, e:size.height, f: 0, 
-								g:size.width * xOffset, h:size.height * yOffset, i:0}; // Center
-				clip.beginGradientFill(type, colors, [100.0, 100.0], [0.0, 255.0], matrix);
+				var matrix = new  flash.geom.Matrix();
+				if (alpha != null) {
+					alphas = alpha;
+				}
+				matrix.createGradientBox(size.width, size.height, 0, size.width * xOffset, size.height * yOffset);
+				clip.beginGradientFill(type, colors, alphas, ratios, matrix);
 				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.endFill();
 			#end
@@ -283,7 +317,7 @@ class ArcticView {
 				// Set the text again to enforce the formatting
 				txtInput.htmlText = html;
 				var listener = function (e:FocusEvent) { validate(); };
-				txtInput.addEventListener(FocusEvent.FOCUS_OUT , listener);
+				txtInput.addEventListener(FocusEvent.FOCUS_OUT, listener);
 				txtInput.type = TextFieldType.INPUT;
 				clip.addChild(txtInput);
 			#else flash
@@ -327,17 +361,16 @@ class ArcticView {
 				hover.buttonMode = true;
 				hover.mouseChildren = false;
 				hover.visible = false;
-				clip.addEventListener( flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
-				clip.addEventListener( flash.events.MouseEvent.MOUSE_OVER, 
+				clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
+				addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
 					function (s) {
-						child.visible = false;
-						hover.visible = true;
-					}
-				);
-				clip.addEventListener( flash.events.MouseEvent.MOUSE_OUT, 
-					function (s) { 
-						child.visible = true;
-						hover.visible = false;
+						if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+							child.visible = false;
+							hover.visible = true;
+						} else {
+							child.visible = true;
+							hover.visible = false;
+						}
 					}
 				);
 			#else flash
@@ -681,15 +714,15 @@ class ArcticView {
 						dragX = -1;
 						dragY = -1;
 					};
-				clip.addEventListener( flash.events.MouseEvent.MOUSE_DOWN, 
+				var me = this;
+				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
 						if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 							dragX = clip.stage.mouseX;
 							dragY = clip.stage.mouseY;
-							
-							clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 							if (firstTime) {
-								clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_UP, mouseUp );
+								me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+								me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
 								firstTime = false;
 							}
 						}
@@ -762,7 +795,7 @@ class ArcticView {
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 			cursorMc.visible = child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
-			clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, 
+			addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
 				function (s) {
 					if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 						cursorMc.visible = true;
@@ -1055,6 +1088,14 @@ class ArcticView {
 			setSize(clip, flash.Stage.width, flash.Stage.height);
 		#end
 	}
+	
+	
+	#if flash9
+	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
+		d.addEventListener(event, handler);
+		stageEventHandlers.push( { obj: d, event: event, handler: handler });
+	}
+	#end
 	
 	/// Move a movieclip
 	static public function moveClip(clip : MovieClip, dx : Float, dy : Float) {

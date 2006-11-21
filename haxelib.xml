@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.4.2">Nicer DrawUtils.drawRect contributed by Zjnue Brzavi, ensure visible in LineStack implemented, no-resizing grid layout added</version>
+    <version name="0.4.4">Fix gradient positioning in Flash 8, unify alpha channel handling in Flash 8 & 9 (always use values 0-100), initial size of Flash 8 content in HTML fixed, fix hover behaviour of buttons in Flash 9</version>
 </project>
