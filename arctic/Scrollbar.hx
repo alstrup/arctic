@@ -21,6 +21,7 @@ class Scrollbar {
     /// Increasing this value will reduce the speed of the scroll bar and vice versa
     static private var SCROLL_DELAY : Int = 100;
 
+
     // This method draws a scrollbar given a movie clip. 
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
     // rendered.
@@ -455,17 +456,18 @@ class Scrollbar {
                     scrollTimer(clip, scrollHand, clipRect, scrollMet);
                  } ); 
 
-
-    		scrollHand.addEventListener(
-                flash.events.MouseEvent.MOUSE_UP, 
-                function (s) {
+                var mouseUp = function (s) {
                     var dragged = Reflect.field(Bool, "dragging");
                     if (dragged) {
                         scrollHand.stopDrag();                
                         Reflect.setField(Bool, "dragging", false);
                     }
-                 } ); 
+                 }
+    		scrollHand.addEventListener(flash.events.MouseEvent.MOUSE_UP, 
+                                                                       mouseUp); 
 
+       		scrollHand.stage.addEventListener(flash.events.MouseEvent.MOUSE_UP,
+                                                                      mouseUp );
 
     		scrollOutline.addEventListener(
                 flash.events.MouseEvent.MOUSE_DOWN, 
@@ -522,6 +524,28 @@ class Scrollbar {
             scrollBar.x = availableWidth - 11;
             scrollBar.y = clip.y;
             moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
+
+            clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+                function (s) {
+                    if (parent.hitTestPoint(flash.Lib.current.mouseX, 
+                                              flash.Lib.current.mouseY, false)) {
+                        var delta = s.delta;
+                        var scrollDown = false;
+
+                        if (delta > 0) {
+                            scrollDown = false;
+                        }
+
+                        if (delta < 0) {
+                            scrollDown = true;
+                            delta*= -1;
+                        }
+                        var intDelta : Int = cast(delta, Int);
+                        moveBy(clip, scrollHand, clipRect, scrollMet, 
+                                                          scrollDown, intDelta);
+                    }
+                }
+            );
        }
         #end
 }
