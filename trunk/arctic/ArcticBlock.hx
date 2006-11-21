@@ -14,10 +14,21 @@ typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight 
  * A user interface is built from ArcticBlocks.
  */
 enum ArcticBlock {
-	/// Draw a solid background behind the given block. Alpha is an optional transparency from 0 to 100.
+	/**
+	 * Draw a solid background behind the given block. 
+	 * Alpha is an optional transparency from 0.0 to 100.0.
+	 * roundRadius > 0 makes the background rounded at the corners.
+	 */
 	Background(color : Int, block : ArcticBlock, ?alpha : Float, ?roundRadius : Float);
 
-	/// Draw a gradient background behind the given block.
+	/**
+	 * Draw a gradient background behind the given block.
+	 * colors is an array of colors in the gradient.
+	 * xOffset & yOffset are percentage offsets from the center of the block, so an offset of 0.5, -0.5 means
+	 * to put the center of the gradient in the top, right corner.
+	 * Alpha is an array of optional transparencies from 0 to 100.0. It has to have as many entries as the color array.
+	 * roundRadius > 0 makes the gradient rounded at the corners.
+	 */ 
 	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Float);
 
 	/// Add some space around the block
@@ -38,6 +49,7 @@ enum ArcticBlock {
 
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
+	 * When the button is clicked, onClick is called.
 	 */
 	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void);
 
@@ -52,36 +64,38 @@ enum ArcticBlock {
 	ToggleButton(selected : ArcticBlock, unselected : ArcticBlock, initialState : Bool, onChange : Bool -> Void, ?onInit : (Bool -> Void) -> Void);
 
     /**
-     * The ArcticBlock will be constraint to the dimensions given - by clipping or extending
+     * The ArcticBlock will be constrained to the dimensions given - by clipping or extending
      */
     ConstrainWidth(minimumWidth : Float, maximumWidth : Float, block : ArcticBlock); 
 
     /**
-     * The ArcticBlock will be constraint to the dimensions given - by clipping or extending
+     * The ArcticBlock will be constrained to the dimensions given - by clipping or extending
      */
     ConstrainHeight(minimumHeight : Float, maximumHeight : Float, block : ArcticBlock);
 
 	/**
 	 * Filler is greedy empty space, that eats space when put in a LineStack or ColumnStack.
-	 * This can be used to implement left alignment, centering, and similar strategies.
+	 * This can be used to implement left alignment, centering, and similar layout strategies.
 	 */
 	Filler;
 
 	/**
 	 * Columns are blocks put next to each other horizontally. The height is the maximum
-	 * height of the blocks.
+	 * height of the blocks. If there is an unconstrained filler in the column stack (recursively)
+	 * this block will use all available width.
 	 */
 	ColumnStack(columns : Array< ArcticBlock > );
 
 	/**
 	 * A bunch of blocks stacked on top of each other. The width is the maximum width
-	 * of the blocks. If you want to make sure a specific block is visible, pass the
-	 * index number of the block in the array as second parameter.
+	 * of the blocks. If you want to make sure the very top of a specific block is visible, 
+	 * pass the index number of the block in the array as second parameter. Notice there
+	 * is no guarantee that all of the entry is visible.
 	 */
 	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Int);
 	
 	/**
-	 * A 2-d grid of block.
+	 * A 2-d grid of block. For now, this does not support resizing or scrollbars.
 	 */
 	Grid(blocks: Array<Array<ArcticBlock>>);
 
@@ -93,7 +107,7 @@ enum ArcticBlock {
 	 * If stayWithinSize is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * This block can be used to make many things, including dialogs. Use the wrapper 
-	 * Arctic.makeDragable if you want to preserve the drag distance across resizes.
+	 * Arctic.makeDragable if you want to preserve the dragged distance across canvas resizes.
 	 */
 	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
 			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
@@ -101,8 +115,8 @@ enum ArcticBlock {
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
 	 * If you want the cursor block to be in ADDITION to the normal cursor, set
-	 * keepNormalCursor to true. Per default, the normal cursor is hidden when
-	 * the custom cursor is visible.
+	 * keepNormalCursor to true. This is useful for toolips, see Arctic.makeTooltip.
+	 * Per default, the normal cursor is hidden when the custom cursor is visible.
 	 */
 	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Bool);
 
@@ -117,7 +131,8 @@ enum ArcticBlock {
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
 
 	/**
-	 * Name this block so that we can get to it, and update it.
+	 * Name this block so that we can get to it, and update it using ArcticView.update
+	 * and ArcticView.getRawMovieClip.
 	 */
 	Id(name : String, block : ArcticBlock);
 
