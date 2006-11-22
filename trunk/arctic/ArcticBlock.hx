@@ -148,8 +148,10 @@ enum ArcticBlock {
 	 *       removing it again).
 	 *  buildFunc: This is called with the optional data payload as first parameter,
 	 *       the MovieClip where the block should be put or drawn, and the available height
-	 *       and width for the element. It should return the resulting display
-	 *       object (movie clip).
+	 *       and width for the element. Also, it is given an optional MovieClip. If this
+	 *       is null, the intent is that this function should construct a new view from
+	 *       stratch. If this is not null, the code should update the given MovieClip.
+	 *       It should return the resulting display object (movie clip).
 	 * 
 	 * Notice that you have to build the custom blocks such that their work with
 	 * both Flash 8 and 9.
@@ -158,7 +160,7 @@ enum ArcticBlock {
 	 */
 	CustomBlock( data : Dynamic, 
 				calcMetricsFunc : Dynamic -> Metrics, 
-				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip
+				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> ArcticMovieClip
 				);
 
 }
