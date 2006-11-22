@@ -73,7 +73,7 @@ class Arctic {
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
-		var build = function(state : Bool, parentMc : Dynamic, availableWidth : Float, availableHeight : Float) : Dynamic {
+		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
 			var size = 12;
 			DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
 			if (state) {
@@ -119,7 +119,7 @@ class Arctic {
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
-		var build = function(state : Bool, parentMc : Dynamic, availableWidth : Float, availableHeight : Float) : Dynamic {
+		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
 			var radius = 6;
 			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
 			if (state) {

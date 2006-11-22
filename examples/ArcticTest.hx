@@ -142,7 +142,7 @@ class ArcticTest {
 			return { width: 100, height : 100, growHeight : false, growWidth : false };
 		}
 		// And another one which should paint & construct the block when ready
-		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float) : ArcticMovieClip {
+		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : ArcticMovieClip {
 			#if flash9
 				parentMc.graphics.beginFill(data);
 				parentMc.graphics.moveTo(50, 0);
