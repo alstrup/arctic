@@ -155,11 +155,6 @@ class ArcticView {
 		}
 		movieClips = [];
 		idMovieClip = new Hash<ArcticMovieClip>();
-/*		#if flash9
-			parent.removeChild(base);
-		#else flash
-			base.removeMovieClip();
-		#end*/
 		base = null;
 	}
 	
@@ -201,10 +196,12 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
 			var size = getSize(child);
 			#if flash9
+				clip.graphics.clear();
 				clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
 				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
+				clip.clear();
 				clip.beginFill(color, if (alpha != null) alpha else 100.0);
 				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
 				clip.endFill();
@@ -234,7 +231,7 @@ class ArcticView {
 				}
 			}
 			#if flash9
-				var matrix = new  flash.geom.Matrix();
+				var matrix = new flash.geom.Matrix();
 				matrix.createGradientBox(size.width, size.height, 0, size.width * xOffset, size.height * yOffset);
 				if (alpha != null) {
 					alphas = [];
@@ -242,14 +239,16 @@ class ArcticView {
 						alphas.push(a / 100.0);
 					}
 				}
+				clip.graphics.clear();
 				clip.graphics.beginGradientFill(flash.display.GradientType.RADIAL, colors, alphas, ratios, matrix);
 				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 				clip.graphics.endFill();
 			#else flash
-				var matrix = new  flash.geom.Matrix();
+				var matrix = new flash.geom.Matrix();
 				if (alpha != null) {
 					alphas = alpha;
 				}
+				clip.clear();
 				matrix.createGradientBox(size.width, size.height, 0, size.width * xOffset, size.height * yOffset);
 				clip.beginGradientFill(type, colors, alphas, ratios, matrix);
 				DrawUtils.drawRect(clip, 0, 0, size.width, size.height, roundRadius);
@@ -259,14 +258,27 @@ class ArcticView {
 
 		case Text(html):
 			#if flash9
-				var tf = new flash.text.TextField();
+				var tf : flash.text.TextField;
+				if (construct) {
+					tf = new flash.text.TextField();
+				} else {
+					tf = cast(clip.getChildAt(0), flash.text.TextField);
+				}
 				tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
 				tf.selectable = false;
 				tf.multiline = true;
 				tf.htmlText = html;
-				clip.addChild(tf);
+				if (construct) {
+					clip.addChild(tf);
+				}
 			#else flash
-				var tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, 100, 100);
+				var tf : flash.TextField;
+				if (construct) {
+					tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, 100, 100);
+					Reflect.setField(clip, "tf", tf);
+				} else {
+					tf = Reflect.field(clip, "tf");
+				}
 				tf.autoSize = true;
 				tf.html = true;
 				tf.selectable = false;
@@ -277,11 +289,23 @@ class ArcticView {
 
 		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
 			#if flash9
-				var txtInput = new flash.text.TextField();
+				var txtInput : flash.text.TextField;
+				if (construct) {
+					txtInput = new flash.text.TextField();
+				} else {
+					var t : Dynamic = clip.getChildAt(0);
+					txtInput = t;
+				}
 				txtInput.width = width;
 				txtInput.height = height;
 			#else flash
-				var txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
+				var txtInput : flash.TextField;
+				if (construct) {
+					txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
+					Reflect.setField(clip, "ti", txtInput);
+				} else {
+					txtInput = Reflect.field(clip, "ti");
+				}
 				txtInput.html = true;
 			#end
 				txtInput.tabEnabled = true;
@@ -294,61 +318,67 @@ class ArcticView {
 					txtInput.backgroundColor = bgColor;
 				}
 				txtInput.border = true;
-				var validate = function() {
-					if (validator == null) {
-						return;
-					}
-					var isValid = validator(txtInput.text);
-					if (isValid) {
-						txtInput.background = (null != bgColor);
-						if (txtInput.background) {
-							txtInput.backgroundColor = bgColor;
+				if (construct) {
+					var validate = function() {
+						if (validator == null) {
+							return;
 						}
-					} else {
-						txtInput.background = true;
-						txtInput.backgroundColor = 0xff0000;
+						var isValid = validator(txtInput.text);
+						if (isValid) {
+							txtInput.background = (null != bgColor);
+							if (txtInput.background) {
+								txtInput.backgroundColor = bgColor;
+							}
+						} else {
+							txtInput.background = true;
+							txtInput.backgroundColor = 0xff0000;
+						}
 					}
+					txtInput.htmlText = html;
+					// Retreive the format of the initial text
+					var txtFormat = txtInput.getTextFormat();
+					if (null != numeric && numeric) {
+						txtInput.restrict = "0-9";
+						txtFormat.align = "right";
+					}
+					#if flash9
+						txtInput.defaultTextFormat = txtFormat;
+						// Set the text again to enforce the formatting
+						txtInput.htmlText = html;
+						var listener = function (e:FocusEvent) { validate(); };
+						txtInput.addEventListener(FocusEvent.FOCUS_OUT, listener);
+						clip.addChild(txtInput);
+						txtInput.type = TextFieldType.INPUT;
+					#else flash
+						txtInput.setNewTextFormat(txtFormat);
+						// Set the text again to enforce the formatting
+						txtInput.htmlText = html;
+						var listener = {
+							// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
+							onChanged : function (txtFld : TextField) {	validate();	}
+						};
+						txtInput.addListener(listener);
+						txtInput.type = "input";
+					#end
 				}
-				txtInput.htmlText = html;
-				// Retreive the format of the initial text
-				var txtFormat = txtInput.getTextFormat();
-				if (null != numeric && numeric) {
-					txtInput.restrict = "0-9";
-					txtFormat.align = "right";
-				}
-			#if flash9
-				txtInput.defaultTextFormat = txtFormat;
-				// Set the text again to enforce the formatting
-				txtInput.htmlText = html;
-				var listener = function (e:FocusEvent) { validate(); };
-				txtInput.addEventListener(FocusEvent.FOCUS_OUT, listener);
-				txtInput.type = TextFieldType.INPUT;
-				clip.addChild(txtInput);
-			#else flash
-				txtInput.setNewTextFormat(txtFormat);
-				// Set the text again to enforce the formatting
-				txtInput.htmlText = html;
-				var listener = {
-					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
-					onChanged : function (txtFld : TextField) {	validate();	}
-				};
-				txtInput.addListener(listener);
-				txtInput.type = "input";
-			#end
 			return clip;
 
 		case Picture(url, w, h, scaling):
 			#if flash9
-				var loader = new flash.display.Loader();
-				var request = new flash.net.URLRequest(url);
-				loader.load(request);
-				clip.addChild(loader);
+				if (construct) {
+					var loader = new flash.display.Loader();
+					var request = new flash.net.URLRequest(url);
+					loader.load(request);
+					clip.addChild(loader);
+				}
 				var s = scaling;
 				clip.scaleX = s;
 				clip.scaleY = s;
 			#else flash
-				var loader = new flash.MovieClipLoader();
-				loader.loadClip(url, clip);
+				if (construct) {
+					var loader = new flash.MovieClipLoader();
+					loader.loadClip(url, clip);
+				}
 				var s = scaling * 100.0;
 				clip._xscale = s;
 				clip._yscale = s;
@@ -365,31 +395,35 @@ class ArcticView {
 				hover.buttonMode = true;
 				hover.mouseChildren = false;
 				hover.visible = false;
-				clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
-				addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
-					function (s) {
-						if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
-							child.visible = false;
-							hover.visible = true;
-						} else {
-							child.visible = true;
-							hover.visible = false;
+				if (construct) {
+					clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
+					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
+						function (s) {
+							if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+								child.visible = false;
+								hover.visible = true;
+							} else {
+								child.visible = true;
+								hover.visible = false;
+							}
 						}
-					}
-				);
+					);
+				}
 			#else flash
 				hover._visible = false;
-				clip.onRelease = action;
-				clip.onMouseMove = function() {
-					var mouseInside = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false);
-					if (mouseInside) {
-						child._visible = false;
-						hover._visible = true;
-					} else {
-						child._visible = true;
-						hover._visible = false;
-					}
-				};
+				if (construct) {
+					clip.onRelease = action;
+					clip.onMouseMove = function() {
+						var mouseInside = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false);
+						if (mouseInside) {
+							child._visible = false;
+							hover._visible = true;
+						} else {
+							child._visible = true;
+							hover._visible = false;
+						}
+					};
+				}
 			#end
 			return clip;
 
@@ -401,36 +435,44 @@ class ArcticView {
 				unsel.mouseChildren = false;
 				sel.buttonMode = true;
 				sel.mouseChildren = false;
-				sel.visible = initialState;
-				unsel.visible = !initialState;
-				var setState = function (newState : Bool) { sel.visible = newState; unsel.visible = !newState; }; 
-				if (null != onInit) {
-					onInit(setState);
-				}
-				clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
-						if (null != onChange) {
-							setState(!sel.visible);
-							onChange(sel.visible);
-						}
-					});
-			#else flash
-				sel._visible = initialState;
-				unsel._visible = !initialState;
-				var setState = function (newState : Bool) { sel._visible = newState; unsel._visible = !newState; }; 
-				if (null != onInit) {
-					onInit(setState);
-				}
-				clip.onPress = function() {
-					if (null != onChange) {
-						setState(!sel._visible);
-						onChange(sel._visible);
+				if (construct) {
+					sel.visible = initialState;
+					unsel.visible = !initialState;
+					var setState = function (newState : Bool) { sel.visible = newState; unsel.visible = !newState; }; 
+					if (null != onInit) {
+						onInit(setState);
 					}
-				};
+					clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
+							if (null != onChange) {
+								setState(!sel.visible);
+								onChange(sel.visible);
+							}
+						});
+				}
+			#else flash
+				if (construct) {
+					sel._visible = initialState;
+					unsel._visible = !initialState;
+					var setState = function (newState : Bool) { sel._visible = newState; unsel._visible = !newState; }; 
+					if (null != onInit) {
+						onInit(setState);
+					}
+					clip.onPress = function() {
+						if (null != onChange) {
+							setState(!sel._visible);
+							onChange(sel._visible);
+						}
+					};
+				}
 			#end
 			return clip;
 
 		case Filler:
 			setSize(clip, availableWidth, availableHeight);
+			return clip;
+		
+		case Fixed(width, height):
+			setSize(clip, width, height);
 			return clip;
 
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
@@ -524,7 +566,7 @@ class ArcticView {
 				// Hm, there is not enough room. 
 				// We need to see if the free children can absorb it
 				if (-freeSpace > growChildrensHeight) {
-					// We need to add a scrollbar ourselves so make room for it
+					// We need to add a scrollbar ourselves to make room for it
 					availableWidth -= 12;
 				}
 			}
@@ -562,6 +604,14 @@ class ArcticView {
 					availableWidth += 12;
 					// Scrollbar
 					Scrollbar.drawScrollBar(clip, child, availableWidth, availableHeight, ensureY);
+				} else {
+					if (!construct) {
+						Scrollbar.removeScrollbar(clip, child);
+					}
+				}
+			} else {
+				if (!construct) {
+					Scrollbar.removeScrollbar(clip, child);
 				}
 			}
 			return clip;
@@ -897,6 +947,8 @@ class ArcticView {
 			return calcMetrics(selected);
 		case Filler:
 			return { width : 0.0, height : 0.0, growWidth : true, growHeight : true };
+		case Fixed(width, height):
+			return { width : width, height : height, growWidth : false, growHeight : false };
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			var m = calcMetrics(block);
 			m.width = Math.min(minimumWidth, Math.max(maximumWidth, m.width));
@@ -1044,7 +1096,8 @@ class ArcticView {
 				#end
 			#else flash
 				var d = p.getNextHighestDepth();
-				var clip = p.createEmptyMovieClip("c" + d, d);
+				var clip = p.createEmptyMovieClip("c" + childNo, d);
+				Reflect.setField(p, "c" + childNo, clip);
 			#end
 			movieClips.push(clip);
 			clip.tabEnabled = false;
@@ -1059,7 +1112,11 @@ class ArcticView {
 					return d;
 				}
 			#else flash
-				// TODO: Implement this
+				if (Reflect.hasField(p, "c" + childNo)) {
+					return Reflect.field(p, "c" + childNo);
+				}
+				// Fallback
+				trace("Trouble");
 				return getOrMakeClip(p, true, childNo);
 			#end
 		}

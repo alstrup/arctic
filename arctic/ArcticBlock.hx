@@ -78,6 +78,11 @@ enum ArcticBlock {
 	 * This can be used to implement left alignment, centering, and similar layout strategies.
 	 */
 	Filler;
+	
+	/**
+	 * An empty block of the given size
+	 */
+	Fixed(width : Float, height : Float);
 
 	/**
 	 * Columns are blocks put next to each other horizontally. The height is the maximum

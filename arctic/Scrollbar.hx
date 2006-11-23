@@ -39,6 +39,7 @@ class Scrollbar {
 
 			var d = parent.getNextHighestDepth();
             var scrollBar = parent.createEmptyMovieClip("c" + d, d);
+			Reflect.setField(parent, "scrollbar", scrollBar);
             var clipRect = new Rectangle<Float>(0, 0, availableWidth, availableHeight);
             clip.scrollRect = clipRect;
 			parent.scrollRect = clipRect;
@@ -199,6 +200,20 @@ class Scrollbar {
         #end
        }
 
+	static public function removeScrollbar(parent : MovieClip, clip : MovieClip) {
+		if (Reflect.hasField(parent, "scrollbar")) {
+			#if flash9
+				parent.removeChild(Reflect.field(parent, "scrollbar"));
+				parent.scrollRect = null;
+				clip.scrollRect = null;
+			#else flash
+				Reflect.field(parent, "scrollbar").removeMovieClip();
+				parent.scrollRect = null;
+				clip.scrollRect = null;
+			#end
+			Reflect.deleteField(parent, "scrollbar");
+		}
+	}
 
     #if flash9
        static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, 
@@ -361,9 +376,11 @@ class Scrollbar {
                 return;
             }
 			
+			
 			// TODO: Implement support for ensureYVisible
 			
             var scrollBar = new MovieClip();
+			Reflect.setField(parent, "scrollbar", scrollBar);
             parent.addChild(scrollBar);
             var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
             clip.scrollRect = clipRect;
