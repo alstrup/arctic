@@ -89,17 +89,41 @@ class Arctic {
 	}
 	
 	/// Make a radio-group to choose between the given texts
-	static public function makeRadioButtonGroup(texts : Array<String>, onSelect : Int -> Void, ?defaultSelected : Int, ?textSize: Float) : ArcticBlock {
+	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : ArcticBlock {
+		if (textSize == null) {
+			textSize = 12;
+		}
+		// Callback fn for the CustomBlock to draw Radio button
+		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
+			var radius = 6;
+			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
+			if (state) {
+				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
+			}
+			return parentMc;
+		}
+		
+		var entries : Array<{ selected: ArcticBlock, unselected: ArcticBlock, value : String }> = [];
+		var i = 0;
+		for (text in texts) {
+			var selected = Border(1, 1, ColumnStack([CustomBlock(true, null, build),
+													 Text(wrapWithDefaultFont(text, textSize))]));
+			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, null, build),
+													   Text(wrapWithDefaultFont(text, textSize))]));
+			entries.push( { selected: selected, unselected: unselected, value: text } );
+		}
+		return LineStack(makeRadioButtonGroup(entries, onSelect, defaultSelected));
+	}
+	
+	/// Make a radio-group to choose between the given blocks
+	static public function makeRadioButtonGroup(entries : Array< { selected : ArcticBlock, unselected : ArcticBlock, value : Dynamic } >, onSelect : Int -> Dynamic -> Void, ?defaultSelected : Int) : Array<ArcticBlock> {
 		var stateChooser = [];
 		var currentRadio = defaultSelected;
 		if (currentRadio == null) {
 			currentRadio = 0;
 		}
-		if (textSize == null) {
-			textSize = 12;
-		}
 		var onInit = function (setState) {
-			if (stateChooser.length == texts.length) {
+			if (stateChooser.length == entries.length) {
 				// Called again on reconstruction: We clear out the old functions
 				stateChooser = [];
 			}
@@ -114,36 +138,22 @@ class Arctic {
 			}
 			currentRadio = index;
 			if (onSelect != null) {
-				onSelect(index);
+				onSelect(index, entries[index].value);
 			}
 		}
 
-		// Callback fn for the CustomBlock to draw Radio button
-		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
-			var radius = 6;
-			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
-			if (state) {
-				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
-			}
-			return parentMc;
-		}
-		
 		var selFn = function(i) : Bool -> Void {
 			return function (b) { onSelectHandler(i); };
 		}
 		var toggleButtons : Array<ArcticBlock> = [];
 		var i = 0;
-		for (text in texts) {
-			var selected = Border(1, 1, ColumnStack([CustomBlock(true, null, build),
-													 Text(wrapWithDefaultFont(text, textSize))]));
-			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, null, build),
-													   Text(wrapWithDefaultFont(text, textSize))]));
-			toggleButtons.push(ToggleButton(selected, unselected, false, selFn(i), onInit));
+		for (entry in entries) {
+			toggleButtons.push(ToggleButton(entry.selected, entry.unselected, false, selFn(i), onInit));
 			++i;
 		}
-		return LineStack(toggleButtons);
+		return toggleButtons;
 	}
-	
+
 	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String) : String {
 		return "<font face='arial'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
 			   (if (color != null) { " color='" + color + "'"; } else "" ) + ">" + text + "</font>";
