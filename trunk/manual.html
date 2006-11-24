@@ -48,7 +48,7 @@ class HelloWorld {
 <p>Save this as <code>HelloWorld.hx</code>  (or have a look at
 examples/HelloWorld.hx) and compile with <code>haxe -lib arctic -swf HelloWorld.swf -main HelloWorld</code>.
 The result is a flash movie which has a button in the top-left corner with the
-text &quot;Hello world&quot;. When you click that, the button is removed, and
+text &quot;Hello world&quot; 50 pixels high. When you click that, the button is removed, and
 the program ends.</p>
 <p>User interfaces in Artic are built from blocks. In the example above, the
 only block used is a button, which is constructed by the <code>Arctic.makeSimpleButton</code>
@@ -65,7 +65,7 @@ This is because the MovieClip is different in Flash 8 and 9, so Arctic provides
 an alias to make the code work in both Flash 8 and 9. Try to compile the code
 with <code>-swf-version 9</code> and see yourself.</p>
 
-<h2>Doing layout&nbsp;</h2>
+<h2>Doing layout</h2>
 
 <p>The blocks in Arctic are designed to be combined similar to lego bricks.
 Technically, each block is an entry in a haXe enum. There are a number of
@@ -132,7 +132,7 @@ the top using the Text block:</p>
 <p>Flash only supports a tiny subset of HTML, but it does allow us to choose
 fonts and colors. The default font in Flash is not very nice, so there is a
 helper Arctic.wrapWithDefaultFont which will wrap a string with an Arial font in
-given size and color:</p>
+given size and color - in this case 16 pixels high and blue color:</p>
 <blockquote>
 
 <pre>var helloWorld = LineStack( [
