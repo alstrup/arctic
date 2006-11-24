@@ -108,7 +108,7 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								Arctic.makeTextChoice([ "See custom block", "See dragable blocks" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20)
+								Arctic.makeTextChoice([ "See custom block", "See dragable blocks" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
 							Border( 10, 10, Arctic.makeCheckBox( Text(Arctic.wrapWithDefaultFont("Check box", 20))) ),
 							ColumnStack( [
