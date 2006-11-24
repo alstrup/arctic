@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.4.7">Fix metrics bug in Grid</version>
+    <version name="0.4.8">Radio group helpers returns a function which can be used to change the currently selected item</version>
 </project>

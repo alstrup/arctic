@@ -9,9 +9,9 @@ import arctic.ArcticBlock;
 class Arctic {
 
 	/// A text button
-	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?size : Float) : ArcticBlock {
-		var t = Border(5, 5, Text(wrapWithDefaultFont(text, size)));
-		return Button(t, Background(0xf0f0f0, t, 70.0, if (size != null) size / 4 else 5.0), onClick);
+	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?fontsize : Float) : ArcticBlock {
+		var t = Border(5, 5, Text(wrapWithDefaultFont(text, fontsize)));
+		return Button(t, Background(0xf0f0f0, t, 70.0, if (fontsize != null) fontsize / 4 else 5.0), onClick);
 	}
 	
 	/// Associate a tooltip with a block
