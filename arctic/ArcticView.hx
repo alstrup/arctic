@@ -689,6 +689,10 @@ class ArcticView {
 				setSize(clip, availableWidth, availableHeight);
 			}
 			
+			if (!construct) {
+				return clip;
+			}
+			
 			var setOffset = function (dx : Float, dy : Float) {
 				if (stayWithin) {
 					dx = Math.min(availableWidth - childSize.width, dx);
@@ -851,38 +855,42 @@ class ArcticView {
 			var cursorMc = build(cursor, clip, 0, 0, construct, 1);
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
-			cursorMc.visible = child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
-			addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
-				function (s) {
-					if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
-						cursorMc.visible = true;
-						cursorMc.x = clip.mouseX;
-						cursorMc.y = clip.mouseY;
-						showMouse(keep);
-						return;
-					} else {
-						cursorMc.visible = false;
-						showMouse();
+				cursorMc.visible = child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
+				if (construct) {
+					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
+						function (s) {
+							if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+								cursorMc.visible = true;
+								cursorMc.x = clip.mouseX;
+								cursorMc.y = clip.mouseY;
+								showMouse(keep);
+								return;
+							} else {
+								cursorMc.visible = false;
+								showMouse();
+							}
+						}
+					);
+				}
+			#else flash
+				cursorMc._visible = child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse);
+				
+				if (construct) {
+					if (clip.onMouseMove == null) {
+						clip.onMouseMove = function() {
+							if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+								cursorMc._visible = true;
+								cursorMc._x = clip._xmouse;
+								cursorMc._y = clip._ymouse;
+								showMouse(keep);
+								return;
+							} else {
+								cursorMc._visible = false;
+								showMouse();
+							}
+						};
 					}
 				}
-			);
-			#else flash
-			cursorMc._visible = child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse);
-
-			if (clip.onMouseMove == null) {
-				clip.onMouseMove = function() {
-					if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
-						cursorMc._visible = true;
-						cursorMc._x = clip._xmouse;
-						cursorMc._y = clip._ymouse;
-						showMouse(keep);
-						return;
-					} else {
-						cursorMc._visible = false;
-						showMouse();
-					}
-				};
-			}
 			#end
 			
 			return clip;
@@ -922,7 +930,7 @@ class ArcticView {
 
 	private function calcMetrics(c : ArcticBlock) : Metrics {
 		var m = doCalcMetrics(c);
-//		trace(m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + ":" + c);
+	//	trace(m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + ":" + c);
 		return m;
 	}
 	
@@ -990,7 +998,6 @@ class ArcticView {
 
 		case Grid(cells):
 			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			trace(gridMetrics);
 			var columnWidths = [];
 			var lineHeights = [];
 			var y = 0;
@@ -1001,7 +1008,7 @@ class ArcticView {
 					var m = calcMetrics(block);
 					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
 					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
-					if (columnWidths.length < x) {
+					if (columnWidths.length <= x) {
 						columnWidths.push(m.width);
 					} else {
 						if (columnWidths[x] < m.width) {
@@ -1011,7 +1018,7 @@ class ArcticView {
 					lineHeight = Math.max(lineHeight, m.height);
 					++x;
 				}
-				if (lineHeights.length < y) {
+				if (lineHeights.length <= y) {
 					lineHeights.push(lineHeight);
 				} else {
 					if (lineHeights[y] < lineHeight) {
@@ -1020,8 +1027,12 @@ class ArcticView {
 				}
 				++y;
 			}
-			gridMetrics.width = Lambda.fold( columnWidths.iterator(), function (a : Float, b : Float) { return a + b; }, 0.0);
-			gridMetrics.height = Lambda.fold( lineHeights.iterator(), function (a : Float, b : Float) { return a + b; }, 0.0);
+			for (w in columnWidths) {
+				gridMetrics.width += w;
+			}
+			for (h in lineHeights) {
+				gridMetrics.height += h;
+			}
 			return gridMetrics;
 		
 	    case ScrollBar(block, availableWidth, availableHeight):
@@ -1105,7 +1116,7 @@ class ArcticView {
 		} else {
 			#if flash9
 				if (p.numChildren < childNo) {
-					trace("Trouble");
+					// Fallback - should never happen
 					return getOrMakeClip(p, true, childNo);
 				} else {
 					var d : Dynamic= p.getChildAt(childNo);
@@ -1115,8 +1126,7 @@ class ArcticView {
 				if (Reflect.hasField(p, "c" + childNo)) {
 					return Reflect.field(p, "c" + childNo);
 				}
-				// Fallback
-				trace("Trouble");
+				// Fallback - should never happen
 				return getOrMakeClip(p, true, childNo);
 			#end
 		}

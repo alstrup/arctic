@@ -3,5 +3,9 @@
 -lib arctic</output>
   <output name="ArcticTest flash9" mode="swf9" out="ArcticTest9.swf" class="ArcticTest" lib="" cmd="" main="True" debug="False">-swf-header 800:600:50
 -lib arctic</output>
+  <output name="DynamicExample" mode="swf" out="DynamicExample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="False">-lib arctic</output>
+  <output name="DynamicExample flash9" mode="swf9" out="DynamicExample9.swf" class="DynamicExample" lib="" cmd="" main="True" debug="False">-lib arctic</output>
+  <output name="HelloWorld" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-lib arctic</output>
+  <output name="HelloWorld flash9" mode="swf9" out="HelloWorld9.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-lib arctic</output>
   <files path="/" />
 </haxe>

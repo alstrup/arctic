@@ -32,20 +32,25 @@ class Scrollbar {
             drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight, ensureYVisible);
         #else flash
             if (clip._height <= availableHeight) {
+				Scrollbar.removeScrollbar(parent, clip);
                 return;
             }
-
-			// TODO: Implement support for ensureYVisible
-
-			var d = parent.getNextHighestDepth();
-            var scrollBar = parent.createEmptyMovieClip("c" + d, d);
-			Reflect.setField(parent, "scrollbar", scrollBar);
+			
+			var scrollBar;
+			
+			if (Reflect.hasField(parent, "scrollbar")) {
+				scrollBar = Reflect.field(parent, "scrollbar");
+			} else {
+				var d = parent.getNextHighestDepth();
+				scrollBar = parent.createEmptyMovieClip("c" + d, d);
+				Reflect.setField(parent, "scrollbar", scrollBar);
+			}
             var clipRect = new Rectangle<Float>(0, 0, availableWidth, availableHeight);
             clip.scrollRect = clipRect;
 			parent.scrollRect = clipRect;
             var squareHeight = 10;
 
-            d = scrollBar.getNextHighestDepth();
+            var d = scrollBar.getNextHighestDepth();
             var upperChild = scrollBar.createEmptyMovieClip("scrollBarUpperChild" + d, d);
 
             // Upper scroll bar handle
@@ -370,56 +375,80 @@ class Scrollbar {
             }
 
     #if flash9 
+	
+		private static function getChild(m : MovieClip, n : Int)  : MovieClip {
+			var d : Dynamic = m.getChildAt(n);
+			return d;
+		}
+	
         private static function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
                                                          availableHeight : Float, ensureYVisible : Float) {
             if (clip.height <= availableHeight) {
+				Scrollbar.removeScrollbar(parent, clip);
                 return;
             }
 			
-			
-			// TODO: Implement support for ensureYVisible
-			
-            var scrollBar = new MovieClip();
-			Reflect.setField(parent, "scrollbar", scrollBar);
-            parent.addChild(scrollBar);
+			var scrollBar : MovieClip;
+			var upperChild : MovieClip;
+			var scrollOutline : MovieClip;
+			var scrollHand : MovieClip;
+			var lowerChild : MovieClip;
+			var construct : Bool;
+			if (Reflect.hasField(parent, "scrollbar")) {
+				scrollBar = Reflect.field(parent, "scrollbar");
+				upperChild = getChild(scrollBar, 0);
+				scrollOutline = getChild(scrollBar, 1);
+				scrollHand = getChild(scrollBar, 2);
+				lowerChild = getChild(scrollBar, 3);
+				construct = false;
+			} else {
+				scrollBar = new MovieClip();
+				Reflect.setField(parent, "scrollbar", scrollBar);
+				parent.addChild(scrollBar);
+
+				upperChild = new MovieClip();
+				scrollBar.addChild(upperChild);
+
+				scrollOutline = new MovieClip();
+				scrollBar.addChild(scrollOutline);
+
+				scrollHand = new MovieClip();
+				scrollBar.addChild(scrollHand);
+
+				lowerChild = new MovieClip();
+				scrollBar.addChild(lowerChild);
+				construct = true;
+			}
             var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
             clip.scrollRect = clipRect;
             parent.scrollRect = clipRect;
             var squareHeight = 10;
 
-            var upperChild = new MovieClip();
-            scrollBar.addChild(upperChild);
+			var height =  7;
 
             // Upper scroll bar handle
-            //Drawing upper white squate    
-
-            DrawUtils.drawRectangle(upperChild, 0, 0, 12, squareHeight, 0, 
-                                                           0x000000, 0x000000 );
-
-            
-            var height =  7;
-
-            //Drawing upper scrollbar triangle
-            upperChild.graphics.beginFill(0xFFFFFF);
-            upperChild.graphics.moveTo(2 , height );
-            upperChild.graphics.lineTo(2 , height );
-            upperChild.graphics.lineTo(2 + 8 , height );
-            upperChild.graphics.lineTo(2 + 4 , height - 4 );
-            upperChild.graphics.endFill();
+			if (construct) {
+				//Drawing upper white squate    
+				DrawUtils.drawRectangle(upperChild, 0, 0, 12, squareHeight, 0, 
+															   0x000000, 0x000000 );
+				
+				//Drawing upper scrollbar triangle
+				upperChild.graphics.beginFill(0xFFFFFF);
+				upperChild.graphics.moveTo(2 , height );
+				upperChild.graphics.lineTo(2 , height );
+				upperChild.graphics.lineTo(2 + 8 , height );
+				upperChild.graphics.lineTo(2 + 4 , height - 4 );
+				upperChild.graphics.endFill();
+			}
 
             var scrollHeight = availableHeight - (squareHeight * 2);
 
-            var scrollOutline = new MovieClip();
-            scrollBar.addChild(scrollOutline);
-            
+			scrollOutline.graphics.clear();
             DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 
                                                           0x000000,0x000000,0);
 
-
             scrollOutline.y = upperChild.height;
 
-            var scrollHand = new MovieClip();
-            scrollBar.addChild(scrollHand);
             var scrollHandHeight = 10.0;
 
             if ((clip.height - availableHeight) < scrollHeight) {
@@ -427,6 +456,7 @@ class Scrollbar {
             }
             var dragHeight = scrollHeight - scrollHandHeight + 10;
 
+			scrollHand.graphics.clear();
             DrawUtils.drawRectangle(scrollHand, 0, 0, 6, scrollHandHeight - 0.5,
                                                             0, 
                                                             0x000000, 0x000000);
@@ -442,11 +472,9 @@ class Scrollbar {
             scrollHand.y = scrollMet.startY;
             scrollHand.x = scrollMet.startX;
 
-            var lowerChild = new MovieClip();
-            scrollBar.addChild(lowerChild);
-
 
             //Drawing lower white square 
+			lowerChild.graphics.clear();
             DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
                                                            0x000000, 0x000000 );
             
@@ -461,108 +489,111 @@ class Scrollbar {
             //lowerChild._x = 10;
             lowerChild.y = availableHeight - 10 ;
 
-    		scrollHand.addEventListener(
-                flash.events.MouseEvent.MOUSE_DOWN, 
-                function (s) {
-                    scrollHand.startDrag(false , new Rectangle(
-                                                    scrollMet.startX , 
-                                                    scrollMet.startY ,
-                                                                   0 , 
-                                                        dragHeight) );
-                    Reflect.setField(Bool, "dragging", true);
-                    scrollTimer(clip, scrollHand, clipRect, scrollMet);
-                 } ); 
+			if (construct) {
+				scrollHand.addEventListener(
+					flash.events.MouseEvent.MOUSE_DOWN, 
+					function (s) {
+						scrollHand.startDrag(false , new Rectangle(
+														scrollMet.startX , 
+														scrollMet.startY ,
+																	   0 , 
+															dragHeight) );
+						Reflect.setField(Bool, "dragging", true);
+						scrollTimer(clip, scrollHand, clipRect, scrollMet);
+					 } ); 
 
-                var mouseUp = function (s) {
-                    var dragged = Reflect.field(Bool, "dragging");
-                    if (dragged) {
-                        scrollHand.stopDrag();                
-                        Reflect.setField(Bool, "dragging", false);
-                    }
-                 }
-    		scrollHand.addEventListener(flash.events.MouseEvent.MOUSE_UP, 
-                                                                       mouseUp); 
+					var mouseUp = function (s) {
+						var dragged = Reflect.field(Bool, "dragging");
+						if (dragged) {
+							scrollHand.stopDrag();                
+							Reflect.setField(Bool, "dragging", false);
+						}
+					 }
+				scrollHand.addEventListener(flash.events.MouseEvent.MOUSE_UP, 
+																		   mouseUp); 
 
-       		scrollHand.stage.addEventListener(flash.events.MouseEvent.MOUSE_UP,
-                                                                      mouseUp );
+				scrollHand.stage.addEventListener(flash.events.MouseEvent.MOUSE_UP,
+																		  mouseUp );
 
-    		scrollOutline.addEventListener(
-                flash.events.MouseEvent.MOUSE_DOWN, 
-                function (s) {
-                    //var scrollToY = scrollBar._ymouse;
-                     var scrollToY = s.localY;
-                    var startY = scrollMet.startY;
-                    if (scrollToY < startY ) {
-                        scrollToY = scrollMet.startY;
-                    } else if (scrollToY >= scrollMet.endY) {
-                        scrollToY = scrollMet.endY;
-                    }
-                    scrollHand.y = scrollToY;
-                    scroll(clip, scrollHand, clipRect, scrollMet);
-                 } ); 
-
-
-
-    		lowerChild.addEventListener(
-                flash.events.MouseEvent.MOUSE_DOWN, 
-                function (s) {
-                    Reflect.setField(Bool, "scrollPressed", true);
-                    scrollByOne(clip, scrollHand, clipRect, scrollMet, true);
-                } ); 
+				scrollOutline.addEventListener(
+					flash.events.MouseEvent.MOUSE_DOWN, 
+					function (s) {
+						//var scrollToY = scrollBar._ymouse;
+						 var scrollToY = s.localY;
+						var startY = scrollMet.startY;
+						if (scrollToY < startY ) {
+							scrollToY = scrollMet.startY;
+						} else if (scrollToY >= scrollMet.endY) {
+							scrollToY = scrollMet.endY;
+						}
+						scrollHand.y = scrollToY;
+						scroll(clip, scrollHand, clipRect, scrollMet);
+					 } ); 
 
 
-    		lowerChild.addEventListener(
-                flash.events.MouseEvent.MOUSE_UP, 
-                function (s) {
-                    var scrollPressed = Reflect.field(Bool, "scrollPressed");
-                    if (scrollPressed) {
-                        Reflect.setField(Bool, "scrollPressed", false);
-                    }            
-                 } ); 
 
-    		upperChild.addEventListener(
-                flash.events.MouseEvent.MOUSE_DOWN, 
-                function (s) {
-                    Reflect.setField(Bool, "scrollPressed", true);
-                    scrollByOne(clip, scrollHand, clipRect, scrollMet, false);
-                } ); 
+				lowerChild.addEventListener(
+					flash.events.MouseEvent.MOUSE_DOWN, 
+					function (s) {
+						Reflect.setField(Bool, "scrollPressed", true);
+						scrollByOne(clip, scrollHand, clipRect, scrollMet, true);
+					} ); 
 
 
-    		upperChild.addEventListener(
-                flash.events.MouseEvent.MOUSE_UP, 
-                function (s) {
-                    var scrollPressed = Reflect.field(Bool, "scrollPressed");
-                    if (scrollPressed) {
-                        Reflect.setField(Bool, "scrollPressed", false);
-                    }            
-                 } ); 
+				lowerChild.addEventListener(
+					flash.events.MouseEvent.MOUSE_UP, 
+					function (s) {
+						var scrollPressed = Reflect.field(Bool, "scrollPressed");
+						if (scrollPressed) {
+							Reflect.setField(Bool, "scrollPressed", false);
+						}            
+					 } ); 
 
+				upperChild.addEventListener(
+					flash.events.MouseEvent.MOUSE_DOWN, 
+					function (s) {
+						Reflect.setField(Bool, "scrollPressed", true);
+						scrollByOne(clip, scrollHand, clipRect, scrollMet, false);
+					} ); 
+
+
+				upperChild.addEventListener(
+					flash.events.MouseEvent.MOUSE_UP, 
+					function (s) {
+						var scrollPressed = Reflect.field(Bool, "scrollPressed");
+						if (scrollPressed) {
+							Reflect.setField(Bool, "scrollPressed", false);
+						}            
+					 } ); 
+			}
 
             scrollBar.x = availableWidth - 11;
             scrollBar.y = clip.y;
             moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
 
-            clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
-                function (s) {
-                    if (parent.hitTestPoint(flash.Lib.current.mouseX, 
-                                              flash.Lib.current.mouseY, false)) {
-                        var delta = s.delta;
-                        var scrollDown = false;
+			if (construct) {
+				clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+					function (s) {
+						if (parent.hitTestPoint(flash.Lib.current.mouseX, 
+												  flash.Lib.current.mouseY, false)) {
+							var delta = s.delta;
+							var scrollDown = false;
 
-                        if (delta > 0) {
-                            scrollDown = false;
-                        }
+							if (delta > 0) {
+								scrollDown = false;
+							}
 
-                        if (delta < 0) {
-                            scrollDown = true;
-                            delta*= -1;
-                        }
-                        var intDelta : Int = cast(delta, Int);
-                        moveBy(clip, scrollHand, clipRect, scrollMet, 
-                                                          scrollDown, intDelta);
-                    }
-                }
-            );
-       }
-        #end
+							if (delta < 0) {
+								scrollDown = true;
+								delta*= -1;
+							}
+							var intDelta : Int = cast(delta, Int);
+							moveBy(clip, scrollHand, clipRect, scrollMet, 
+															  scrollDown, intDelta);
+						}
+					}
+				);
+			}
+		}
+		#end
 }
