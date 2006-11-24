@@ -41,7 +41,7 @@
 
 --next
 # HelloWorld
--swf index.swf
+-swf HelloWorld.swf
 -main HelloWorld
 -lib arctic
 
