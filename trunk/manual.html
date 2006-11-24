@@ -136,7 +136,7 @@ given size and color - in this case 16 pixels high and blue color:</p>
 <blockquote>
 
 <pre>var helloWorld = LineStack( [
-<font color="#FF0000">	Text(Arctic.wrapWithDefaultFont(</font>&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;<font color="#FF0000">, 16, &quot;#0000ff&quot;)),
+	Text(<font color="#FF0000">Arctic.wrapWithDefaultFont(</font>&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;<font color="#FF0000">, 16, &quot;#0000ff&quot;)),
 </font>	Filler, 
 	ColumnStack( [ 
 		Filler,
@@ -145,18 +145,20 @@ given size and color - in this case 16 pixels high and blue color:</p>
 	Filler ] );</pre>
 
 </blockquote>
-<p>We can also change the background color using the Background element:</p>
+<p>We can also add a rounded background color using the Background element:</p>
 <blockquote>
 
-<pre>var helloWorld = <font color="#FF0000">Background(0xdddddd,
-</font>	LineStack( [
+<pre>var helloWorld = <font color="#FF0000">Background(0xdddddd,</font>
+	LineStack( [
 		Text(Arctic.wrapWithDefaultFont(&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;, 16, &quot;#0000ff&quot;)),
-<font color="#FF0000">	</font>	Filler, 
+		Filler, 
 		ColumnStack( [ 
 			Filler,
 			Arctic.makeSimpleButton(&quot;Hello world&quot;,  function() { me.remove(); }, 50),
 			Filler ] ),
 		Filler ] )
-	<font color="#FF0000">)</font>;</pre>
+	<font color="#FF0000">, 100.0, 20)</font>;</pre>
 
 </blockquote>
+<p>The 100.0 value in the last line means that the background is fully opaque,
+and the 20 value means that the background is rounded.</p>

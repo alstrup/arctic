@@ -57,5 +57,5 @@ More versions from the manual:
 					Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50),
 					Filler ] ),
 				Filler ] )
-			);
+			, 100.0, 20);
 */
