@@ -38,3 +38,16 @@
 -cp ..
 --flash-strict
 
+
+--next
+# HelloWorld
+-swf index.swf
+-main HelloWorld
+-lib arctic
+
+--next
+# HelloWorld flash9
+-swf HelloWorld9.swf
+-swf-version 9
+-main HelloWorld
+-lib arctic

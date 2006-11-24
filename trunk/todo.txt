@@ -1,7 +1,6 @@
 Bug-fixes:
 - Change scrollbar to listen to mouse wheel
 - Change scrollbar drag in Flash 9 to work outside of the window as well
-
 - Make tooltip have a delay, and make sure they do not go outside the stage
 - Add filling behaviour to grid
 
@@ -15,7 +14,6 @@ New features to consider, in order of priority:
 - Nice default, light-weight look for widgets
 - Progress-bar
 - Add horizontal scrollbar (and extend columnstack to add one if needed)
-- Table (or grid-layout)
 - Resizable bitmap with aspect-ratio preservation
 - Calendar widget
 - Combo-box
