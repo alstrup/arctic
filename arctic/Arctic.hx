@@ -88,8 +88,12 @@ class Arctic {
 		return ToggleButton(selectedBlock, notSelectedBlock, selected, ourOnCheck, ourOnInit);
 	}
 	
-	/// Make a radio-group to choose between the given texts
-	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : ArcticBlock {
+	/**
+	* Make a radio-group to choose between the given texts.
+	* Returns the final block and a function that can be used to change the currently selected item.
+	*/
+	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
+			{ block: ArcticBlock, selectFn: Int -> Void } {
 		if (textSize == null) {
 			textSize = 12;
 		}
@@ -112,11 +116,17 @@ class Arctic {
 													   Text(wrapWithDefaultFont(text, textSize))]));
 			entries.push( { selected: selected, unselected: unselected, value: text } );
 		}
-		return LineStack(makeRadioButtonGroup(entries, onSelect, defaultSelected));
+		var group = makeRadioButtonGroup(entries, onSelect, defaultSelected);
+		return { block: LineStack(group.blocks), selectFn : group.selectFn };
 	}
 	
-	/// Make a radio-group to choose between the given blocks
-	static public function makeRadioButtonGroup(entries : Array< { selected : ArcticBlock, unselected : ArcticBlock, value : Dynamic } >, onSelect : Int -> Dynamic -> Void, ?defaultSelected : Int) : Array<ArcticBlock> {
+	/**
+	 * Make a radio-group to choose between the given blocks.
+	 * Returns an array of coupled blocks, and a function which can be used to change the
+	 * current selected item.
+	 */ 
+	static public function makeRadioButtonGroup(entries : Array< { selected : ArcticBlock, unselected : ArcticBlock, value : Dynamic } >, onSelect : Int -> Dynamic -> Void, ?defaultSelected : Int) 
+			: { blocks: Array<ArcticBlock>, selectFn : Int -> Void } {
 		var stateChooser = [];
 		var currentRadio = defaultSelected;
 		if (currentRadio == null) {
@@ -132,7 +142,7 @@ class Arctic {
 				setState(true);
 			}
 		};
-		var onSelectHandler = function (index : Int) {
+		var onSelectHandler = function (index : Int) : Void {
 			for (i in 0...stateChooser.length) {
 				stateChooser[i](i == index);
 			}
@@ -151,7 +161,7 @@ class Arctic {
 			toggleButtons.push(ToggleButton(entry.selected, entry.unselected, false, selFn(i), onInit));
 			++i;
 		}
-		return toggleButtons;
+		return { blocks:toggleButtons, selectFn : onSelectHandler };
 	}
 
 	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String) : String {
