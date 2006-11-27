@@ -41,8 +41,10 @@ enum ArcticBlock {
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
 	 * The validator callback is called on each change in Flash 8, but only on loss of focus in Flash 9. You can use this callback to
 	 * extract the contents of the text input.
+	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
+	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9.
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int);
+	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool);
 
 	/// A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size
 	Picture(url : String, width : Float, height : Float, scaling : Float);
