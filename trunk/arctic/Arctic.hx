@@ -56,7 +56,7 @@ class Arctic {
 	}
 
 	/// Add a check-box in front on the given block
-	static public function makeCheckBox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
+	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
 		// Local closured variables to remember state
 		var selected = defaultSelected;
 		if (selected == null) {
