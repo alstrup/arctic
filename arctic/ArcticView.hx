@@ -994,21 +994,22 @@ class ArcticView {
 			if (construct) {
 				return buildFun(data, clip, availableWidth, availableHeight, null);
 			} else {
-				// TODO: Fix this to be "getChild(clip, 0)"
-				return buildFun(data, clip, availableWidth, availableHeight, null);
+				return buildFun(data, clip, availableWidth, availableHeight, getOrMakeClip(clip, false, 0));
 			}
 		}
-		
+
 		return clip;
 	}
 
 	private function calcMetrics(c : ArcticBlock) : Metrics {
+#if false
 		var m = doCalcMetrics(c);
-	//	trace(m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + ":" + c);
+		trace(m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + ":" + c);
 		return m;
 	}
 	
 	private function doCalcMetrics(c) {
+#end
 		switch (c) {
 		case Border(x, y, block):
 			var m = calcMetrics(block);
