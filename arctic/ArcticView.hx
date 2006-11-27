@@ -287,7 +287,7 @@ class ArcticView {
 			#end
 			return clip;
 
-		case TextInput(html, width, height, validator, maxChars, numeric, bgColor) :
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus) :
 			#if flash9
 				var txtInput : flash.text.TextField;
 				if (construct) {
@@ -360,7 +360,21 @@ class ArcticView {
 						txtInput.addListener(listener);
 						txtInput.type = "input";
 					#end
+					
+					// Setting additional txtInput properties from the style object
+					var fields = Reflect.fields(style);
+					for (i in 0...fields.length){
+						Reflect.setField(txtInput, fields[i], Reflect.field(style,fields[i]));
+					}
+
+					// Setting focus on txtInput 
+					#if flash9
+						if (focus != null && focus) clip.stage.focus = txtInput;
+					#else flash
+						if (focus != null && focus) flash.Selection.setFocus(txtInput);
+					#end
 				}
+						
 			return clip;
 
 		case Picture(url, w, h, scaling):
@@ -967,7 +981,7 @@ class ArcticView {
 			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
 			m.growHeight = false;
 			return m;
-		case TextInput(html, width, height, validator, maxChars, numeric, bgColor):
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus):
 			return { width : width, height : height, growWidth : false, growHeight : false };
 		case ColumnStack(columns):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
