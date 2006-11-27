@@ -10,19 +10,21 @@ import flash.text.TextFieldType;
 import flash.events.FocusEvent;
 #else true
 import flash.MovieClip;
+import flash.MovieClipLoader;
 import flash.geom.Rectangle;
 import flash.TextField;
 import flash.TextFormat;
 import flash.Mouse;
 #end
 
-/// Information we need at runtime
+/// Information we need at runtime to implement updating
 typedef BlockInfo = {
 	// Dragable needs to know how much space is available in the containing block
 	available : { width: Float, height : Float },
 	// Dragable needs to know how much we have moved so far
 	totalDx : Float,
 	totalDy : Float,
+	// Dragable needs to know how big the draggable area is
 	childSize : { width: Float, height : Float } 
 }
 
@@ -39,6 +41,9 @@ class ArcticView {
 		base = null;
 		useStageSize = false;
 		updates = new Hash<ArcticBlock>();
+		if (metricsCache == null) {
+			metricsCache = new Hash<{ width: Float, height : Float } >();
+		}
 	}
 
 	public var gui : ArcticBlock;
@@ -400,7 +405,7 @@ class ArcticView {
 			#else flash
 				if (construct) {
 					var loader = new flash.MovieClipLoader();
-					loader.loadClip(url, clip);
+					var r = loader.loadClip(url, clip);
 				}
 				var s = scaling * 100.0;
 				clip._xscale = s;
@@ -441,6 +446,7 @@ class ArcticView {
 				child._visible = true;
 				hover._visible = false;
 				if (construct) {
+					//clip.onRelease = action;
 					clip.onMouseUp = function () {
 						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
 							action();
@@ -495,6 +501,14 @@ class ArcticView {
 					if (null != onInit) {
 						onInit(setState);
 					}
+					/*
+					clip.onPress = function () {
+						setState(!sel._visible);
+						if (null != onChange) {
+							trace("Click");
+							onChange(sel._visible);
+						}
+					};*/
 					clip.onMouseDown = function() {
 						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
 							setState(!sel._visible);
@@ -1010,6 +1024,7 @@ class ArcticView {
 	
 	private function doCalcMetrics(c) {
 #end
+		var text = null;
 		switch (c) {
 		case Border(x, y, block):
 			var m = calcMetrics(block);
@@ -1021,6 +1036,11 @@ class ArcticView {
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
 			return calcMetrics(block);
 		case Text(html):
+			if (metricsCache.exists(html)) {
+				var m = metricsCache.get(html);
+				return { width : m.width, height : m.height, growWidth : false, growHeight : false };
+			}
+			text = html;
 			// Fall-through to creation
 		case Picture(url, w, h, scaling):
 			return { width : w, height : h, growWidth : false, growHeight : false };
@@ -1165,10 +1185,16 @@ class ArcticView {
 			var mc = build(c, tempMovie, 0, 0, true, 0);
 			var size = getSize(mc);
 			var m = { width : size.width, height : size.height, growWidth: false, growHeight: false };
-			mc.removeMovieClip();
+			tempMovie.removeMovieClip();
+//			mc.removeMovieClip();
 		#end
+		if (text != null) {
+			metricsCache.set(text, { width: m.width, height : m.height });
+		}
 		return m;
 	}
+	
+	static private var metricsCache : Hash< { width: Float, height : Float } >;
 	
 	private function getOrMakeClip(p : MovieClip, construct : Bool, childNo : Int) : MovieClip {
 		if (construct) {
@@ -1280,8 +1306,7 @@ class ArcticView {
 			return { width: flash.Stage.width, height: flash.Stage.height };
 		#end
 	}
-	
-	
+
 	#if flash9
 	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
 		d.addEventListener(event, handler);
@@ -1303,6 +1328,11 @@ class ArcticView {
 	/// Turn the normal cursor on or off
 	static public function showMouse(?show : Bool) {
 		#if flash9
+			if (show == null || show) {
+				flash.ui.Mouse.show();
+			} else {
+				flash.ui.Mouse.hide();
+			}
 		#else flash
 			if (show == null || show) {
 				flash.Mouse.show();
