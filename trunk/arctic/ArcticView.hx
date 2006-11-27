@@ -16,6 +16,15 @@ import flash.TextFormat;
 import flash.Mouse;
 #end
 
+/// Information we need at runtime
+typedef BlockInfo = {
+	// Dragable needs to know how much space is available in the containing block
+	available : { width: Float, height : Float },
+	// Dragable needs to know how much we have moved so far
+	totalDx : Float,
+	totalDy : Float,
+	childSize : { width: Float, height : Float } 
+}
 
 /**
  * The main class in Arctic which builds a user interface from an ArcticBlock.
@@ -93,7 +102,7 @@ class ArcticView {
 	}
 	
 	public function onResize() {
-		if (false) {
+		if (true) {
 			var stage = getStageSize(parent);
 			base = build(gui, parent, stage.width, stage.height, false, 0);
 		} else {
@@ -408,6 +417,7 @@ class ArcticView {
 				child.mouseChildren = false;
 				hover.buttonMode = true;
 				hover.mouseChildren = false;
+				child.visible = true;
 				hover.visible = false;
 				if (construct) {
 					clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
@@ -422,8 +432,13 @@ class ArcticView {
 							}
 						}
 					);
+					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
+						child.visible = true;
+						hover.visible = false;
+					});
 				}
 			#else flash
+				child._visible = true;
 				hover._visible = false;
 				if (construct) {
 					clip.onMouseUp = function () {
@@ -441,6 +456,10 @@ class ArcticView {
 							child._visible = true;
 							hover._visible = false;
 						}
+					};
+					hover.onRollOut = function() { 
+						child._visible = true;
+						hover._visible = false;
 					};
 				}
 			#end
@@ -700,31 +719,52 @@ class ArcticView {
             return clip;
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
-			var totalDx = 0.0;
-			var totalDy = 0.0;
             var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			var childSize = getSize(child);
+			var currentChildSize = getSize(child);
+			var info : BlockInfo;
+			if (construct) {
+				info = {
+					available: { width: availableWidth, height: availableHeight },
+					totalDx: 0.0,
+					totalDy: 0.0,
+					childSize: currentChildSize
+				};
+				setBlockInfo(child, info);
+			} else {
+				info = getBlockInfo(child);
+				info.available = { width: availableWidth, height: availableHeight };
+				info.childSize = currentChildSize;
+			}
 			if (stayWithin) {
 				setSize(clip, availableWidth, availableHeight);
 			}
 			
+			var me = this;
+			var setOffset = function (dx : Float, dy : Float) {
+				var info = me.getBlockInfo(child);
+				if (stayWithin) {
+					dx = Math.min(info.available.width - info.childSize.width, dx);
+					dy = Math.min(info.available.height - info.childSize.height, dy);
+				}
+				moveClip(child, dx, dy);
+				info.totalDx = dx;
+				info.totalDy = dy;
+			}; 
+			
 			if (!construct) {
+				if (null != onInit) {
+					// Reverse movement so it's back in a second
+					moveClip(child, -info.totalDx, -info.totalDy);
+					onInit(setOffset);
+				}
 				return clip;
 			}
 			
-			var setOffset = function (dx : Float, dy : Float) {
-				if (stayWithin) {
-					dx = Math.min(availableWidth - childSize.width, dx);
-					dy = Math.min(availableHeight - childSize.height, dy);
-				}
-				moveClip(child, dx, dy);
-				totalDx = dx;
-				totalDy = dy;
-			}; 
 			var dragX = -1.0;
 			var dragY = -1.0;
 			
 			var doDrag = function (dx : Float, dy : Float) {
+				var info = me.getBlockInfo(child);
 				if (!sideMotion) {
 					dx = 0;
 				}
@@ -734,10 +774,10 @@ class ArcticView {
 				var motion = false;
 					if (sideMotion) {
 						while (Math.abs(dx) > 0) {
-							var newTotalDx = totalDx + dx;
-							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= availableWidth - childSize.width)) {
+							var newTotalDx = info.totalDx + dx;
+							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childSize.width)) {
 								moveClip(child, dx, 0);
-								totalDx = newTotalDx;
+								info.totalDx = newTotalDx;
 								motion = true;
 								break;
 							}
@@ -751,10 +791,10 @@ class ArcticView {
 					}
 					if (upDownMotion) {
 						while (Math.abs(dy) > 0) {
-							var newTotalDy = totalDy + dy;
-							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= availableHeight - childSize.height)) {
+							var newTotalDy = info.totalDy + dy;
+							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childSize.height)) {
 								moveClip(child, 0, dy);
-								totalDy = newTotalDy;
+								info.totalDy = newTotalDy;
 								motion = true;
 								break;
 							}
@@ -768,7 +808,7 @@ class ArcticView {
 					}
 					if (motion) {
 						if (onDrag != null) {
-							onDrag(totalDx, totalDy);
+							onDrag(info.totalDx, info.totalDy);
 						}
 					}
 			}
@@ -794,14 +834,13 @@ class ArcticView {
 						dragX = -1;
 						dragY = -1;
 					};
-				var me = this;
 				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
 						if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 							dragX = clip.stage.mouseX;
 							dragY = clip.stage.mouseY;
+							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 							if (firstTime) {
-								me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 								me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
 								firstTime = false;
 							}
@@ -874,29 +913,31 @@ class ArcticView {
 			var cursorMc = build(cursor, clip, 0, 0, construct, 1);
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
-				cursorMc.visible = child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
+				var onMove = function (s) {
+					if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+						cursorMc.visible = true;
+						cursorMc.x = clip.mouseX;
+						cursorMc.y = clip.mouseY;
+						showMouse(keep);
+						return;
+					} else {
+						cursorMc.visible = false;
+						showMouse();
+					}
+				};
 				if (construct) {
-					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
-						function (s) {
-							if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
-								cursorMc.visible = true;
-								cursorMc.x = clip.mouseX;
-								cursorMc.y = clip.mouseY;
-								showMouse(keep);
-								return;
-							} else {
-								cursorMc.visible = false;
-								showMouse();
-							}
-						}
+					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
+					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() { 
+						cursorMc.visible = false;
+						showMouse();
+					}
 					);
 				}
+				onMove(null);
 			#else flash
 				cursorMc._visible = child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse);
 				
-				if (construct) {
-					if (clip.onMouseMove == null) {
-						clip.onMouseMove = function() {
+				var onMove = function() {
 							if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
 								cursorMc._visible = true;
 								cursorMc._x = clip._xmouse;
@@ -908,15 +949,29 @@ class ArcticView {
 								showMouse();
 							}
 						};
+				if (construct) {
+					if (clip.onMouseMove == null) {
+						clip.onMouseMove = onMove;
+					}
+					if (clip.onRollOut == null) {
+						clip.onRollOut = function() { 
+							// TODO: We need to notify the children here as well, because Flash
+							// does not propagate events down
+							cursorMc._visible = false;
+							showMouse();
+						};
 					}
 				}
+				onMove();
 			#end
 			
 			return clip;
 
 		case Offset(dx, dy, block) :
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			moveClip(child, dx, dy);
+			if (construct) {
+				moveClip(child, dx, dy);
+			}
 			return clip;
 			
 		case OnTop(base, overlay) :
@@ -1150,6 +1205,14 @@ class ArcticView {
 			#end
 		}
 		
+	}
+
+	private function getBlockInfo(clip : MovieClip) : BlockInfo {
+		return Reflect.field(clip, "arcticInfo");
+	}
+	
+	private function setBlockInfo(clip : MovieClip, info : BlockInfo) {
+		Reflect.setField(clip, "arcticInfo", info);
 	}
 	
 	/**
