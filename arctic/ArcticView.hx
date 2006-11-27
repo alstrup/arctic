@@ -426,7 +426,6 @@ class ArcticView {
 			#else flash
 				hover._visible = false;
 				if (construct) {
-					//clip.onRelease = action;
 					clip.onMouseUp = function () {
 						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
 							action();
@@ -477,7 +476,6 @@ class ArcticView {
 					if (null != onInit) {
 						onInit(setState);
 					}
-					//clip.onPress 
 					clip.onMouseDown = function() {
 						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
 							setState(!sel._visible);
