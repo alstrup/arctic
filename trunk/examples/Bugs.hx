@@ -24,15 +24,16 @@ class Bugs {
 		switch (count) {
 			case 0:
 			screen = 
-				Border( 100, 100, 
+				Border( 50, 100, 
 				ColumnStack( [
 					Arctic.makeTooltip( Text("This text has a tooltip."), "This tooltip should come on top of everything"),
-					Text("Tooltip should not go beneath this stuff"),
+					Text("Don't go beneath this stuff"),
 					Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
 				] ) );
 			case 1:
 			screen = 
-				ColumnStack( [
+				LineStack( [
+					Arctic.makeDragable(true, true, true, Background(0x8080ff, Border(10, 10, TextInput("Selection with mouse does not work", 200, 20)))),
 					Arctic.makeDragable(true, true, true, Background(0x8080ff, Border(10, 10, TextInput("Selection with mouse does not work", 200, 20)))),
 					Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
 				]);
