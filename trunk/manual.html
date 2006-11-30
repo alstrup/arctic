@@ -162,3 +162,32 @@ given size and color - in this case 16 pixels high and blue color:</p>
 </blockquote>
 <p>The 100.0 value in the last line means that the background is fully opaque,
 and the 20 value means that the background is rounded.</p>
+<h2>Controlling &amp; debugging layout</h2>
+<p>Doing layout in Arctic can sometimes be tricky - especially in nested
+layouts. To help you learn do layout using Arctic, it is good to know how it
+works behind the scenes: First, Arctic figures out how much space to use for the
+layout by asking the size of the parent MovieClip. That's why it is sometimes a
+good idea to use setSize on that clip first, in case there is nothing in it.</p>
+<p>Next, Arctic recursively builds the blocks from the top downwards, passing
+the size of the rectangle for that block along. Each time it encounters a layout
+block, such as a ColumnStack, a LineStack or a Grid, it does a two-pass
+algorithm. First, the minimum size and resizing behaviour of each block in the
+stack or grid are determined. This is used to determine how much free space is
+available to distribute to each column and/or row. In the next phase, Arctic
+will spread the available surplus space to the blocks that resize evenly.</p>
+<p>So, Arctic does layout on rectangles only. Each block has a corresponding
+minimum rectangle size, and might resize horizontally or vertically or both, in
+terms of layout. Fillers resize in the direction of their nearest containing
+block, such as a LineStack or ColumnStack. Dragable resize in the directions
+their flags dictate. Border, Background, GradientBackground, Button, and similar
+elements inherit their nested block's resizing behaviour. ConstrainHeight and
+ConstrainWidth never resize in the corresponding direction, even if they contain
+a resizing element.</p>
+<p>To debug layout trouble, try wrapping the problematic blocks and their
+parents with Background() elements in various colors. If something is resizing
+too much, you can try to use a ConstrainHeight or ConstrainWidth to make it
+better. If alignment is off, you might need something like a LineStack([Filler,
+block]) wrapper to position things correctly.</p>
+<p>If you need to align blocks to a baseline of a font, or something like that,
+you'll have to do a CustomBlock, or use Fixed and Border elements with exact
+pixel offsets to do the trick.</p>
