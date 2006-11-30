@@ -924,42 +924,56 @@ class ArcticView {
 		
 		case Cursor(block, cursor, keepNormalCursor) :
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			var cursorMc = build(cursor, clip, 0, 0, construct, 1);
+			var me = this;
+			var cursorMc = null;
+			// We need to construct the cursor lazily because we want it to come on top of everything
+			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, construct, 1);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
 					if (child.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+						if (cursorMc == null) {
+							cursorMc = cursorMcFn();
+							cursorMcFn = null;
+						}
 						cursorMc.visible = true;
-						cursorMc.x = clip.mouseX;
-						cursorMc.y = clip.mouseY;
+						cursorMc.x = me.parent.mouseX;
+						cursorMc.y = me.parent.mouseY;
 						showMouse(keep);
 						return;
 					} else {
-						cursorMc.visible = false;
+						if (cursorMc != null) {
+							cursorMc.visible = false;
+						}
 						showMouse();
 					}
 				};
 				if (construct) {
 					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
 					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() { 
-						cursorMc.visible = false;
-						showMouse();
-					}
+							cursorMc.visible = false;
+							showMouse();
+						}
 					);
 				}
 				onMove(null);
 			#else flash
-				cursorMc._visible = child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse);
 				
 				var onMove = function() {
 							if (child.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+								if (cursorMc == null) {
+									cursorMc = cursorMcFn();
+									cursorMcFn = null;
+								}
 								cursorMc._visible = true;
-								cursorMc._x = clip._xmouse;
-								cursorMc._y = clip._ymouse;
+								cursorMc._x = me.parent._xmouse;
+								cursorMc._y = me.parent._ymouse;
 								showMouse(keep);
 								return;
 							} else {
-								cursorMc._visible = false;
+								if (cursorMc != null) {
+									cursorMc._visible = false;
+								}
 								showMouse();
 							}
 						};
@@ -970,8 +984,11 @@ class ArcticView {
 					if (clip.onRollOut == null) {
 						clip.onRollOut = function() { 
 							// TODO: We need to notify the children here as well, because Flash
-							// does not propagate events down
-							cursorMc._visible = false;
+							// does not propagate events down. This means that highlighters on
+							// buttons are not turned off if they have a tooltip on them
+							if (cursorMc != null) {
+								cursorMc._visible = false;
+							}
 							showMouse();
 						};
 					}
