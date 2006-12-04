@@ -1,4 +1,5 @@
 # bugs.swf
 -swf bugs.swf
+-swf-version 9
 -main Bugs
 -cp ..

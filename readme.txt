@@ -18,7 +18,7 @@ interface will require a full refresh.
 Arctic is so simple that you should have little trouble understanding how it
 is implemented, and thus it should be easy to extend it to cover your needs.
 
-See the example to learn how to build your own arctic views,
+See the example to learn how to build your own arctic views.
 
 To install, run
 
