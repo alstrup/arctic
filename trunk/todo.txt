@@ -1,7 +1,6 @@
 Bug-fixes:
 - LineStack goes crazy when lots of elements go inside it
-- Dragable should not capture movements from child elements, like selecting in
-  TextInputs or scrolling scrollbars.
+- Dragable should not capture movements from scrollbars.
 - Add API for text elements to set focus to them, and ask whether they have focus
 
 - Change scrollbar to listen to mouse wheel
