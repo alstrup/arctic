@@ -1,4 +1,5 @@
 Bug-fixes:
+- Hover effect does not automatically trigger on refresh (see dynamic example)
 - LineStack goes crazy when lots of elements go inside it
 - Dragable should not capture movements from scrollbars.
 - Add API for text elements to set focus to them, and ask whether they have focus
@@ -9,16 +10,23 @@ Bug-fixes:
 - Add filling behaviour to grid
 
 New features to consider, in order of priority:
+
   // A slider has it's own coordinate system
 - Slider( totalHeight, onChange, ?initialPos, ?dragBarHeight )
    = Dragable( Handle )
+
 - Scrollbar = LineStack(Button, Slider, Button);
 
-- Change update to be more efficient and animate
 - Nice default, light-weight look for widgets
+
 - Progress-bar
+
 - Add horizontal scrollbar (and extend columnstack to add one if needed)
+
 - Resizable bitmap with aspect-ratio preservation
+
 - Calendar widget
+
 - Combo-box
+
 - Simple audio/video player
