@@ -283,7 +283,7 @@ class ArcticView {
 			#end
 			return clip;
 
-		case Text(html):
+		case Text(html, embeddedFont):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			#if flash9
 				var tf : flash.text.TextField;
@@ -291,6 +291,9 @@ class ArcticView {
 					tf = new flash.text.TextField();
 				} else {
 					tf = cast(clip.getChildAt(0), flash.text.TextField);
+				}
+				if (embeddedFont) {
+					tf.embedFonts = true;
 				}
 				tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
 				tf.selectable = false;
@@ -306,6 +309,9 @@ class ArcticView {
 					Reflect.setField(clip, "tf", tf);
 				} else {
 					tf = Reflect.field(clip, "tf");
+				}
+				if (embeddedFont) {
+					tf.embedFonts = true;
 				}
 				tf.autoSize = true;
 				tf.html = true;
@@ -1091,7 +1097,7 @@ class ArcticView {
 			return calcMetrics(block);
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
 			return calcMetrics(block);
-		case Text(html):
+		case Text(html, embeddedFont):
 			if (metricsCache.exists(html)) {
 				var m = metricsCache.get(html);
 				return { width : m.width, height : m.height, growWidth : false, growHeight : false };
