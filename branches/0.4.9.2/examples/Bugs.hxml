@@ -1,0 +1,11 @@
+# bugs.swf
+-swf bugs.swf
+-main Bugs
+-cp ..
+
+--next
+# bugs9.swf
+-swf bugs9.swf
+-swf-version 9
+-main Bugs
+-cp ..

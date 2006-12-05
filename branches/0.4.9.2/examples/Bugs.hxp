@@ -1,0 +1,5 @@
+﻿<haxe selected="0">
+  <output name="bugs.swf" mode="swf" out="bugs.swf" class="Bugs" lib="" cmd="" main="True" debug="False">-cp ..</output>
+  <output name="bugs9.swf" mode="swf9" out="bugs9.swf" class="Bugs" lib="" cmd="" main="True" debug="False">-cp ..</output>
+  <files path="/" />
+</haxe>
