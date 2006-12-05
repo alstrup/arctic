@@ -35,7 +35,7 @@ enum ArcticBlock {
 	Border(x : Float, y : Float, block : ArcticBlock);
 
 	/// A text (in the subset of HTML which Flash understands)
-	Text(html : String);
+	Text(html : String, ?embeddedFont : Bool);
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.

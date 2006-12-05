@@ -170,8 +170,8 @@ class Arctic {
 		return { blocks:toggleButtons, selectFn : onSelectHandler };
 	}
 
-	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String) : String {
-		return "<font face='arial'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
+	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String, ?font : String) : String {
+		return "<font face='" + (if (font == null) "arial" else font) + "'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
 			   (if (color != null) { " color='" + color + "'"; } else "" ) + ">" + text + "</font>";
 	}
 }
