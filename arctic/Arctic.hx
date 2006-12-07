@@ -8,15 +8,25 @@ import arctic.ArcticBlock;
  */
 class Arctic {
 
+	/// The default font used in the helpers here
+	static public var defaultFont = "arial";
+	/// Is the default font an embedded font?
+	static public var isDefaultFontEmbedded = false;
+
+	/// Make a text using the given parameters. Default color is black. If font is omitted, the default font is used
+	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool) {
+		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded);
+	}
+	
 	/// A text button
 	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?fontsize : Float) : ArcticBlock {
-		var t = Border(5, 5, Text(wrapWithDefaultFont(text, fontsize)));
+		var t = Border(5, 5, makeText(text, fontsize));
 		return Button(t, Background(0xf0f0f0, t, 70.0, if (fontsize != null) fontsize / 4 else 5.0), onClick);
 	}
 	
 	/// Associate a tooltip with a block
 	static public function makeTooltip(block : ArcticBlock, text : String) : ArcticBlock {
-		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, Text(wrapWithDefaultFont(text))), 100, 3)), true);
+		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, makeText(text)), 100, 3)), true);
 	}
 
 	/// A block which looks like a page in a tear-off calendar on the given date
@@ -24,10 +34,15 @@ class Arctic {
 		var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 		var days = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
 		var day = days[Math.floor(3 + date.getTime() / (1000 * 60 * 60 * 24)) % 7];
-		var text = "<font color='#000000' face='arial'><p align='center'><b>" + months[date.getMonth()]
+		var text = "<font color='#9CAACE' face='" + defaultFont + "'><p align='center'><b>" + months[date.getMonth()]
 				+ "</b><br><p align='center'><b><font size='32'>" + date.getDate() + "</font></b>"
 				+ "<br><p align='center'><b>" + day + "</b></font>";
-		return Background(0x000000, Border(1, 1, Background(0xFFFCA9, ConstrainWidth(75, 75, ConstrainHeight(75, 75, ColumnStack([Filler,Text(text), Filler]))))));
+		return Background(0x000000, Border(0, 0, Background(0x3B4C77, ConstrainWidth(75, 75, ConstrainHeight(75, 75, 
+			LineStack([ 
+				Filler,
+				ColumnStack([Filler,Text(text, isDefaultFontEmbedded), Filler]),
+				Filler ]
+			))))));
 	}
 	
 	/**
@@ -117,9 +132,9 @@ class Arctic {
 		var i = 0;
 		for (text in texts) {
 			var selected = Border(1, 1, ColumnStack([CustomBlock(true, calcMetrics, build),
-													 Text(wrapWithDefaultFont(text, textSize))]));
+													 makeText(text, textSize)]));
 			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, calcMetrics, build),
-													   Text(wrapWithDefaultFont(text, textSize))]));
+													   makeText(text, textSize)]));
 			entries.push( { selected: selected, unselected: unselected, value: text } );
 		}
 		var group = makeRadioButtonGroup(entries, onSelect, defaultSelected);
@@ -171,7 +186,7 @@ class Arctic {
 	}
 
 	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String, ?font : String) : String {
-		return "<font face='" + (if (font == null) "arial" else font) + "'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
+		return "<font face='" + (if (font == null) defaultFont else font) + "'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
 			   (if (color != null) { " color='" + color + "'"; } else "" ) + ">" + text + "</font>";
 	}
 }
