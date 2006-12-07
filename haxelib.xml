@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.4.9.2">Fix tooltips hiding under other elements, fix nested dragables and textinputs</version>
+    <version name="0.4.9.3">Support embedded fonts in Text block</version>
 </project>
