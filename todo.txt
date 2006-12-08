@@ -1,6 +1,8 @@
 Bug-fixes:
 - Hover effect does not automatically trigger on refresh (see dynamic example)
-- LineStack goes crazy when lots of elements go inside it
+- LineStack goes crazy when lots of elements go inside it. 
+  To fix this, calcMetrics needs available width & height - because LineStack
+  needs to report availableheight rather than minimum height.
 - Dragable should not capture movements from scrollbars.
 - Add API for text elements to set focus to them, and ask whether they have focus
 
