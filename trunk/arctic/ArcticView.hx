@@ -826,45 +826,45 @@ class ArcticView {
 					dy = 0;
 				}
 				var motion = false;
-					if (sideMotion) {
-						while (Math.abs(dx) > 0) {
-							var newTotalDx = info.totalDx + dx;
-							if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childSize.width)) {
-								moveClip(child, dx, 0);
-								info.totalDx = newTotalDx;
-								motion = true;
-								break;
-							}
-							// We just try a smaller drag
-							if (dx > 0) {
-								dx--;
-							} else {
-								dx++;
-							}
+				if (sideMotion) {
+					while (Math.abs(dx) > 0) {
+						var newTotalDx = info.totalDx + dx;
+						if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childSize.width)) {
+							moveClip(child, dx, 0);
+							info.totalDx = newTotalDx;
+							motion = true;
+							break;
+						}
+						// We just try a smaller drag
+						if (dx > 0) {
+							dx--;
+						} else {
+							dx++;
 						}
 					}
-					if (upDownMotion) {
-						while (Math.abs(dy) > 0) {
-							var newTotalDy = info.totalDy + dy;
-							if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childSize.height)) {
-								moveClip(child, 0, dy);
-								info.totalDy = newTotalDy;
-								motion = true;
-								break;
-							}
-							// We just try a smaller drag
-							if (dy > 0) {
-								dy--;
-							} else {
-								dy++;
-							}
+				}
+				if (upDownMotion) {
+					while (Math.abs(dy) > 0) {
+						var newTotalDy = info.totalDy + dy;
+						if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childSize.height)) {
+							moveClip(child, 0, dy);
+							info.totalDy = newTotalDy;
+							motion = true;
+							break;
+						}
+						// We just try a smaller drag
+						if (dy > 0) {
+							dy--;
+						} else {
+							dy++;
 						}
 					}
-					if (motion) {
-						if (onDrag != null) {
-							onDrag(info.totalDx, info.totalDy);
-						}
+				}
+				if (motion) {
+					if (onDrag != null) {
+						onDrag(info.totalDx, info.totalDy);
 					}
+				}
 			}
 			
 			#if flash9
