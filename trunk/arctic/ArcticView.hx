@@ -716,7 +716,7 @@ class ArcticView {
 					var m = calcMetrics(block);
 					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
 					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
-					if (columnWidths.length < x) {
+					if (columnWidths.length <= x) {
 						columnWidths.push(m.width);
 					} else {
 						if (columnWidths[x] < m.width) {
@@ -726,7 +726,7 @@ class ArcticView {
 					lineHeight = Math.max(lineHeight, m.height);
 					++x;
 				}
-				if (lineHeights.length < y) {
+				if (lineHeights.length <= y) {
 					lineHeights.push(lineHeight);
 				} else {
 					if (lineHeights[y] < lineHeight) {
