@@ -20,7 +20,7 @@ class Arctic {
 	
 	/// A text button
 	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?fontsize : Float) : ArcticBlock {
-		var t = Border(5, 5, makeText(text, fontsize));
+		var t = Border(10, 5, makeText(text, fontsize));
 		return Button(t, Background(0xf0f0f0, t, 70.0, if (fontsize != null) fontsize / 4 else 5.0), onClick);
 	}
 	
@@ -30,19 +30,19 @@ class Arctic {
 	}
 
 	/// A block which looks like a page in a tear-off calendar on the given date
-	static public function makeDateView(date : Date) : ArcticBlock {
+	static public function makeDateView(date : Date, ?background : Int) : ArcticBlock {
 		var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 		var days = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
 		var day = days[Math.floor(3 + date.getTime() / (1000 * 60 * 60 * 24)) % 7];
-		var text = "<font color='#9CAACE' face='" + defaultFont + "'><p align='center'><b>" + months[date.getMonth()]
+		var text = "<font color='#ffffff' face='" + defaultFont + "'><p align='center'><b>" + months[date.getMonth()]
 				+ "</b><br><p align='center'><b><font size='32'>" + date.getDate() + "</font></b>"
 				+ "<br><p align='center'><b>" + day + "</b></font>";
-		return Background(0x000000, Border(0, 0, Background(0x3B4C77, ConstrainWidth(75, 75, ConstrainHeight(75, 75, 
+		return Background(if (background == null) 0x3B4C77 else background, ConstrainWidth(75, 75, ConstrainHeight(75, 75, 
 			LineStack([ 
 				Filler,
 				ColumnStack([Filler,Text(text, isDefaultFontEmbedded), Filler]),
 				Filler ]
-			))))));
+			))), 100, 5);
 	}
 	
 	/**
