@@ -53,6 +53,14 @@ class Bugs {
 					LineStack( [ Arctic.makeText("Text", 100), Filler ] ),
 					Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
 				] )));
+			case 4:
+			// Text radio-choice does not work
+			screen = 
+					LineStack( [ 
+						Arctic.makeTextChoice([ "See custom block", "See dragable blocks" ], function(i : Int, text : String) { }, 0, 20).block,
+						Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
+					]);
+
 			default:
 			screen = Text("The end");
 		}

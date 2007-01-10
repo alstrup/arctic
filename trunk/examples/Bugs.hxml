@@ -2,6 +2,8 @@
 -swf bugs.swf
 -main Bugs
 -cp ..
+-swf-header 800:600:50
+
 
 --next
 # bugs9.swf
@@ -9,3 +11,5 @@
 -swf-version 9
 -main Bugs
 -cp ..
+-swf-header 800:600:50
+
