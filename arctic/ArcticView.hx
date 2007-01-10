@@ -461,8 +461,8 @@ class ArcticView {
 				clip._xscale = s;
 				clip._yscale = s;
 			#end
-			setSize(clip, w / scaling, h / scaling);
-			return { clip: clip, width: w / scaling, height: h / scaling };
+			setSize(clip, w, h);
+			return { clip: clip, width: w, height: h };
 
 		case Button(block, hover, action):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
