@@ -6,8 +6,7 @@ If you checked Arctic out from SVN, you can use the "DevArcticExamples.*"
 files instead. The only difference is that those files use relative
 paths to the Arctic-files and the development ones have debugging turned on.
 
-See ArcticTest.hx to learn how to make use of Arctic. It contains a number
-of screens, increasing in complexity.
+Read ../manual.html to learn how to use Arctic.
 
+See also ArcticTest.hx for a number of screens, increasing in complexity.
 See also DynamicExample.hx for an example of updating an Arctic screen.
-
