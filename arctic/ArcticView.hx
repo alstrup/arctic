@@ -197,21 +197,21 @@ class ArcticView {
 	
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
-#if true
+#if false
 		var clip = doBuild(gui, p, availableWidth, availableHeight, construct, childNo);
 		var metrics = calcMetrics(gui, availableWidth, availableHeight);
 		if (clip.width > availableWidth) {
-//			trace("Too wide: " + clip.width + " should be max " + availableWidth + " with " + gui);
+			trace("Too wide: " + clip.width + " should be max " + availableWidth + " with " + gui);
 		}
 		if (clip.height > availableHeight) {
 			trace("Too high: " + clip.width + " should be max " + availableWidth + " with " + gui);
 		}
-/*		if (clip.width != metrics.width) {
+		if (clip.width != metrics.width) {
 			trace("Metrics wrong: Is "+ clip.width + " wide but metrics say " + metrics.width + " (" + availableWidth +" available) with " + gui);
 		}
 		if (clip.height != metrics.height) {
 			trace("Metrics wrong: Is "+ clip.height + " high but metrics say " + metrics.height + " (" + availableHeight + " available) with " + gui);
-		}*/
+		}
 		return clip;
 	}
 	
@@ -843,7 +843,6 @@ class ArcticView {
 					moveClip(child.clip, -info.totalDx, -info.totalDy);
 					onInit(setOffset);
 				}
-				// TODO: Fix this
 				return { clip: clip, width: width, height: height};
 			}
 			
@@ -1023,15 +1022,17 @@ class ArcticView {
 						showMouse();
 					}
 				};
-				onMove(null);
 				if (construct) {
 					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
-					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() { 
-							cursorMc.clip.visible = false;
+					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
+							if (cursorMc != null) {
+								cursorMc.clip.visible = false;
+							}
 							showMouse();
 						}
 					);
 				}
+				onMove(null);
 			#else flash
 				
 				var onMove = function() {
@@ -1161,9 +1162,8 @@ class ArcticView {
 			return { width : width, height : height, growWidth : false, growHeight : false };
 		case ColumnStack(columns):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			var availPerColumn = availableWidth / columns.length;
 			for (c in columns) {
-				var cm = calcMetrics(c, availPerColumn, availableHeight);
+				var cm = calcMetrics(c, 0, availableHeight);
 				m.width += cm.width;
 				m.height = Math.max(cm.height, m.height);
 				m.growWidth = m.growWidth || cm.growWidth;
@@ -1175,9 +1175,8 @@ class ArcticView {
 			return m;
 		case LineStack(blocks, ensureVisibleIndex):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			var availPerLine = availableHeight / blocks.length;
 			for (c in blocks) {
-				var cm = calcMetrics(c, availableWidth, availPerLine);
+				var cm = calcMetrics(c, availableWidth, 0);
 				m.width = Math.max(cm.width, m.width);
 				m.height += cm.height;
 				// A filler here should in itself not impact width growth in this situation
@@ -1190,7 +1189,6 @@ class ArcticView {
 			if (m.height > availableHeight) {
 				m.width += 12;
 			}
-			m.height = Math.min(m.height, availableHeight);
 			return m;
 
 		case Grid(cells):
@@ -1279,13 +1277,13 @@ class ArcticView {
 		#if flash9
 			var tempMovie = new MovieClip();
 			parent.addChild(tempMovie);
-			var mc = doBuild(c, tempMovie, availableWidth, availableHeight, true, 0);
+			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
 			var m = { width : mc.width, height : mc.height, growWidth: false, growHeight: false };
 			parent.removeChild(tempMovie);
 		#else flash
 			var d = parent.getNextHighestDepth();
 			var tempMovie = parent.createEmptyMovieClip("c" + d, d);
-			var mc = doBuild(c, tempMovie, availableWidth, availableHeight, true, 0);
+			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
 			var m = { width : mc.width, height : mc.height, growWidth: false, growHeight: false };
 			tempMovie.removeMovieClip();
 //			mc.removeMovieClip();
