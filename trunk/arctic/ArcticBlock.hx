@@ -166,8 +166,7 @@ enum ArcticBlock {
 	 * If they do not, the layout might be broken.
 	 */
 	CustomBlock( data : Dynamic, 
-				calcMetricsFunc : Dynamic -> Metrics, 
-				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> ArcticMovieClip
+				calcMetricsFunc : Dynamic -> Float -> Float -> Metrics, 
+				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> { clip: ArcticMovieClip, width: Float, height: Float }
 				);
-
 }

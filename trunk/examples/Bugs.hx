@@ -46,6 +46,13 @@ class Bugs {
 					Arctic.makeDragable(true, true, true, ConstrainWidth(300, 300, ConstrainHeight(100, 100, Background(0x8080ff, Border(10, 10, Arctic.makeDragable(true, true, true, Background(0x80ff80, Border(10, 10, TextInput("Selection with mouse should work", 200, 20))))))))),
 					Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
 				]);
+			case 3:
+			// Nested LineStack become too big:
+			screen = Border(0, 120, Background(0xf08000, 
+				LineStack( [ 
+					LineStack( [ Arctic.makeText("Text", 100), Filler ] ),
+					Arctic.makeSimpleButton( "Next bug", function() { me.next(); } )
+				] )));
 			default:
 			screen = Text("The end");
 		}

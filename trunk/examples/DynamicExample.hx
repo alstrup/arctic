@@ -24,12 +24,13 @@ class DynamicExample  {
 		// To make a screen, first build the data structure representing the contents
 		var me = this;
 		rows = [];
-		var screen = Border (10, 10, Background(0xf08000, 
+		var screen = Border(100, 20, Background(0xf08000, 
 			LineStack( [ 
 				Id("elements", Filler), 
 				Arctic.makeSimpleButton("Add row",  function() { me.addRow(); }, 50),
 				Arctic.makeSimpleButton("Close",  function() { me.remove(); }, 50) 
 			] ) ) );
+
 		// Then construct the arctic object
 		arcticView = new ArcticView( screen );
 		// And finally display on the given movieclip
@@ -41,7 +42,7 @@ class DynamicExample  {
 		rows.push("Another line " + rows.length);
 		var elements = [];
 		for (r in rows) {
-			elements.push(Text(r));
+			elements.push(Arctic.makeText(r, 100));
 		}
 		elements.push(Filler);
 		arcticView.update("elements", LineStack(elements, rows.length) );

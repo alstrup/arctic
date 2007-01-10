@@ -88,17 +88,17 @@ class Arctic {
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
-		var calcMetrics = function(data) {
+		var calcMetrics = function(data, availableWidth, availableHeight) {
 			return { width: 13, height: 13, growWidth : false, growHeight : false };
 		}
-		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
+		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var size = 12;
 			DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
 			if (state) {
 				size -= 4;
 				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
 			}
-			return parentMc;
+			return { clip: parentMc, width: 13, height: 13 };
 		}
 
 		var notSelectedBlock = ColumnStack( [ CustomBlock(false, calcMetrics, build), block ] );
@@ -116,16 +116,16 @@ class Arctic {
 			textSize = 12;
 		}
 		// Callback fn for the CustomBlock to draw Radio button
-		var calcMetrics = function(data) {
+		var calcMetrics = function(data, availableWidth, availableHeight) {
 			return { width: 13, height: 13, growWidth : false, growHeight : false };
 		}
-		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : Dynamic {
+		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var radius = 6;
 			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
 			if (state) {
 				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
 			}
-			return parentMc;
+			return { clip: parentMc, width: 13, height: 13 };
 		}
 		
 		var entries : Array<{ selected: ArcticBlock, unselected: ArcticBlock, value : String }> = [];
