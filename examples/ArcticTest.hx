@@ -138,11 +138,11 @@ class ArcticTest {
 	
 	public function customBlock() {
 		// A custom block needs two functions. One to tell Arctic the size and desired resizing behaviour:
-		var calcMetrics = function(data : Int) : Metrics {
+		var calcMetrics = function(data : Int, availableWidth, availableHeight) : Metrics {
 			return { width: 100, height : 100, growHeight : false, growWidth : false };
 		}
 		// And another one which should paint & construct the block when ready
-		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) : ArcticMovieClip {
+		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			#if flash9
 				parentMc.graphics.beginFill(data);
 				parentMc.graphics.moveTo(50, 0);
@@ -158,7 +158,7 @@ class ArcticTest {
 				parentMc.lineTo(50, 0);
 				parentMc.endFill();
 			#end
-			return parentMc;
+			return { clip: parentMc, width: 100.0, height: 100.0 };
 		}
 		
 		var custom = Background( 0x000000,
