@@ -250,14 +250,17 @@ class ArcticView {
 				block = Border(xspacing, yspacing, block);
 			}			
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			#if flash9
-				clip.graphics.clear();
-				clip.graphics.lineStyle(thickness, color, if (alpha != null) alpha / 100.0 else 1.0);
-			#else flash
-				clip.clear();
-				clip.lineStyle(thickness, color, alpha);
-			#end
-			DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+			if (thickness != null && thickness != 0) {
+				#if flash9
+					clip.graphics.clear();
+					clip.graphics.lineStyle(thickness, color, if (alpha != null) alpha / 100.0 else 1.0);
+				#else flash
+					clip.clear();
+					clip.lineStyle(thickness, color, alpha);
+				#end
+				var delta = thickness / 2;
+				DrawUtils.drawRect(clip, -delta, -delta, child.width + 2 * delta, child.height + 2 * delta, roundRadius);
+			}
 			return { clip: clip, width: child.width, height: child.height };
 		
 		case Shadow(block, distance, angle, color, alpha):
