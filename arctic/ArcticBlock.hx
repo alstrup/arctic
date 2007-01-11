@@ -169,4 +169,14 @@ enum ArcticBlock {
 				calcMetricsFunc : Dynamic -> Float -> Float -> Metrics, 
 				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> { clip: ArcticMovieClip, width: Float, height: Float }
 				);
+	
+	/**
+	 * Draws a frame around the given block
+	 */
+	Frame(block: ArcticBlock, ?thickness: Float, ?color: Int, ?roundRadius: Float, ?alpha: Float, ?xspacing: Float, ?yspacing: Float);
+
+	/**
+	 * Drops a shadow for the given block 
+	 */
+	Shadow(block: ArcticBlock, ?distance: Int, ?angle: Int, ?color: Int, ?alpha: Float);
 }
