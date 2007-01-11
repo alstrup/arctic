@@ -40,7 +40,7 @@ class ArcticTest {
 								Filler, 
 								ColumnStack( [
 									Filler,
-									Text("<font face='arial' size='40'>Hello world!</font>"),
+									Shadow( Text("<font face='arial' size='40'>Hello world!</font>"), 7, 45, 0x777777, 0.5 ),
 									Filler ]
 								),
 								Filler,
@@ -100,7 +100,7 @@ class ArcticTest {
 						LineStack( [
 							Border( 10, 10, 
 								ColumnStack( [
-									Arctic.makeDateView(Date.now()), 
+									Frame(Arctic.makeDateView(Date.now()), 1, 0x777777, 2, 100, 2, 2), 
 									Border( 20, 20, 
 										Text("<b><font face='arial' size='24' color='#ffffff'>Today's appointments</font></b>")
 									)

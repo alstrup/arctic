@@ -241,7 +241,35 @@ class ArcticView {
 			var h = child.height + 2 * y;
 			setSize(clip, w, h);
 			return { clip: clip, width: w, height: h };
-
+		
+		case Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing):
+			var clip : MovieClip = getOrMakeClip(p, construct, childNo);			
+			if (xspacing == null) xspacing = 0;
+			if (yspacing == null) yspacing = 0;
+			if (xspacing != 0 || yspacing != 0) {
+				block = Border(xspacing, yspacing, block);
+			}			
+			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
+			#if flash9
+				clip.graphics.clear();
+				clip.graphics.lineStyle(thickness, color, if (alpha != null) alpha / 100.0 else 1.0);
+			#else flash
+				clip.clear();
+				clip.lineStyle(thickness, color, alpha);
+			#end
+			DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+			return { clip: clip, width: child.width, height: child.height };
+		
+		case Shadow(block, distance, angle, color, alpha):
+			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
+			var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
+			// we must use a temporary array (see documentation)
+			var _filters = clip.filters;
+			_filters.push(dropShadow);
+			clip.filters = _filters;
+			return { clip: clip, width: child.width, height: child.height };
+			
 		case Background(color, block, alpha, roundRadius):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
@@ -1127,6 +1155,18 @@ class ArcticView {
 			m.width += 2 * x;
 			m.height += 2 * y;
 			return m;
+		case Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing):		
+			if (xspacing == null) xspacing = 0;
+			if (yspacing == null) yspacing = 0;
+			if (thickness == null) thickness = 0;
+			var x = xspacing + thickness / 2;
+			var y = yspacing + thickness / 2;
+			if (x != 0 || y != 0) {
+				block = Border(x, y, block);
+			}
+			return calcMetrics(block, availableWidth, availableHeight);
+		case Shadow(block, distance, angle, color, alpha):
+			return calcMetrics(block, availableWidth, availableHeight);
 		case Background(color, block, alpha, roundRadius):
 			return calcMetrics(block, availableWidth, availableHeight);
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
