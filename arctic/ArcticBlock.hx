@@ -44,7 +44,7 @@ enum ArcticBlock {
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
 	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9.
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool);
+	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool, ?embeddedFont : Bool);
 
 	/// A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size
 	Picture(url : String, width : Float, height : Float, scaling : Float);

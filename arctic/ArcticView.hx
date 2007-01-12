@@ -376,7 +376,7 @@ class ArcticView {
 			var s = getSize(clip);
 			return { clip: clip, width: s.width, height: s.height };
 
-		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus) :
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont) :
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			if (construct) {
 				activeClips.push(clip);
@@ -388,6 +388,9 @@ class ArcticView {
 				} else {
 					var t : Dynamic = clip.getChildAt(0);
 					txtInput = t;
+				}
+				if (embeddedFont) {
+					txtInput.embedFonts = true;
 				}
 				txtInput.width = width;
 				txtInput.height = height;
@@ -401,6 +404,9 @@ class ArcticView {
 				}
 				txtInput.html = true;
 			#end
+				if (embeddedFont) {
+					txtInput.embedFonts = true;
+				}
 				txtInput.tabEnabled = true;
 				setSize(clip, width, height);
 				if (null != maxChars) {
@@ -410,7 +416,6 @@ class ArcticView {
 					txtInput.background = true;
 					txtInput.backgroundColor = bgColor;
 				}
-				txtInput.border = true;
 				if (construct) {
 					var validate = function() {
 						if (validator == null) {
@@ -1201,7 +1206,7 @@ class ArcticView {
 			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
 			m.growHeight = false;
 			return m;
-		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus):
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embedFont):
 			return { width : width, height : height, growWidth : false, growHeight : false };
 		case ColumnStack(columns):
 			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
