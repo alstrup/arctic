@@ -51,7 +51,14 @@ class ArcticView {
 	public var parent : MovieClip;
 	private var base : MovieClip;
 	private var useStageSize : Bool;
-    
+	
+	/// This resizes the given movieclip to make room for our GUI block minimumsize, plus some extra space
+	public function adjustToFit(p : MovieClip, extraWidth : Float, extraHeight : Float) : Void {
+		parent = p;
+		var w = calcMetrics(gui, 0, 0);
+		clipSize(p, w.width + extraWidth, w.height + extraHeight);
+	}
+	
 	/**
 	 * Builds the user interface on the movieclip given. If useStageSize is true
 	 * the user interface will automatically resize to the size of the stage.
@@ -62,6 +69,7 @@ class ArcticView {
 			stageSize(p);
 		}
 		parent = p;
+		
 		refresh();
 
 		if (useStageSize) {
@@ -1158,7 +1166,7 @@ class ArcticView {
 		return m;
 	}
 	
-	private function doCalcMetrics(c, availableWidth : Float, availableHeight : Float) {
+	private function doCalcMetrics(c : ArcticBlock, availableWidth : Float, availableHeight : Float) : Metrics {
 #end
 		var text = null;
 		switch (c) {
