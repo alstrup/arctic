@@ -246,20 +246,23 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);			
 			if (xspacing == null) xspacing = 0;
 			if (yspacing == null) yspacing = 0;
-			if (xspacing != 0 || yspacing != 0) {
-				block = Border(xspacing, yspacing, block);
-			}			
+			if (thickness == null) thickness = 0;
+			var x = xspacing + thickness;
+			var y = yspacing + thickness;
+			if (x != 0 || y != 0) {
+				block = Border(x, y, block);
+			}	
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (thickness != null && thickness != 0) {
+			if (thickness != 0) {
+				var delta = thickness / 2;
 				#if flash9
 					clip.graphics.clear();
 					clip.graphics.lineStyle(thickness, color, if (alpha != null) alpha / 100.0 else 1.0);
 				#else flash
 					clip.clear();
-					clip.lineStyle(thickness, color, alpha);
+					clip.lineStyle(thickness, color, if (alpha != null) alpha else 100);
 				#end
-				var delta = thickness / 2;
-				DrawUtils.drawRect(clip, -delta, -delta, child.width + 2 * delta, child.height + 2 * delta, roundRadius);
+				DrawUtils.drawRect(clip, delta, delta, child.width - thickness, child.height - thickness, roundRadius);
 			}
 			return { clip: clip, width: child.width, height: child.height };
 		
@@ -289,7 +292,7 @@ class ArcticView {
 			#end
 			return { clip: clip, width: child.width, height: child.height };
 
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
+		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
 			if (colors == null || colors.length == 0) {
@@ -311,9 +314,10 @@ class ArcticView {
 					#end
 				}
 			}
+			if (rotation == null) rotation = 0;
 			#if flash9
 				var matrix = new flash.geom.Matrix();
-				matrix.createGradientBox(child.width, child.height, 0, child.width * xOffset, child.height * yOffset);
+				matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
 				if (alpha != null) {
 					alphas = [];
 					for (a in alpha) {
@@ -330,7 +334,7 @@ class ArcticView {
 					alphas = alpha;
 				}
 				clip.clear();
-				matrix.createGradientBox(child.width, child.height, 0, child.width * xOffset, child.height * yOffset);
+				matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
 				clip.beginGradientFill(type, colors, alphas, ratios, matrix);
 				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 				clip.endFill();
@@ -1167,8 +1171,8 @@ class ArcticView {
 			if (xspacing == null) xspacing = 0;
 			if (yspacing == null) yspacing = 0;
 			if (thickness == null) thickness = 0;
-			var x = xspacing + thickness / 2;
-			var y = yspacing + thickness / 2;
+			var x = xspacing + thickness;
+			var y = yspacing + thickness;
 			if (x != 0 || y != 0) {
 				block = Border(x, y, block);
 			}
@@ -1177,7 +1181,7 @@ class ArcticView {
 			return calcMetrics(block, availableWidth, availableHeight);
 		case Background(color, block, alpha, roundRadius):
 			return calcMetrics(block, availableWidth, availableHeight);
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius):
+		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
 			return calcMetrics(block, availableWidth, availableHeight);
 		case Text(html, embeddedFont):
 			if (metricsCache.exists(html)) {

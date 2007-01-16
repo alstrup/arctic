@@ -28,8 +28,9 @@ enum ArcticBlock {
 	 * to put the center of the gradient in the top, right corner.
 	 * Alpha is an array of optional transparencies from 0 to 100.0. It has to have as many entries as the color array.
 	 * roundRadius > 0 makes the gradient rounded at the corners.
+	 * rotation - the amount to rotate, in radians (the default value is 0).
 	 */ 
-	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Float);
+	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Float, ?rotation: Float);
 
 	/// Add some space around the block
 	Border(x : Float, y : Float, block : ArcticBlock);
