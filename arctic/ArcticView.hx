@@ -287,16 +287,21 @@ class ArcticView {
 		case Background(color, block, alpha, roundRadius):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
+			// a fill will not be created if the color is equal to null
 			#if flash9
 				clip.graphics.clear();
-				clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
-				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-				clip.graphics.endFill();
+				if (color != null) {
+					clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
+					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+					clip.graphics.endFill();
+				}
 			#else flash
 				clip.clear();
-				clip.beginFill(color, if (alpha != null) alpha else 100.0);
-				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-				clip.endFill();
+				if (color != null) {
+					clip.beginFill(color, if (alpha != null) alpha else 100.0);
+					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+					clip.endFill();
+				}
 			#end
 			return { clip: clip, width: child.width, height: child.height };
 
@@ -547,7 +552,7 @@ class ArcticView {
 				if (construct) {
 					//clip.onRelease = action;
 					clip.onMouseUp = function () {
-						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
+						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
 							action();
 						}
 					}
@@ -602,7 +607,7 @@ class ArcticView {
 						onInit(setState);
 					}
 					clip.onMouseDown = function() {
-						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
+						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
 							setState(!sel.clip._visible);
 							onChange(sel.clip._visible);
 						}
@@ -1530,6 +1535,29 @@ class ArcticView {
 				flash.Mouse.hide();
 			}
 		#end
+	}
+	
+	/// Returns true when the clip is visible and enabled
+	static function isActive(clip: MovieClip): Bool {
+		if (clip == null) return false;
+		
+		var active = true;
+		#if flash9
+			active = clip.visible && clip.enabled;
+			var parent = clip.parent;
+			while (null != parent && active) {
+				active = active && parent.visible && parent.mouseEnabled;
+				parent = parent.parent;
+			}	
+		#else flash
+			var parent = clip;
+			while (null != parent && active) {
+				active = active && parent._visible && parent.enabled;
+				parent = parent._parent;
+			}
+		#end
+		
+		return active;
 	}
 	
 }
