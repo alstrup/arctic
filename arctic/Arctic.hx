@@ -164,6 +164,12 @@ class Arctic {
 			}
 		};
 		var onSelectHandler = function (index : Int) : Void {
+			if (index == null) {
+				// remove selection
+				Lambda.iter(stateChooser.iterator(), function(f) { f(false); } );
+				currentRadio = null;
+				return;
+			}
 			for (i in 0...stateChooser.length) {
 				stateChooser[i](i == index);
 			}
