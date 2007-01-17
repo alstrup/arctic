@@ -15,7 +15,7 @@
 -cp ..
 --flash-strict
 </output>
-  <output name="HelloWorld" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-lib arctic</output>
-  <output name="HelloWorld flash9" mode="swf9" out="HelloWorld9.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-lib arctic</output>
+  <output name="HelloWorld" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-cp ..</output>
+  <output name="HelloWorld flash9" mode="swf9" out="HelloWorld9.swf" class="HelloWorld" lib="" cmd="" main="True" debug="False">-cp ..</output>
   <files path="/" />
 </haxe>

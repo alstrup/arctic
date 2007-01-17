@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.5.2">Support embedded fonts in TextInput block.</version>
+    <version name="0.5.3">Frame size bug fixed. Add new method to resize a movieclip to the size of a block in an ArcticView</version>
 </project>
