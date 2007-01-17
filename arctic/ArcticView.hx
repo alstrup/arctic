@@ -56,7 +56,7 @@ class ArcticView {
 	public function adjustToFit(p : MovieClip, extraWidth : Float, extraHeight : Float) : Void {
 		parent = p;
 		var w = calcMetrics(gui, 0, 0);
-		clipSize(p, w.width + extraWidth, w.height + extraHeight);
+		setSize(p, w.width + extraWidth, w.height + extraHeight);
 	}
 	
 	/**
