@@ -43,11 +43,11 @@
 # HelloWorld
 -swf HelloWorld.swf
 -main HelloWorld
--lib arctic
+-cp ..
 
 --next
 # HelloWorld flash9
 -swf HelloWorld9.swf
 -swf-version 9
 -main HelloWorld
--lib arctic
+-cp ..
