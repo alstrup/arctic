@@ -606,7 +606,7 @@ class ArcticView {
 					if (null != onInit) {
 						onInit(setState);
 					}
-					clip.onMouseDown = function() {
+					clip.onMouseUp = function() {
 						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
 							setState(!sel.clip._visible);
 							onChange(sel.clip._visible);
