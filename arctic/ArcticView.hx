@@ -752,7 +752,7 @@ class ArcticView {
 				ensureY = y;
 			}
 			
-			if (y > availableHeight) {
+			if (y > availableHeight && availableHeight >= 10) {
 				// Scrollbar
 				w += 12;
 				Scrollbar.drawScrollBar(clip, child, w, availableHeight, ensureY);
@@ -1251,7 +1251,8 @@ class ArcticView {
 				m.growHeight = m.growHeight || cm.growHeight;
 			}
 			// If we are higher, a scrollbar is added, so the resulting height is never more than availableHeight
-			if (m.height > availableHeight) {
+			// except if there is no height available for the scrollbar
+			if (m.height > availableHeight && availableHeight >= 10) {
 				m.width += 12;
 			}
 			return m;
