@@ -48,7 +48,7 @@ enum ArcticBlock {
 	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool, ?embeddedFont : Bool);
 
 	/// A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size
-	Picture(url : String, width : Float, height : Float, scaling : Float);
+	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Bool);
 
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
@@ -179,5 +179,5 @@ enum ArcticBlock {
 	/**
 	 * Drops a shadow for the given block 
 	 */
-	Shadow(block: ArcticBlock, ?distance: Int, ?angle: Int, ?color: Int, ?alpha: Float);
+	Shadow(block: ArcticBlock, distance: Int, angle: Int, color: Int, alpha: Float);
 }

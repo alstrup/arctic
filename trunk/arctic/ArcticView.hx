@@ -493,9 +493,10 @@ class ArcticView {
 			var s = getSize(clip);
 			return { clip: clip, width: s.width, height: s.height };
 
-		case Picture(url, w, h, scaling):
+		case Picture(url, w, h, scaling, resource):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			#if flash9
+				// TODO: Resource version probably does not work
 				if (construct) {
 					var loader = new flash.display.Loader();
 					var request = new flash.net.URLRequest(url);
@@ -506,13 +507,25 @@ class ArcticView {
 				clip.scaleX = s;
 				clip.scaleY = s;
 			#else flash
-				if (construct) {
-					var loader = new flash.MovieClipLoader();
-					var r = loader.loadClip(url, clip);
-				}
 				var s = scaling * 100.0;
-				clip._xscale = s;
-				clip._yscale = s;
+				if (resource) {
+					var child;
+					if (construct) {
+						child = clip.attachMovie(url, "picture", clip.getNextHighestDepth());
+						Reflect.setField(clip, "picture", child);
+					} else {
+						child = Reflect.field(clip, "picture");
+					}
+					child._xscale = s;
+					child._yscale = s;
+				} else {
+					if (construct) {
+						var loader = new flash.MovieClipLoader();
+						var r = loader.loadClip(url, clip);
+					}
+					clip._xscale = s;
+					clip._yscale = s;
+				}
 			#end
 			setSize(clip, w, h);
 			return { clip: clip, width: w, height: h };
@@ -1203,7 +1216,7 @@ class ArcticView {
 			}
 			text = html;
 			// Fall-through to creation
-		case Picture(url, w, h, scaling):
+		case Picture(url, w, h, scaling, resource):
 			return { width : w, height : h, growWidth : false, growHeight : false };
 		case Button(block, hover, action):
 			return calcMetrics(block, availableWidth, availableHeight);
