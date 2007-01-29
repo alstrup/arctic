@@ -89,7 +89,7 @@ class Arctic {
 
 		// Callback fn for the CustomBlock to draw Radio button
 		var calcMetrics = function(data, availableWidth, availableHeight) {
-			return { width: 13, height: 13, growWidth : false, growHeight : false };
+			return { width: 13.0, height: 13.0, growWidth : false, growHeight : false };
 		}
 		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var size = 12;
@@ -98,7 +98,7 @@ class Arctic {
 				size -= 4;
 				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
 			}
-			return { clip: parentMc, width: 13, height: 13 };
+			return { clip: parentMc, width: 13.0, height: 13.0 };
 		}
 
 		var notSelectedBlock = ColumnStack( [ CustomBlock(false, calcMetrics, build), block ] );
@@ -117,7 +117,7 @@ class Arctic {
 		}
 		// Callback fn for the CustomBlock to draw Radio button
 		var calcMetrics = function(data, availableWidth, availableHeight) {
-			return { width: 13, height: 13, growWidth : false, growHeight : false };
+			return { width: 13.0, height: 13.0, growWidth : false, growHeight : false };
 		}
 		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var radius = 6;
@@ -125,7 +125,7 @@ class Arctic {
 			if (state) {
 				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
 			}
-			return { clip: parentMc, width: 13, height: 13 };
+			return { clip: parentMc, width: 13.0, height: 13.0 };
 		}
 		
 		var entries : Array<{ selected: ArcticBlock, unselected: ArcticBlock, value : String }> = [];
@@ -166,7 +166,7 @@ class Arctic {
 		var onSelectHandler = function (index : Int) : Void {
 			if (index == null) {
 				// remove selection
-				Lambda.iter(stateChooser.iterator(), function(f) { f(false); } );
+				Lambda.iter(stateChooser, function(f) { f(false); } );
 				currentRadio = null;
 				return;
 			}
