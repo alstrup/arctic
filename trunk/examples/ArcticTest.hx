@@ -139,7 +139,7 @@ class ArcticTest {
 	public function customBlock() {
 		// A custom block needs two functions. One to tell Arctic the size and desired resizing behaviour:
 		var calcMetrics = function(data : Int, availableWidth, availableHeight) : Metrics {
-			return { width: 100, height : 100, growHeight : false, growWidth : false };
+			return { width: 100.0, height : 100.0, growHeight : false, growWidth : false };
 		}
 		// And another one which should paint & construct the block when ready
 		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {

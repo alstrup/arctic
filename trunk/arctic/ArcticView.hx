@@ -45,6 +45,9 @@ class ArcticView {
 		if (metricsCache == null) {
 			metricsCache = new Hash<{ width: Float, height : Float } >();
 		}
+		#if flash9
+			stageEventHandlers = [];
+		#end
 	}
 
 	public var gui : ArcticBlock;
@@ -78,8 +81,7 @@ class ArcticView {
 				p.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
 				p.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
-				var resizeHandler = function( event : flash.events.Event ) { t.onResize();}; 
-				addStageEventListener(p.stage, flash.events.Event.RESIZE, resizeHandler ); 
+				addStageEventListener(p.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
 			#else flash
 				flash.Stage.addListener(this);
 				flash.Stage.scaleMode = "noScale";
@@ -106,6 +108,7 @@ class ArcticView {
 			for (e in stageEventHandlers) {
 				e.obj.removeEventListener(e.event, e.handler);
 			}
+			stageEventHandlers = [];
 		#end
 		if (useStageSize) {
 			#if flash9
@@ -144,10 +147,6 @@ class ArcticView {
 			size = getSize(parent);
 		}
 
-		#if flash9
-			stageEventHandlers = [];
-		#end
-		
 		var result = build(gui, parent, size.width, size.height, true, 0);
 		base = result.clip;
 	}
@@ -225,9 +224,11 @@ class ArcticView {
 	
 	private function doBuild(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
-#end					
-
+#end
 //		trace("build " + availableWidth + "," + availableHeight + ": " + gui + " (might be called from calcMetrics!)");
+		if (this == null) {
+			return { clip: null, width: 0.0, height: 0.0 };
+		}
 		switch (gui) {
 		case Border(x, y, block):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
@@ -1517,7 +1518,7 @@ class ArcticView {
 	
 	static public function getStageSize(clip : MovieClip) : { width : Float, height : Float } {
 		#if flash9
-			return { width: clip.stage.stageWidth, height: clip.stage.stageHeight };
+			return { width: cast(clip.stage.stageWidth, Float), height: cast(clip.stage.stageHeight, Float) };
 		#else flash
 			return { width: flash.Stage.width, height: flash.Stage.height };
 		#end
