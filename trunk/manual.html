@@ -33,10 +33,10 @@ class HelloWorld {
 		// To make a screen, first build the data structure representing the content
 		var me = this;
 		<font color="red">var helloWorld = Arctic.makeSimpleButton(&quot;Hello world&quot;,  function() { me.remove(); }, 50);</font>
-		// Then construct the arctic object
-		arcticView = new ArcticView( helloWorld );
-		// And finally display on the given movieclip
-		var root = arcticView.display(parent, true);
+		// Then construct the arctic object on the given movieclip
+		arcticView = new ArcticView( helloWorld, parent );
+		// And finally display 
+		var root = arcticView.display(true);
 	}
 	public function remove() {
 		// Clear out the screen
