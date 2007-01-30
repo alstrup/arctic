@@ -32,10 +32,10 @@ class DynamicExample  {
 			] ) ) );
 
 		// Then construct the arctic object
-		arcticView = new ArcticView( screen );
+		arcticView = new ArcticView( screen, parent );
 		// And finally display on the given movieclip
 //		ArcticView.setSize(parent, 100, 100);
-		var root = arcticView.display(parent, true);
+		var root = arcticView.display(true);
 	}
 	
 	private function addRow() {
@@ -63,8 +63,8 @@ class DynamicExample  {
 		]) ) );
 		
 		// Then construct the arctic object
-		arcticView = new ArcticView( screen );
-		var root = arcticView.display(parent, true);
+		arcticView = new ArcticView( screen, parent );
+		var root = arcticView.display(true);
 	}
 	
 	private var rows : Array<String>;

@@ -13,9 +13,9 @@ class HelloWorld {
 		var helloWorld = Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50);
 
 		// Then construct the arctic object
-		arcticView = new ArcticView( helloWorld );
+		arcticView = new ArcticView( helloWorld, parent );
 		// And finally display on the given movieclip
-		var root = arcticView.display(parent, true);
+		var root = arcticView.display(true);
 	}
 	public function remove() {
 		// Clear out the screen

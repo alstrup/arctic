@@ -68,12 +68,12 @@ class Bugs {
 			screen = Text("The end");
 		}
 		 // Then construct the arctic object
-		arcticView = new ArcticView( screen );
+		arcticView = new ArcticView( screen, parent );
 		if (!fullsize) {
-			arcticView.adjustToFit(parent, 0, 0);
+			arcticView.adjustToFit(0, 0);
 		}
 		// And finally display on the given movieclip
-		var root = arcticView.display(parent, fullsize);
+		var root = arcticView.display(fullsize);
 		++count;
 	}
 	public var arcticView : ArcticView;
