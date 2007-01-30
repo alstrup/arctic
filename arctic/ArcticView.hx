@@ -33,12 +33,19 @@ typedef BlockInfo = {
  * The main class in Arctic which builds a user interface from an ArcticBlock.
  * Construct the ArcticBlock representing your user interface and call
  * display() with a movieclip to construct it.
+ * Building the user interface is a done in a depth first traversal of the
+ * tree of blocks - see build. Some blocks might need to know the size of
+ * their children to make layout themselves, which calcMetrics can find out.
  */
 class ArcticView {
 
-	public function new(gui0 : ArcticBlock) {
+	/**
+	* This prepares a user interface view of the given block on the given movieclip.
+	* Nothing is displayed. Call display() to make the user interface visible.
+	*/ 
+	public function new(gui0 : ArcticBlock, parent0 : MovieClip) {
 		gui = gui0;
-		parent = null;
+		parent = parent0;
 		base = null;
 		useStageSize = false;
 		updates = new Hash<ArcticBlock>();
@@ -50,38 +57,43 @@ class ArcticView {
 		#end
 	}
 
+	/// This is the block this view presents
 	public var gui : ArcticBlock;
+	/// The parent MovieClip which we put the view on
 	public var parent : MovieClip;
+	/// The root MovieClip we built for the view
 	private var base : MovieClip;
+	/// Whether or not we should track resizing of the Flash window
 	private var useStageSize : Bool;
 	
-	/// This resizes the given movieclip to make room for our GUI block minimumsize, plus some extra space
-	public function adjustToFit(p : MovieClip, extraWidth : Float, extraHeight : Float) : Void {
-		parent = p;
+	/// This resizes the hosting movieclip to make room for our GUI block minimumsize, plus some extra space
+	public function adjustToFit(extraWidth : Float, extraHeight : Float) : Void {
 		var w = calcMetrics(gui, 0, 0);
-		setSize(p, w.width + extraWidth, w.height + extraHeight);
+		setSize(parent, w.width + extraWidth, w.height + extraHeight);
 	}
 	
 	/**
-	 * Builds the user interface on the movieclip given. If useStageSize is true
-	 * the user interface will automatically resize to the size of the stage.
+	 * Builds the user interface. If useStageSize is true the user interface will 
+	 * automatically resize to the size of the stage. If not, the user interface will
+	 * be sized according to the size of the parent movieclip. You can use
+	 * adjustToFit() to resize the parent to the minimum space required for the
+	 * block.
 	 */
-	public function display(p : MovieClip, useStageSize0 : Bool) : MovieClip {
+	public function display(useStageSize0 : Bool) : MovieClip {
 		useStageSize = useStageSize0;
 		if (useStageSize) {
-			stageSize(p);
+			stageSize(parent);
 		}
-		parent = p;
 		
 		refresh();
 
 		if (useStageSize) {
 			// Make sure we follow screen resizes
 			#if flash9
-				p.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
-				p.stage.align = flash.display.StageAlign.TOP_LEFT;
+				parent.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
+				parent.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
-				addStageEventListener(p.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
+				addStageEventListener(parent.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
 			#else flash
 				flash.Stage.addListener(this);
 				flash.Stage.scaleMode = "noScale";
@@ -92,6 +104,7 @@ class ArcticView {
 	}
 
 	#if flash9
+	/// We record all the event handlers we register so that we can clean them up again when destroyed
 	private var stageEventHandlers : Array<{ obj: flash.events.EventDispatcher, event : String, handler : Dynamic } >;
 	#end
 	
@@ -118,12 +131,15 @@ class ArcticView {
 		}
 	}
 	
+	/// Our resize handler is called by Flash when the Flash movie is resized
 	public function onResize() {
 		if (true) {
+			/// This is smart refresh, where we reuse MovieClips to reduce flicker
 			var stage = getStageSize(parent);
 			var result = build(gui, parent, stage.width, stage.height, false, 0);
 			base = result.clip;
 		} else {
+			/// This is dumb refresh, where we rebuilt everything from scratch
 			if (base != null) {
 				remove();
 			}
@@ -132,6 +148,10 @@ class ArcticView {
 		}
 	}
 
+	/**
+	* This will rebuilt the user interface from scratch. Useful if you have updated
+	* the GUI using update() below.
+	*/ 
 	public function refresh() {
 		if (base != null) {
 			remove();
@@ -161,17 +181,19 @@ class ArcticView {
 	}
 	
 	/**
-	* Get access to the raw movieclip for the named element.
-	* Notice! This movieclip is destroyed on resize, and thus you have to
-	* do call this method again to do the special stuff you do again.
+	* Get access to the raw movieclip for the named block.
+	* Notice! This movieclip is destroyed on refresh, and thus you have to
+	* do call this method again to do the special stuff you do again
+	* on the new clip for the named block.
 	*/
 	public function getRawMovieClip(id : String) : ArcticMovieClip {
 		return idMovieClip.get(id);
 	}
 	
 	/**
-	 * Removes the visual element - notice, however that if usestage is true, the view is reconstructed on resize.
-	 * Use destroy() if you want to get rid of this display for good
+	 * Removes the visual element - notice, however that if useStage is true, 
+	 * the view is reconstructed on resize. Use destroy() if you want to get 
+	 * rid of this display for good
 	 */
 	private function remove() {
 		if (base == null) {
@@ -199,9 +221,19 @@ class ArcticView {
 	/// We record updates of blocks here.
 	private var updates : Hash<ArcticBlock>;
 	
-	/// And the movieclips for ids here
+	/// And the movieclips for named ids here
 	private var idMovieClip : Hash<ArcticMovieClip>;
-	
+
+	/**
+	 * This constructs or updates all the movieclips used to display the given block on the
+	 * given movieclip. It will potentially fill out the available space passed. The
+	 * childNo parameter is bookkeeping to who which sibling MovieClip corresponds to the
+	 * root movieclip.
+	 * We return the resulting root clip, along with the size of it. (We can not rely
+	 * on Flash to tell the size, especially when scrollbars using Flash scrollRect
+	 * feature are involved).
+	 * The algorithm is a simple recursive depth first traversal of the blocks.
+	 */
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
 #if false
@@ -227,6 +259,7 @@ class ArcticView {
 #end
 //		trace("build " + availableWidth + "," + availableHeight + ": " + gui + " (might be called from calcMetrics!)");
 		if (this == null) {
+			// This should not happen, but just to be safe
 			return { clip: null, width: 0.0, height: 0.0 };
 		}
 		switch (gui) {
@@ -279,6 +312,7 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
 			if (construct) {
+				// TODO: We do not support changing of Shadow parameters in an update
 				var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
 				// we must use a temporary array (see documentation)
 				var _filters = clip.filters;
@@ -312,7 +346,7 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
 			if (colors == null || colors.length == 0) {
-				// Hm, this must be a mistake, but what the heck
+				// Hm, this must be a mistake, but better safe than sorry
 				return { clip: clip, width: child.width, height: child.height };
 			}
 			var ratios = [];
@@ -1183,6 +1217,15 @@ class ArcticView {
 		return null;
 	}
 
+	/**
+	 * This calculates the size of the given blocks, when the given space is available
+	 * for layout.
+	 * Special case: If availableWidth & availableHeight is 0, we calculate the minimum
+	 * size required to display the block (i.e. without using scrollbars).
+	 * For some blocks (like Text), we find the size of the block by temporarily constructing it,
+	 * because Flash does not provide reliable APIs for getting the size in other ways.
+	 * We cache the metrics for Text blocks, though.
+	 */
 	private function calcMetrics(c : ArcticBlock, availableWidth : Float, availableHeight : Float) : Metrics {
 #if false
 		var m = doCalcMetrics(c, availableWidth, availableHeight);
@@ -1379,11 +1422,11 @@ class ArcticView {
 		return m;
 	}
 	
+	/// For text elements, we cache the sizes
 	static private var metricsCache : Hash< { width: Float, height : Float } >;
 
 	/**
 	 * Creates a clip (if construct is true) as childNo, otherwise gets existing movieclip at that point.
-	 * If active is true, we also record any constructed clip in the array of active movieclips.
 	 */ 
 	private function getOrMakeClip(p : MovieClip, construct : Bool, childNo : Int) : MovieClip {
 		if (construct) {
@@ -1422,10 +1465,12 @@ class ArcticView {
 		}
 	}
 
+	/// Get to the book keeping details of the given clip
 	private function getBlockInfo(clip : MovieClip) : BlockInfo {
 		return Reflect.field(clip, "arcticInfo");
 	}
 	
+	/// Set the book keeping details for this clip
 	private function setBlockInfo(clip : MovieClip, info : BlockInfo) {
 		Reflect.setField(clip, "arcticInfo", info);
 	}
@@ -1456,7 +1501,6 @@ class ArcticView {
 		return null;
 	}
 	
-	
 	#if flash9
 	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
 		d.addEventListener(event, handler);
@@ -1467,6 +1511,7 @@ class ArcticView {
 	/**
 	 * A helper function which forces a movieclip to have at least a certain size.
 	 * Notice, that this will never shrink a movieclip. Use clipSize for that.
+	 * Notice also that it clears out any graphics that might exist in the clip.
 	 */
 	static public function setSize(clip : MovieClip, width : Float, height : Float) {
 		#if flash9
@@ -1579,5 +1624,4 @@ class ArcticView {
 		
 		return active;
 	}
-	
 }

@@ -24,9 +24,9 @@ class ArcticTest {
 		var me = this;
 		var helloWorld = Arctic.makeSimpleButton("Hello world",  function() { me.showHelloWorld2(); }, 50);
 		// Then construct the arctic object
-		arcticView = new ArcticView( helloWorld );
+		arcticView = new ArcticView( helloWorld, parent );
 		// And finally display on the given movieclip
-		var root = arcticView.display(parent, true);
+		var root = arcticView.display(true);
 	}
 	
 	public function showHelloWorld2() {
@@ -54,9 +54,9 @@ class ArcticTest {
 							] )
 						);
 		// Then construct the arctic object
-		arcticView = new ArcticView(helloWorld);
+		arcticView = new ArcticView(helloWorld, parent);
 		// And finally display on the given movieclip
-		var root = arcticView.display(parent, true);
+		var root = arcticView.display(true);
 	}
 	
 	public function nextWorld() {
@@ -122,8 +122,8 @@ class ArcticTest {
 			);
 		radioChoice = 0;
 
-		arcticView = new ArcticView(gui);
-		var root = arcticView.display(parent, true);
+		arcticView = new ArcticView(gui, parent);
+		var root = arcticView.display(true);
 	}
 
 	public function screen1next() {
@@ -175,8 +175,8 @@ class ArcticTest {
 						)
 					);
 			
-		arcticView = new ArcticView(custom);
-		var root = arcticView.display(parent, true);
+		arcticView = new ArcticView(custom, parent);
+		var root = arcticView.display(true);
 	}
 	
 	public function draggable() {
@@ -190,8 +190,8 @@ class ArcticTest {
 					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), 0, 200 ) ),
 					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere") )
 				] );
-		arcticView = new ArcticView(drag);
-		var root = arcticView.display(parent, true);
+		arcticView = new ArcticView(drag, parent);
+		var root = arcticView.display(true);
 	}
 
 	public var arcticView : ArcticView;
