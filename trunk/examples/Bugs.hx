@@ -67,6 +67,40 @@ class Bugs {
 			case 6:
 			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
 			screen = LineStack( [ Arctic.makeText("Text", 200), Arctic.makeSimpleButton( "Next bug", next ) ] );
+			case 7:
+			screen =
+			Border(10,10,
+				Background( 0x8888ff,
+						ConstrainWidth(500,500,
+							LineStack( [
+								Text("<font face='arial' size='40'>Visual settings</font>"),
+								Background(0xAAAAFF,
+									ColumnStack( [
+										Arctic.makeTooltip(
+											Arctic.makeCheckbox( Fixed(0,0), function(state : Bool) { trace(state); } ),
+											"Enable this feature (disable to use default)"),
+										Text("<font face='arial' size='20'>Logo banner: </font>"),
+										Filler,
+										Id("LogoBannerInput",TextInput("", 150, 20, null, null, 100, false, 0xFFFFFF, false))
+									] )
+								),
+								Background(0xCCCCFF,
+									ColumnStack( [
+										Arctic.makeTooltip(
+											Arctic.makeCheckbox( Fixed(0,0)),
+											"Enable this feature (disable to use default)"),
+										Text("<font face='arial' size='20'>Logo banner: </font>"),
+										Filler,
+										TextInput("", 150, 20, null, null, 150, false, 0xFFFFFF, false)
+									] )
+								),
+								Filler
+							] )
+						),
+						100,20
+				)
+			);
+			
 			default:
 			screen = Text("The end");
 		}
