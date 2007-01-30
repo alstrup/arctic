@@ -1,6 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.5.8">Compatible with haxe 1.11. Fix event handler cleanup</version>
+    <version name="0.5.9">Re-enable smart refresh</version>
 </project>
-
