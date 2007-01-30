@@ -805,7 +805,7 @@ class ArcticView {
 			if (y > availableHeight && availableHeight >= 10) {
 				// Scrollbar
 				w += 12;
-				Scrollbar.drawScrollBar(clip, child, w, availableHeight, ensureY);
+				Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
 				y = availableHeight;
 			} else {
 				if (!construct) {
@@ -886,7 +886,7 @@ class ArcticView {
 		case ScrollBar(block, availableWidth, availableHeight):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
             var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-            Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, 0);
+            Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, child.height, 0);
             return { clip: clip, width: availableWidth, height: availableHeight };
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):

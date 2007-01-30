@@ -11,9 +11,7 @@ import flash.Mouse;
 
 typedef ScrollMetrics = { startX : Float, startY : Float, 
                          endY : Float, scrollHeight : Float, toScroll : Float, 
-                         clipHeight : Float }
-
-
+                         clipHeight : Float, dragHeight : Float }
 
 class Scrollbar {
 
@@ -27,9 +25,9 @@ class Scrollbar {
     // rendered.
     // This can be seperated out and written as a seperate class - ideally it should use ArcticBlocks to construct itself
     public static function drawScrollBar(parent : MovieClip, clip : MovieClip, availableWidth : Float,
-                                                         availableHeight : Float, ensureYVisible : Float) {
+                                                         availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
         #if flash9 
-            drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight, ensureYVisible);
+            drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight, realHeight, ensureYVisible);
         #else flash
 			var scrollBar;
 			
@@ -73,28 +71,29 @@ class Scrollbar {
             DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 
                                                                       0x000000);
             scrollOutline._y = upperChild._height;
-
+			
 			// The slider hand
             d = scrollBar.getNextHighestDepth();
             var scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
             var scrollHandHeight = 10.0;
-            if ((clip._height - availableHeight) < scrollHeight) {
-                scrollHandHeight = scrollHeight - (clip._height - availableHeight);
+            if ((realHeight - availableHeight) < scrollHeight) {
+                scrollHandHeight = scrollHeight - (realHeight - availableHeight);
             }
-            var dragHeight = scrollHeight - scrollHandHeight + 10;
-
             DrawUtils.drawRectangle(scrollHand, 0, 0, 6, scrollHandHeight - 0.5,
                                                             0, 
                                                             0x000000, 0x000000);
-  
-            var scrollMet = { startX : 0.0, startY : 0.0, endY : 0.0, 
-                            scrollHeight : 0.0, toScroll : 0.0, clipHeight : 0.0 };
-            scrollMet.startX = 2;
-            scrollMet.startY = upperChild._height + 0.5;
-            scrollMet.scrollHeight = scrollHeight - scrollHandHeight - 1;
-            scrollMet.toScroll = ( (clip._height - availableHeight) / scrollMet.scrollHeight);
-            scrollMet.clipHeight = clip._height;
+            var scrollMet = { 
+					startX : 2.0, 
+					startY : upperChild._height + 0.5, 
+					endY : 0.0, 
+					scrollHeight : scrollHeight - scrollHandHeight - 1, 
+					toScroll : 0.0, 
+					clipHeight : realHeight, 
+					dragHeight : scrollHeight - scrollHandHeight + 10
+			};
+			scrollMet.toScroll = ( (realHeight - availableHeight) / scrollMet.scrollHeight);
             scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
+			Reflect.setField(clip, "scrollmet", scrollMet);
             scrollHand._y = scrollMet.startY;
             scrollHand._x = scrollMet.startX;
 
@@ -130,14 +129,16 @@ class Scrollbar {
                 var inUpperChild = upperChild.hitTest(flash.Lib.current._xmouse, 
                                                   flash.Lib.current._ymouse, false);
 
+				var scrollMet : ScrollMetrics = Reflect.field(clip, "scrollmet");
+												  
                 if (mouseInside) {
-                    scrollHand.startDrag(false , scrollMet.startX , 
+                    scrollHand.startDrag(false, scrollMet.startX , 
                                                     scrollMet.startY ,
                                                     scrollMet.startX , 
-                                                    dragHeight );
+                                                    scrollMet.dragHeight );
                     dragged = true;
                     Reflect.setField(Bool, "dragging", true);
-                    scrollTimer(clip, scrollHand, clipRect, scrollMet);
+                    scrollTimer(clip, scrollHand, clipRect);
                 } else if (inScrollOutline) {
                     var scrollToY = flash.Lib.current._ymouse;
                     scrollToY = scrollBar._ymouse;
@@ -172,7 +173,7 @@ class Scrollbar {
 
             scrollBar._x = availableWidth - 11;
             scrollBar._y = clip._y;
-            moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
+            moveToY(clip, scrollHand, clipRect, ensureYVisible);
             
             var mouseWheelListener = { 
 					onMouseDown : function() {},
@@ -217,11 +218,12 @@ class Scrollbar {
 
     #if flash9
        static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, 
-                            rect : Rectangle, scrollMet : ScrollMetrics) {          
+                            rect : Rectangle) {          
     #else flash
        static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip, 
-                        rect : Rectangle<Float>, scrollMet : ScrollMetrics) {
+                        rect : Rectangle<Float>) {
     #end
+			var scrollMet = Reflect.field(clip, "scrollmet");
             var interval = new haxe.Timer(100);                
             interval.run = function () {
                 var dragged = Reflect.field(Bool, "dragging");
@@ -340,13 +342,12 @@ class Scrollbar {
 
     #if flash9
         static private function moveToY(clip : MovieClip, scrollHand : MovieClip, 
-                          rect : Rectangle , scrollMet : ScrollMetrics,
-                                                      ensureYVisible : Float ) {
+                          rect : Rectangle, ensureYVisible : Float ) {
     #else flash
         static private function moveToY(clip : MovieClip, scrollHand : MovieClip, 
-                          rect : Rectangle < Float >, scrollMet : ScrollMetrics,
-                                                      ensureYVisible : Float ) {
+                          rect : Rectangle < Float >, ensureYVisible : Float ) {
     #end
+			var scrollMet = Reflect.field(clip, "scrollmet");
             var visibleY = rect.y + rect.height;
             var moveToY = rect.y;
             if ( (ensureYVisible >= rect.y) && (ensureYVisible <= visibleY) ) {
@@ -377,7 +378,7 @@ class Scrollbar {
 		}
 	
         private static function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
-                                                         availableHeight : Float, ensureYVisible : Float) {
+                                                         availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
 			var scrollBar : MovieClip;
 			var upperChild : MovieClip;
 			var scrollOutline : MovieClip;
@@ -409,9 +410,9 @@ class Scrollbar {
 				scrollBar.addChild(lowerChild);
 				construct = true;
 			}
-            var clipRect = new Rectangle(0, 0 , availableWidth, availableHeight);
-            clip.scrollRect = clipRect;
-            parent.scrollRect = clipRect;
+            var clipRectangle = new Rectangle(0, 0 , availableWidth, availableHeight);
+            clip.scrollRect = clipRectangle;
+            parent.scrollRect = clipRectangle;
             var squareHeight = 10;
 
 			var height =  7;
@@ -435,41 +436,44 @@ class Scrollbar {
 
 			scrollOutline.graphics.clear();
             DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 
-                                                          0x000000,0x000000,0);
+                                                          0x000000, 0x000000,0);
 
             scrollOutline.y = upperChild.height;
 
             var scrollHandHeight = 10.0;
 
-            if ((clip.height - availableHeight) < scrollHeight) {
-                scrollHandHeight = scrollHeight - (clip.height - availableHeight);
+            if ((realHeight - availableHeight) < scrollHeight) {
+                scrollHandHeight = scrollHeight - (realHeight - availableHeight);
             }
-            var dragHeight = scrollHeight - scrollHandHeight + 10;
 
 			scrollHand.graphics.clear();
             DrawUtils.drawRectangle(scrollHand, 0, 0, 6, scrollHandHeight - 0.5,
                                                             0, 
                                                             0x000000, 0x000000);
-  
-            var scrollMet = { startX : 0.0, startY : 0.0, endY : 0.0, 
-                            scrollHeight : 0.0, toScroll : 0.0, clipHeight : 0.0 };
-            scrollMet.startX = 2;
-            scrollMet.startY = upperChild.height + 0.5;
-            scrollMet.scrollHeight = scrollHeight - scrollHandHeight - 1;
-            scrollMet.toScroll = ( (clip.height - availableHeight) / scrollMet.scrollHeight);
-            scrollMet.clipHeight = clip.height;
-            scrollMet.endY = scrollMet.startY + scrollMet.scrollHeight - 0.5;
-            scrollHand.y = scrollMet.startY;
-            scrollHand.x = scrollMet.startX;
+            var scrollMetrics = { 
+					startX : 2.0, 
+					startY : upperChild.height + 0.5, 
+					endY : 0.0, 
+					scrollHeight : scrollHeight - scrollHandHeight - 1, 
+					toScroll : 0.0,
+					clipHeight : realHeight, 
+					dragHeight : scrollHeight - scrollHandHeight + 10 
+			};
+			scrollMetrics.toScroll = ( (realHeight - availableHeight) / scrollMetrics.scrollHeight);
+            scrollMetrics.endY = scrollMetrics.startY + scrollMetrics.scrollHeight - 0.5;
+			
+			Reflect.setField(clip, "scrollmet", scrollMetrics);
+			
+            scrollHand.y = scrollMetrics.startY;
+            scrollHand.x = scrollMetrics.startX;
 
-
-            //Drawing lower white square 
+            // Drawing lower white square 
 			lowerChild.graphics.clear();
             DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
                                                            0x000000, 0x000000 );
             
             height = 3;
-            //Drawing lower scrollbar triangle
+            // Drawing lower scrollbar triangle
             lowerChild.graphics.beginFill(0xFFFFFF);
             lowerChild.graphics.moveTo(2 , height );
             lowerChild.graphics.lineTo(2, height );
@@ -483,13 +487,14 @@ class Scrollbar {
 				scrollHand.addEventListener(
 					flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) {
-						scrollHand.startDrag(false , new Rectangle(
+						var scrollMet = Reflect.field(clip, "scrollmet");
+						scrollHand.startDrag(false, new Rectangle(
 														scrollMet.startX , 
 														scrollMet.startY ,
 																	   0 , 
-															dragHeight) );
+														scrollMet.dragHeight) );
 						Reflect.setField(Bool, "dragging", true);
-						scrollTimer(clip, scrollHand, clipRect, scrollMet);
+						scrollTimer(clip, scrollHand, clip.scrollRect);
 					 } ); 
 
 					var mouseUp = function (s) {
@@ -508,8 +513,9 @@ class Scrollbar {
 				scrollOutline.addEventListener(
 					flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) {
+						var scrollMet : ScrollMetrics = Reflect.field(clip, "scrollmet");
 						//var scrollToY = scrollBar._ymouse;
-						 var scrollToY = s.localY;
+						var scrollToY = s.localY;
 						var startY = scrollMet.startY;
 						if (scrollToY < startY ) {
 							scrollToY = scrollMet.startY;
@@ -517,7 +523,7 @@ class Scrollbar {
 							scrollToY = scrollMet.endY;
 						}
 						scrollHand.y = scrollToY;
-						scroll(clip, scrollHand, clipRect, scrollMet);
+						scroll(clip, scrollHand, clip.scrollRect, scrollMet);
 					 } ); 
 
 
@@ -525,8 +531,9 @@ class Scrollbar {
 				lowerChild.addEventListener(
 					flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) {
+						var scrollMet = Reflect.field(clip, "scrollmet");
 						Reflect.setField(Bool, "scrollPressed", true);
-						scrollByOne(clip, scrollHand, clipRect, scrollMet, true);
+						scrollByOne(clip, scrollHand, clip.scrollRect, scrollMet, true);
 					} ); 
 
 
@@ -542,8 +549,9 @@ class Scrollbar {
 				upperChild.addEventListener(
 					flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) {
+						var scrollMet = Reflect.field(clip, "scrollmet");
 						Reflect.setField(Bool, "scrollPressed", true);
-						scrollByOne(clip, scrollHand, clipRect, scrollMet, false);
+						scrollByOne(clip, scrollHand, clip.scrollRect, scrollMet, false);
 					} ); 
 
 
@@ -559,7 +567,7 @@ class Scrollbar {
 
             scrollBar.x = availableWidth - 11;
             scrollBar.y = clip.y;
-            moveToY(clip, scrollHand, clipRect, scrollMet, ensureYVisible);
+            moveToY(clip, scrollHand, clip.scrollRect, ensureYVisible);
 
 			if (construct) {
 				clip.stage.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
@@ -575,10 +583,11 @@ class Scrollbar {
 
 							if (delta < 0) {
 								scrollDown = true;
-								delta*= -1;
+								delta *= -1;
 							}
 							var intDelta : Int = cast(delta, Int);
-							moveBy(clip, scrollHand, clipRect, scrollMet, 
+							var scrollMet = Reflect.field(clip, "scrollmet");
+							moveBy(clip, scrollHand, clip.scrollRect, scrollMet, 
 															  scrollDown, intDelta);
 						}
 					}
