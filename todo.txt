@@ -1,9 +1,10 @@
 Bug-fixes:
+- Remove scrollbar event handlers when scrollbar is removed
+
 - Hover effect does not automatically trigger on refresh (see dynamic example)
 - Dragable should not capture movements from scrollbars.
 - Add API for text elements to set focus to them, and ask whether they have focus
 
-- Change scrollbar to listen to mouse wheel
 - Change scrollbar drag in Flash 9 to work outside of the window as well
 - Make tooltip have a delay, and make sure they do not go outside the stage
 - Add filling behaviour to grid
