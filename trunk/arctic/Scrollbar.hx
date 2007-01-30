@@ -32,26 +32,53 @@ class Scrollbar {
         #else flash
 			var scrollBar;
 			
+			var construct : Bool;
+			var upperChild;
+			var scrollOutline;
+			var scrollHand;
+			var lowerChild;
 			if (Reflect.hasField(parent, "scrollbar")) {
 				scrollBar = Reflect.field(parent, "scrollbar");
+				upperChild = Reflect.field(scrollBar, "upperChild");
+				scrollOutline = Reflect.field(scrollBar, "outline");
+				scrollHand = Reflect.field(scrollBar, "hand");
+				lowerChild = Reflect.field(scrollBar, "lowerChild");
+				construct = false;
 			} else {
 				var d = parent.getNextHighestDepth();
 				scrollBar = parent.createEmptyMovieClip("c" + d, d);
 				Reflect.setField(parent, "scrollbar", scrollBar);
+	
+				var d = scrollBar.getNextHighestDepth();
+				upperChild = scrollBar.createEmptyMovieClip("scrollBarUpperChild" + d, d);
+				Reflect.setField(scrollBar, "upperChild", upperChild);
+
+				d = scrollBar.getNextHighestDepth();
+				scrollOutline = scrollBar.createEmptyMovieClip("scrollBarOutline" + d, d);
+				Reflect.setField(scrollBar, "outline", scrollOutline);
+				
+				d = scrollBar.getNextHighestDepth();
+				scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
+				Reflect.setField(scrollBar, "hand", scrollHand);
+
+				d = scrollBar.getNextHighestDepth();
+				lowerChild = scrollBar.createEmptyMovieClip("scrollBarLowerChild" + d, d);
+				Reflect.setField(scrollBar, "lowerChild", lowerChild);
+
+				construct = true;
 			}
+
             var clipRectangle = new Rectangle<Float>(0, 0, availableWidth, availableHeight);
             clip.scrollRect = clipRectangle;
 			parent.scrollRect = clipRectangle;
             var squareHeight = 10;
 
-            var d = scrollBar.getNextHighestDepth();
-            var upperChild = scrollBar.createEmptyMovieClip("scrollBarUpperChild" + d, d);
-
             // Upper scroll bar handle
-            //Drawing upper white squate    
-            
-            DrawUtils.drawRectangle(upperChild, 0, 0, 12, squareHeight, 0, 
-                                        0x000000, 0x000000 );
+            // Drawing upper white squate
+			if (construct) {
+				DrawUtils.drawRectangle(upperChild, 0, 0, 12, squareHeight, 0, 
+											0x000000, 0x000000 );
+			}
             var height =  7;
 
             //Drawing upper scrollbar triangle
@@ -65,24 +92,20 @@ class Scrollbar {
 
 			// The slider background part
             var scrollHeight = availableHeight - (squareHeight * 2);
-
-            d = scrollBar.getNextHighestDepth();
-            var scrollOutline = scrollBar.createEmptyMovieClip("scrollBarOutline" + d, d);
-            
+			
+			scrollOutline.clear();
             DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 
                                                                       0x000000);
             scrollOutline._y = upperChild._height;
 			
 			// The slider hand
-            d = scrollBar.getNextHighestDepth();
-            var scrollHand = scrollBar.createEmptyMovieClip("scrollHand" + d, d);
             var scrollHandHeight = 10.0;
             if ((realHeight - availableHeight) < scrollHeight) {
                 scrollHandHeight = scrollHeight - (realHeight - availableHeight);
             }
+			scrollHand.clear();
             DrawUtils.drawRectangle(scrollHand, 0, 0, 6, scrollHandHeight - 0.5,
-                                                            0, 
-                                                            0x000000, 0x000000);
+                                    0, 0x000000, 0x000000);
             var scrollMet = { 
 					startX : 2.0, 
 					startY : upperChild._height + 0.5, 
@@ -99,22 +122,20 @@ class Scrollbar {
             scrollHand._x = scrollMet.startX;
 
 			// The lower button
-            d = scrollBar.getNextHighestDepth();
-            var lowerChild = scrollBar.createEmptyMovieClip("scrollBarLowerChild" + d, d);
-
             //Drawing lower white square 
-            DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
-                                        0x000000, 0x000000 );
-            height = 3;
-            //Drawing lower scrollbar triangle
-            lowerChild.lineStyle(0.2, 0xFFFFFF);
-            lowerChild.beginFill(0xFFFFFF);
-            lowerChild.moveTo(2 , height );
-            lowerChild.lineTo(2, height );
-            lowerChild.lineTo(2 + 7, height );
-            lowerChild.lineTo(2 + 3.5, height + 4 );
-            lowerChild.endFill();
-            //lowerChild._x = 10;
+			if (construct) {
+				DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
+											0x000000, 0x000000 );
+				height = 3;
+				//Drawing lower scrollbar triangle
+				lowerChild.lineStyle(0.2, 0xFFFFFF);
+				lowerChild.beginFill(0xFFFFFF);
+				lowerChild.moveTo(2 , height );
+				lowerChild.lineTo(2, height );
+				lowerChild.lineTo(2 + 7, height );
+				lowerChild.lineTo(2 + 3.5, height + 4 );
+				lowerChild.endFill();
+			}
             lowerChild._y = availableHeight - 10 ;
 
 			// Behaviour
@@ -176,28 +197,31 @@ class Scrollbar {
             scrollBar._y = clip._y;
             moveToY(clip, scrollHand, ensureYVisible);
             
-            var mouseWheelListener = { 
-					onMouseDown : function() {},
-					onMouseMove : function() {},
-					onMouseUp : function() {},
-					onMouseWheel : function ( delta : Float, target ) {
-						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
-                            var scrollDown = false;
+			if (construct) {
+				var mouseWheelListener = { 
+						onMouseDown : function() {},
+						onMouseMove : function() {},
+						onMouseUp : function() {},
+						onMouseWheel : function ( delta : Float, target ) {
+							if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+								var scrollDown = false;
 
-                            if (delta > 0) {
-                                scrollDown = false;
-                            }
+								if (delta > 0) {
+									scrollDown = false;
+								}
 
-                            if (delta < 0) {
-                                scrollDown = true;
-                                delta*= -1;
-                            }
-                            var intDelta : Int = cast(delta, Int);
-                            moveBy(clip, scrollHand, scrollMet, scrollDown, intDelta);
+								if (delta < 0) {
+									scrollDown = true;
+									delta*= -1;
+								}
+								var intDelta : Int = cast(delta, Int);
+								var scrollMet = Reflect.field(clip, "scrollmet");
+								moveBy(clip, scrollHand, scrollMet, scrollDown, intDelta);
+							}
 						}
-					}
-				};
-			flash.Mouse.addListener(mouseWheelListener);
+					};
+				flash.Mouse.addListener(mouseWheelListener);
+			}
         #end
     }
 
@@ -433,19 +457,20 @@ class Scrollbar {
             scrollHand.x = scrollMetrics.startX;
 
             // Drawing lower white square 
-			lowerChild.graphics.clear();
-            DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
-                                                           0x000000, 0x000000 );
-            
-            height = 3;
-            // Drawing lower scrollbar triangle
-            lowerChild.graphics.beginFill(0xFFFFFF);
-            lowerChild.graphics.moveTo(2 , height );
-            lowerChild.graphics.lineTo(2, height );
-            lowerChild.graphics.lineTo(2 + 8, height );
-            lowerChild.graphics.lineTo(2 + 4, height + 4 );
-            lowerChild.graphics.endFill();
-            //lowerChild._x = 10;
+			if (construct) {
+				lowerChild.graphics.clear();
+				DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 
+															   0x000000, 0x000000 );
+				
+				height = 3;
+				// Drawing lower scrollbar triangle
+				lowerChild.graphics.beginFill(0xFFFFFF);
+				lowerChild.graphics.moveTo(2 , height );
+				lowerChild.graphics.lineTo(2, height );
+				lowerChild.graphics.lineTo(2 + 8, height );
+				lowerChild.graphics.lineTo(2 + 4, height + 4 );
+				lowerChild.graphics.endFill();
+			}
             lowerChild.y = availableHeight - 10 ;
 
 			if (construct) {
