@@ -9,10 +9,9 @@ class HelloWorld {
 	
 	public function new(parent : ArcticMovieClip) {
 		// To make a screen, first build the data structure representing the contents
-		var me = this;
-		var helloWorld = Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50);
+		var helloWorld = Arctic.makeSimpleButton("Hello world",  remove, 50);
 
-		// Then construct the arctic object
+		// Then construct the arctic view object
 		arcticView = new ArcticView( helloWorld, parent );
 		// And finally display on the given movieclip
 		var root = arcticView.display(true);
@@ -28,33 +27,33 @@ class HelloWorld {
 More versions from the manual:
 
 		var helloWorld = ColumnStack( [ Filler,
-			Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50),
+			Arctic.makeSimpleButton("Hello world", remove, 50),
 			Filler ] );
 
 		var helloWorld = LineStack( [
 			Filler, 
 			ColumnStack( [ 
 				Filler,
-				Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50),
+				Arctic.makeSimpleButton("Hello world", remove, 50),
 				Filler ] ),
 			Filler ] );
 
 		var helloWorld = LineStack( [
-			Text(Arctic.wrapWithDefaultFont("Some text in <b>HTML</b> is nice", 16, "#0000ff")),
+			Arctic.makeText("Some text in <b>HTML</b> is nice", 16, "#0000ff"),
 			Filler, 
 			ColumnStack( [ 
 				Filler,
-				Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50),
+				Arctic.makeSimpleButton("Hello world", remove, 50),
 				Filler ] ),
 			Filler ] );
 
 		var helloWorld = Background(0xdddddd,
 			LineStack( [
-				Text(Arctic.wrapWithDefaultFont("Some text in <b>HTML</b> is nice", 16, "#0000ff")),
+				Arctic.makeText("Some text in <b>HTML</b> is nice", 16, "#0000ff"),
 				Filler, 
 				ColumnStack( [ 
 					Filler,
-					Arctic.makeSimpleButton("Hello world",  function() { me.remove(); }, 50),
+					Arctic.makeSimpleButton("Hello world", remove, 50),
 					Filler ] ),
 				Filler ] )
 			, 100.0, 20);
