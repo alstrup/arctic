@@ -31,11 +31,6 @@ class Scrollbar {
         #if flash9 
             drawScrollBarForFlash9(parent, clip, availableWidth, availableHeight, ensureYVisible);
         #else flash
-            if (clip._height <= availableHeight) {
-				Scrollbar.removeScrollbar(parent, clip);
-                return;
-            }
-			
 			var scrollBar;
 			
 			if (Reflect.hasField(parent, "scrollbar")) {
@@ -383,11 +378,6 @@ class Scrollbar {
 	
         private static function drawScrollBarForFlash9(parent : MovieClip, clip : MovieClip, availableWidth : Float,
                                                          availableHeight : Float, ensureYVisible : Float) {
-            if (clip.height <= availableHeight) {
-				Scrollbar.removeScrollbar(parent, clip);
-                return;
-            }
-			
 			var scrollBar : MovieClip;
 			var upperChild : MovieClip;
 			var scrollOutline : MovieClip;

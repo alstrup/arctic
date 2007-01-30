@@ -9,7 +9,7 @@ class Bugs {
 	
 	public function new(parent0 : ArcticMovieClip) {
 		parent = parent0;
-		count = 0;
+		count = 6;
 		next();
 	}
 	public function next() : Void {
@@ -64,6 +64,9 @@ class Bugs {
 			// This should be a 20x20 red box
 			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
 			fullsize = false;
+			case 6:
+			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
+			screen = LineStack( [ Arctic.makeText("Text", 700) ] );
 			default:
 			screen = Text("The end");
 		}
