@@ -119,7 +119,7 @@ class ArcticView {
 	}
 	
 	public function onResize() {
-		if (false) {
+		if (true) {
 			var stage = getStageSize(parent);
 			var result = build(gui, parent, stage.width, stage.height, false, 0);
 			base = result.clip;
@@ -278,11 +278,13 @@ class ArcticView {
 		case Shadow(block, distance, angle, color, alpha):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
-			// we must use a temporary array (see documentation)
-			var _filters = clip.filters;
-			_filters.push(dropShadow);
-			clip.filters = _filters;
+			if (construct) {
+				var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
+				// we must use a temporary array (see documentation)
+				var _filters = clip.filters;
+				_filters.push(dropShadow);
+				clip.filters = _filters;
+			}
 			return { clip: clip, width: child.width, height: child.height };
 			
 		case Background(color, block, alpha, roundRadius):
@@ -1170,9 +1172,12 @@ class ArcticView {
 		case CustomBlock(data, calcMetricsFun, buildFun):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			if (construct) {
-				return buildFun(data, clip, availableWidth, availableHeight, null);
+				var result = buildFun(data, clip, availableWidth, availableHeight, null);
+				Reflect.setField(clip, "customClip", result.clip);
+				return result;
 			} else {
-				return buildFun(data, clip, availableWidth, availableHeight, getOrMakeClip(clip, false, 0));
+				var clip = Reflect.field(clip, "customClip");
+				return buildFun(data, clip, availableWidth, availableHeight, clip);
 			}
 		}
 		return null;
