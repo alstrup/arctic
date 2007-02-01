@@ -169,6 +169,30 @@ given size and color - in this case 16 pixels high and blue color:</p>
 <p>The 100.0 value in the last line means that the background is fully opaque,
 and the 20 value means that the background is rounded.</p>
 
+<h2>TextInput</h2>
+
+The TextInput block provides a way for the user to type text.
+
+A small example:
+
+<blockquote>
+
+<pre>
+  var value = "";
+  var gui = LineStack( [ Filler, TextInput("Write something here", 400, 20, function (s) { value = s; return true; }),
+                    Arctic.makeSimpleButton( "Click me!", function () { trace(value); } ) ] );
+
+  var arcticView = new ArcticView( gui, flash.Lib.current);
+  arcticView.display(true);
+</pre>
+</blockquote>
+
+The function parameter is a function which serves two purposes: First, it provides a way to get the
+contents of the input box, which is illustrated above. Secondly, it also serves as a
+validator function, which can be used to check that the contents typed conform 
+to some syntax. If the contents are not as required, return false, and the user is notified by
+a red color.
+
 <h2>Controlling &amp; debugging layout</h2>
 
 <p>Doing layout in Arctic can sometimes be tricky - especially in nested
