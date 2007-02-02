@@ -85,7 +85,7 @@ class ArcticView {
 			stageSize(parent);
 		}
 		
-		refresh();
+		refresh(true);
 
 		if (useStageSize) {
 			// Make sure we follow screen resizes
@@ -144,22 +144,25 @@ class ArcticView {
 				remove();
 			}
 			stageSize(parent);
-			refresh();
+			refresh(true);
 		}
 	}
 
 	/**
-	* This will rebuilt the user interface from scratch. Useful if you have updated
-	* the GUI using update() below.
+	* This will update the user interface. Useful if you have updated
+	* the GUI using update() below. If you pass true, everything is built
+	* from scratch.
 	*/ 
-	public function refresh() {
-		if (base != null) {
+	public function refresh(rebuild : Bool) {
+		if (rebuild && base != null) {
 			remove();
 		}
-		movieClips = [];
-		activeClips = [];
-		idMovieClip = new Hash<ArcticMovieClip>();
-		showMouse();
+		if (rebuild) {
+			movieClips = [];
+			activeClips = [];
+			idMovieClip = new Hash<ArcticMovieClip>();
+			showMouse();
+		}
 		var size;
 		if (useStageSize) {
 			size = getStageSize(parent);
@@ -167,7 +170,7 @@ class ArcticView {
 			size = getSize(parent);
 		}
 
-		var result = build(gui, parent, size.width, size.height, true, 0);
+		var result = build(gui, parent, size.width, size.height, rebuild, 0);
 		base = result.clip;
 	}
 
