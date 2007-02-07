@@ -21,8 +21,7 @@ class ArcticTest {
 
 	public function showHelloWorld1() {
 		// To make a screen, first build the data structure representing the contents
-		var me = this;
-		var helloWorld = Arctic.makeSimpleButton("Hello world",  function() { me.showHelloWorld2(); }, 50);
+		var helloWorld = Arctic.makeSimpleButton("Hello world", showHelloWorld2, 50);
 		// Then construct the arctic object
 		arcticView = new ArcticView( helloWorld, parent );
 		// And finally display on the given movieclip
@@ -34,7 +33,6 @@ class ArcticTest {
 		arcticView.destroy();
 		
 		// To make a nicer screen, we use a background and some more layout
-		var me = this;
 		var helloWorld = GradientBackground( "radial", [ 0xffceff, 0xff77ee], 0.2, 0.4,
 							LineStack( [ 
 								Filler, 
@@ -47,7 +45,7 @@ class ArcticTest {
 								ColumnStack( [
 									Filler,
 									Arctic.makeTooltip(
-										Arctic.makeSimpleButton("Continue",  function() { me.nextWorld(); }, 25),
+										Arctic.makeSimpleButton("Continue", nextWorld, 25),
 										"Click here to continue"
 									)
 								] )
@@ -108,12 +106,12 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								Arctic.makeTextChoice([ "See custom block", "See dragable blocks" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
+								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
 							Border( 10, 10, Arctic.makeCheckbox( Text(Arctic.wrapWithDefaultFont("Check box", 20))) ),
 							ColumnStack( [
 								Filler,
-								Arctic.makeSimpleButton("Continue",  function() { me.screen1next(); }, 25)
+								Arctic.makeSimpleButton("Continue",  screen1next, 25)
 							] )
 							]
 						)
@@ -131,12 +129,16 @@ class ArcticTest {
 		
 		if (radioChoice == 0) {
 			customBlock();
-		} else {
+		} else if (radioChoice == 1) {
 			draggable();
+		} else {
+			wideText();
 		}
 	}
 	
 	public function customBlock() {
+		arcticView.destroy();
+	
 		// A custom block needs two functions. One to tell Arctic the size and desired resizing behaviour:
 		var calcMetrics = function(data : Int, availableWidth, availableHeight) : Metrics {
 			return { width: 100.0, height : 100.0, growHeight : false, growWidth : false };
@@ -180,6 +182,8 @@ class ArcticTest {
 	}
 	
 	public function draggable() {
+		arcticView.destroy();
+
 		// Small example showing the different kinds of draggable blocks possible in Arctic
 		var makeText = function (text) {
 			return Background(0x202020, Border(5, 5, Text("<font size='20' face='arial' color='#ffffff'>" + text + "</font>")), 100, 5);
@@ -191,6 +195,17 @@ class ArcticTest {
 					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere") )
 				] );
 		arcticView = new ArcticView(drag, parent);
+		var root = arcticView.display(true);
+	}
+	
+	public function wideText() {
+		arcticView.destroy();
+		var gui = ColumnStack( [ 
+			Filler, 
+			Text("Arctic is a simple haXe GUI framework which allows you to create user interfaces for flash applications. It is unique by supporting both Flash 8 and Flash 9 targets using the same client code.", 
+				null, true),
+			Filler ] );
+		arcticView = new ArcticView(gui, parent);
 		var root = arcticView.display(true);
 	}
 
