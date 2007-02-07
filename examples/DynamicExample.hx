@@ -46,7 +46,7 @@ class DynamicExample  {
 		}
 		elements.push(Filler);
 		arcticView.update("elements", LineStack(elements, rows.length) );
-		arcticView.refresh();
+		arcticView.refresh(true);
 	}
 	
 	private function remove() {

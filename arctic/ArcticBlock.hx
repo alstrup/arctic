@@ -35,8 +35,14 @@ enum ArcticBlock {
 	/// Add some space around the block
 	Border(x : Float, y : Float, block : ArcticBlock);
 
-	/// A text (in the subset of HTML which Flash understands)
-	Text(html : String, ?embeddedFont : Bool);
+	/**
+	 * A text (in the subset of HTML which Flash understands).
+	 * If wordWrap is true, the text will grow in the width and height as much as possible,
+	 * and the text inside word wrap according to how much width is available.
+	 * If wordWrap is false, the text will always have the same size, and only break lines
+	 * if <br/> tags exist in the text.
+	 */
+	Text(html : String, ?embeddedFont : Bool, ?wordWrap : Bool);
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.

@@ -39,7 +39,7 @@ typedef BlockInfo = {
  */
 class ArcticView {
 
-	/**
+/**
 	* This prepares a user interface view of the given block on the given movieclip.
 	* Nothing is displayed. Call display() to make the user interface visible.
 	*/ 
@@ -241,18 +241,22 @@ class ArcticView {
                     availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
 #if false
 		var clip = doBuild(gui, p, availableWidth, availableHeight, construct, childNo);
-		var metrics = calcMetrics(gui, availableWidth, availableHeight);
-		if (clip.width > availableWidth) {
-			trace("Too wide: " + clip.width + " should be max " + availableWidth + " with " + gui);
-		}
-		if (clip.height > availableHeight) {
-			trace("Too high: " + clip.width + " should be max " + availableWidth + " with " + gui);
-		}
-		if (clip.width != metrics.width) {
-			trace("Metrics wrong: Is "+ clip.width + " wide but metrics say " + metrics.width + " (" + availableWidth +" available) with " + gui);
-		}
-		if (clip.height != metrics.height) {
-			trace("Metrics wrong: Is "+ clip.height + " high but metrics say " + metrics.height + " (" + availableHeight + " available) with " + gui);
+		trace("build (" + availableWidth + "," + availableHeight + "): (" + clip.width + "," + clip.height + ") = " + gui + " (might be called from calcMetrics!)" );
+		
+		if (false) {
+			var metrics = calcMetrics(gui, availableWidth, availableHeight);
+			if (clip.width > availableWidth) {
+				trace("Too wide: " + clip.width + " should be max " + availableWidth + " with " + gui);
+			}
+			if (clip.height > availableHeight) {
+				trace("Too high: " + clip.width + " should be max " + availableWidth + " with " + gui);
+			}
+			if (clip.width != metrics.width) {
+				trace("Metrics wrong: Is "+ clip.width + " wide but metrics say " + metrics.width + " (" + availableWidth +" available) with " + gui);
+			}
+			if (clip.height != metrics.height) {
+				trace("Metrics wrong: Is "+ clip.height + " high but metrics say " + metrics.height + " (" + availableHeight + " available) with " + gui);
+			}
 		}
 		return clip;
 	}
@@ -394,7 +398,7 @@ class ArcticView {
 			#end
 			return { clip: clip, width: child.width, height: child.height };
 
-		case Text(html, embeddedFont):
+		case Text(html, embeddedFont, wordWrap):
 			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
 			#if flash9
 				var tf : flash.text.TextField;
@@ -406,6 +410,10 @@ class ArcticView {
 				if (embeddedFont) {
 					tf.embedFonts = true;
 				}
+				if (wordWrap) {
+					tf.wordWrap = true;
+					tf.width = availableWidth;
+				}
 				tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
 				tf.selectable = false;
 				tf.multiline = true;
@@ -416,10 +424,13 @@ class ArcticView {
 			#else flash
 				var tf : flash.TextField;
 				if (construct) {
-					tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, 100, 100);
+					tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, if (wordWrap) availableWidth else 0, 100);
 					Reflect.setField(clip, "tf", tf);
 				} else {
 					tf = Reflect.field(clip, "tf");
+					if (wordWrap) {
+						tf._width = availableWidth;
+					}
 				}
 				if (embeddedFont) {
 					tf.embedFonts = true;
@@ -429,6 +440,7 @@ class ArcticView {
 				tf.selectable = false;
 				tf.multiline = true;
 				tf.htmlText = html;
+				tf.wordWrap = wordWrap;
 			#end
 			var s = getSize(clip);
 			return { clip: clip, width: s.width, height: s.height };
@@ -1239,6 +1251,7 @@ class ArcticView {
 	private function doCalcMetrics(c : ArcticBlock, availableWidth : Float, availableHeight : Float) : Metrics {
 #end
 		var text = null;
+		var growing = false;
 		switch (c) {
 		case Border(x, y, block):
 			var m = calcMetrics(block, availableWidth, availableHeight);
@@ -1261,12 +1274,17 @@ class ArcticView {
 			return calcMetrics(block, availableWidth, availableHeight);
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
 			return calcMetrics(block, availableWidth, availableHeight);
-		case Text(html, embeddedFont):
-			if (metricsCache.exists(html)) {
+		case Text(html, embeddedFont, wordWrap):
+			if (!wordWrap && metricsCache.exists(html)) {
 				var m = metricsCache.get(html);
 				return { width : m.width, height : m.height, growWidth : false, growHeight : false };
 			}
+			
 			text = html;
+			if (wordWrap) {
+				growing = true;
+			}
+				
 			// Fall-through to creation
 		case Picture(url, w, h, scaling, resource):
 			return { width : w, height : h, growWidth : false, growHeight : false };
@@ -1409,17 +1427,17 @@ class ArcticView {
 			var tempMovie = new MovieClip();
 			parent.addChild(tempMovie);
 			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
-			var m = { width : mc.width, height : mc.height, growWidth: false, growHeight: false };
+			var m = { width : mc.width, height : mc.height, growWidth: growing, growHeight: growing };
 			parent.removeChild(tempMovie);
 		#else flash
 			var d = parent.getNextHighestDepth();
 			var tempMovie = parent.createEmptyMovieClip("c" + d, d);
 			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
-			var m = { width : mc.width, height : mc.height, growWidth: false, growHeight: false };
+			var m = { width : mc.width, height : mc.height, growWidth: growing, growHeight: growing };
 			tempMovie.removeMovieClip();
 //			mc.removeMovieClip();
 		#end
-		if (text != null) {
+		if (!growing && text != null) {
 			metricsCache.set(text, { width: m.width, height : m.height });
 		}
 		return m;
