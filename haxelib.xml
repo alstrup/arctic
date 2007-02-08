@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.6.3">Support word wrapping text</version>
+    <version name="0.6.4">Support word wrapping in Arctic.makeText</version>
 </project>
