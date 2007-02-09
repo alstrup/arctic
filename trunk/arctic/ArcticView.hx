@@ -843,8 +843,6 @@ class ArcticView {
 				for (block in line) {
 					// We want the minimum size, so do not give any extra space to this
 					var m = calcMetrics(block, 0, 0);
-					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
-					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
 					if (columnWidths.length <= x) {
 						columnWidths.push(m.width);
 					} else {
@@ -1350,8 +1348,6 @@ class ArcticView {
 				var lineHeight = 0.0;
 				for (block in line) {
 					var m = calcMetrics(block, 0, 0);
-					gridMetrics.growWidth = gridMetrics.growWidth || m.growWidth;
-					gridMetrics.growHeight = gridMetrics.growHeight || m.growHeight;
 					if (columnWidths.length <= x) {
 						columnWidths.push(m.width);
 					} else {
