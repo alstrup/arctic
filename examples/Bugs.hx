@@ -62,8 +62,9 @@ class Bugs {
 					]);
 			case 5:
 			// This should be a clickable 20x20 red box
-			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
-			fullsize = false;
+			screen = Background(0xff0000, Button(Fixed(20, 20), Fixed(20, 20), next) );
+//			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
+//			fullsize = false;
 			case 6:
 			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
 			screen = LineStack( [ Arctic.makeText("Text", 200), Arctic.makeSimpleButton( "Next bug", next ) ] );

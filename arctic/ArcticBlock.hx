@@ -6,9 +6,6 @@ typedef ArcticMovieClip = flash.display.MovieClip
 typedef ArcticMovieClip = flash.MovieClip
 #end
 
-/// The structure used by CustomBlocks to tell arctic of dimensions and requested resizing behaviour
-typedef Metrics = { width : Float, height : Float, growWidth : Bool, growHeight : Bool }
-
 /**
  * Arctic is an embedded Domain Specific Language for making user interfaces.
  * A user interface is built from ArcticBlocks.
@@ -155,35 +152,42 @@ enum ArcticBlock {
 	 * with your own basic blocks. Parameters:
 	 * 
 	 *  data: an optional payload.
-	 *  calcMetricsFunc: a function which has to calculate the metrics of the block.
-	 *       This is the size of the block, and bools defining whether the block
-	 *       wants to grow in width and/or height. If you leave this empty, Arctic
-	 *       will use the buildFunc to find out the size (by creating the clip and
-	 *       removing it again).
+
 	 *  buildFunc: This is called with the optional data payload as first parameter,
-	 *       the MovieClip where the block should be put or drawn, and the available height
-	 *       and width for the element. Also, it is given an optional MovieClip. If this
-	 *       is null, the intent is that this function should construct a new view from
+	 *       the build mode requested (see enum below), the parent MovieClip where the 
+	 *       block should be put or drawn, and the available height and width for the 
+	 *       element.
+	 *       If this is null, the intent is that this function should construct a new view from
 	 *       stratch. If this is not null, the code should update the given MovieClip.
-	 *       It should return the resulting display object (movie clip).
+	 *       The function should return the metrics for the block. The different build modes
+	 *       should be consistent in the metrics - otherwise, layout bugs can occur.
 	 * 
 	 * Notice that you have to build the custom blocks such that their work with
 	 * both Flash 8 and 9.
-	 * Notice that calcMetrics should match the size of the clip that buildFunc creates.
-	 * If they do not, the layout might be broken.
 	 */
-	CustomBlock( data : Dynamic, 
-				calcMetricsFunc : Dynamic -> Float -> Float -> Metrics, 
-				buildFunc : Dynamic -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> { clip: ArcticMovieClip, width: Float, height: Float }
-				);
-	
+	CustomBlock( data : Dynamic, buildFunc : Dynamic -> BuildMode -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> Metrics );
+
 	/**
 	 * Draws a frame around the given block
 	 */
 	Frame(block: ArcticBlock, ?thickness: Float, ?color: Int, ?roundRadius: Float, ?alpha: Float, ?xspacing: Float, ?yspacing: Float);
 
 	/**
-	 * Drops a shadow for the given block 
+	 * Drops a shadow for the given block. Notice that the shadow is not considered as part of
+	 * the block in terms of size.
 	 */
 	Shadow(block: ArcticBlock, distance: Int, angle: Int, color: Int, alpha: Float);
+}
+
+/// The structure used by CustomBlocks to tell arctic of dimensions and requested resizing behaviour
+typedef Metrics = { clip: ArcticMovieClip, width : Float, height : Float, growWidth : Bool, growHeight : Bool }
+
+/// What the build function should do
+enum BuildMode {
+	/// Create a new movieclip for the block
+	Create;
+	/// Reuse an existing movieclip, but update that to reflect the block
+	Reuse;
+	/// Do not create or change any movieclips - just calculate metrics
+	Metrics;
 }

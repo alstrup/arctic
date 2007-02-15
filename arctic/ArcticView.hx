@@ -35,14 +35,14 @@ typedef BlockInfo = {
  * display() with a movieclip to construct it.
  * Building the user interface is a done in a depth first traversal of the
  * tree of blocks - see build. Some blocks might need to know the size of
- * their children to make layout themselves, which calcMetrics can find out.
+ * their children to make layout themselves, which build can find out.
  */
 class ArcticView {
 
-/**
-	* This prepares a user interface view of the given block on the given movieclip.
-	* Nothing is displayed. Call display() to make the user interface visible.
-	*/ 
+	/**
+	 * This prepares a user interface view of the given block on the given movieclip.
+	 * Nothing is displayed. Call display() to make the user interface visible.
+	 */ 
 	public function new(gui0 : ArcticBlock, parent0 : MovieClip) {
 		gui = gui0;
 		parent = parent0;
@@ -68,7 +68,7 @@ class ArcticView {
 	
 	/// This resizes the hosting movieclip to make room for our GUI block minimumsize, plus some extra space
 	public function adjustToFit(extraWidth : Float, extraHeight : Float) : Void {
-		var w = calcMetrics(gui, 0, 0);
+		var w = build(gui, parent, 0, 0, Metrics, 0);
 		setSize(parent, w.width + extraWidth, w.height + extraHeight);
 	}
 	
@@ -136,7 +136,7 @@ class ArcticView {
 		if (true) {
 			/// This is smart refresh, where we reuse MovieClips to reduce flicker
 			var stage = getStageSize(parent);
-			var result = build(gui, parent, stage.width, stage.height, false, 0);
+			var result = build(gui, parent, stage.width, stage.height, Reuse, 0);
 			base = result.clip;
 		} else {
 			/// This is dumb refresh, where we rebuilt everything from scratch
@@ -170,7 +170,7 @@ class ArcticView {
 			size = getSize(parent);
 		}
 
-		var result = build(gui, parent, size.width, size.height, rebuild, 0);
+		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, 0);
 		base = result.clip;
 	}
 
@@ -238,61 +238,49 @@ class ArcticView {
 	 * The algorithm is a simple recursive depth first traversal of the blocks.
 	 */
     private function build(gui : ArcticBlock, p : MovieClip, 
-                    availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
+                    availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #if false
-		var clip = doBuild(gui, p, availableWidth, availableHeight, construct, childNo);
-		trace("build (" + availableWidth + "," + availableHeight + "): (" + clip.width + "," + clip.height + ") = " + gui + " (might be called from calcMetrics!)" );
-		
-		if (false) {
-			var metrics = calcMetrics(gui, availableWidth, availableHeight);
-			if (clip.width > availableWidth) {
-				trace("Too wide: " + clip.width + " should be max " + availableWidth + " with " + gui);
-			}
-			if (clip.height > availableHeight) {
-				trace("Too high: " + clip.width + " should be max " + availableWidth + " with " + gui);
-			}
-			if (clip.width != metrics.width) {
-				trace("Metrics wrong: Is "+ clip.width + " wide but metrics say " + metrics.width + " (" + availableWidth +" available) with " + gui);
-			}
-			if (clip.height != metrics.height) {
-				trace("Metrics wrong: Is "+ clip.height + " high but metrics say " + metrics.height + " (" + availableHeight + " available) with " + gui);
-			}
-		}
+		var clip = doBuild(gui, p, availableWidth, availableHeight, mode, childNo);
+		trace("build (" + availableWidth + "," + availableHeight + "): (" + clip.width + "," + clip.height + ") on " + gui );
 		return clip;
 	}
 	
 	private function doBuild(gui : ArcticBlock, p : MovieClip, 
-                    availableWidth : Float, availableHeight : Float, construct : Bool, childNo : Int) : { clip: MovieClip, width : Float, height : Float } {
+                    availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #end
-//		trace("build " + availableWidth + "," + availableHeight + ": " + gui + " (might be called from calcMetrics!)");
 		if (this == null) {
 			// This should not happen, but just to be safe
-			return { clip: null, width: 0.0, height: 0.0 };
+			return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 		}
 		switch (gui) {
 		case Border(x, y, block):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			if (availableWidth < 2 * x) {
-				x = availableWidth / 2;
+			if (mode != Metrics) {
+				if (availableWidth < 2 * x) {
+					x = availableWidth / 2;
+				}
+				if (availableHeight < 2 * y) {
+					y = availableHeight / 2;
+				}
 			}
-			if (availableHeight < 2 * y) {
-				y = availableHeight / 2;
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, Math.max(0.0, availableWidth - 2 * x), Math.max(availableHeight - 2 * y, 0.0), mode, 0);
+			child.width += 2 * x;
+			child.height += 2 * y;
+			if (mode != Metrics) {
+				#if flash9
+					child.clip.x = x;
+					child.clip.y = y;
+				#else flash
+					child.clip._x = x;
+					child.clip._y = y;
+				#end
+				setSize(clip, child.width, child.height);
 			}
-			var child = build(block, clip, availableWidth - 2 * x, availableHeight - 2 * y, construct, 0);
-			#if flash9
-				child.clip.x = x;
-				child.clip.y = y;
-			#else flash
-				child.clip._x = x;
-				child.clip._y = y;
-			#end
-			var w = child.width + 2 * x;
-			var h = child.height + 2 * y;
-			setSize(clip, w, h);
-			return { clip: clip, width: w, height: h };
+			child.clip = clip;
+			return child;
 		
 		case Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);			
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);			
 			if (xspacing == null) xspacing = 0;
 			if (yspacing == null) yspacing = 0;
 			if (thickness == null) thickness = 0;
@@ -301,8 +289,8 @@ class ArcticView {
 			if (x != 0 || y != 0) {
 				block = Border(x, y, block);
 			}	
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (thickness != 0) {
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode != Metrics && thickness != 0) {
 				var delta = thickness / 2;
 				#if flash9
 					clip.graphics.clear();
@@ -313,12 +301,13 @@ class ArcticView {
 				#end
 				DrawUtils.drawRect(clip, delta, delta, child.width - thickness, child.height - thickness, roundRadius);
 			}
-			return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			return child;
 		
 		case Shadow(block, distance, angle, color, alpha):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (construct) {
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
 				// TODO: We do not support changing of Shadow parameters in an update
 				var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
 				// we must use a temporary array (see documentation)
@@ -326,35 +315,40 @@ class ArcticView {
 				_filters.push(dropShadow);
 				clip.filters = _filters;
 			}
-			return { clip: clip, width: child.width, height: child.height };
+			// Notice: We do not let the shadow affect the size
+			child.clip = clip;
+			return child;
 			
 		case Background(color, block, alpha, roundRadius):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			// a fill will not be created if the color is equal to null
-			#if flash9
-				clip.graphics.clear();
-				if (color != null) {
-					clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
-					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-					clip.graphics.endFill();
-				}
-			#else flash
-				clip.clear();
-				if (color != null) {
-					clip.beginFill(color, if (alpha != null) alpha else 100.0);
-					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-					clip.endFill();
-				}
-			#end
-			return { clip: clip, width: child.width, height: child.height };
+			if (mode != Metrics) {
+				#if flash9
+					clip.graphics.clear();
+					if (color != null) {
+						clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
+						DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+						clip.graphics.endFill();
+					}
+				#else flash
+					clip.clear();
+					if (color != null) {
+						clip.beginFill(color, if (alpha != null) alpha else 100.0);
+						DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+						clip.endFill();
+					}
+				#end
+			}
+			child.clip = clip;
+			return child;
 
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (colors == null || colors.length == 0) {
-				// Hm, this must be a mistake, but better safe than sorry
-				return { clip: clip, width: child.width, height: child.height };
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Metrics || colors == null || colors.length == 0) {
+				child.clip = clip;
+				return child;
 			}
 			var ratios = [];
 			var alphas = [];
@@ -396,15 +390,20 @@ class ArcticView {
 				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 				clip.endFill();
 			#end
-			return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			return child;
 
 		case Text(html, embeddedFont, wordWrap):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			if (mode == Metrics && !wordWrap && metricsCache.exists(html)) {
+				var m = metricsCache.get(html);
+				return { clip: null, width : m.width, height : m.height, growWidth : false, growHeight : false };
+			}
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			#if flash9
 				var tf : flash.text.TextField;
-				if (construct) {
+				if (mode == Create || mode == Metrics) {
 					tf = new flash.text.TextField();
-				} else {
+				} else if (mode == Reuse) {
 					tf = cast(clip.getChildAt(0), flash.text.TextField);
 				}
 				if (embeddedFont) {
@@ -418,12 +417,16 @@ class ArcticView {
 				tf.selectable = false;
 				tf.multiline = true;
 				tf.htmlText = html;
-				if (construct) {
+				if (mode == Create) {
 					clip.addChild(tf);
 				}
 			#else flash
+				if (mode == Metrics) {
+					var d = parent.getNextHighestDepth();
+					clip = parent.createEmptyMovieClip("c" + d, d);
+				}
 				var tf : flash.TextField;
-				if (construct) {
+				if (mode == Create || mode == Metrics) {
 					tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, if (wordWrap) availableWidth else 0, 100);
 					Reflect.setField(clip, "tf", tf);
 				} else {
@@ -443,16 +446,32 @@ class ArcticView {
 				tf.wordWrap = wordWrap;
 			#end
 			var s = getSize(clip);
-			return { clip: clip, width: s.width, height: s.height };
+			if (mode == Metrics) {
+				#if flash9
+					s.width = tf.width;
+					s.height = tf.height;
+				#else flash
+					clip.removeMovieClip();
+				#end
+				clip = null;
+				// Cache the result
+				if (!wordWrap) {
+					metricsCache.set(html, s);
+				}
+			}
+			return { clip: clip, width: s.width, height: s.height, growWidth: if (wordWrap) true else false, growHeight: false };
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			if (construct) {
+			if (mode == Metrics) {
+				return { clip: null, width : width, height : height, growWidth : false, growHeight : false };
+			}
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode == Create) {
 				activeClips.push(clip);
 			}
 			#if flash9
 				var txtInput : flash.text.TextField;
-				if (construct) {
+				if (mode == Create) {
 					txtInput = new flash.text.TextField();
 				} else {
 					var t : Dynamic = clip.getChildAt(0);
@@ -465,7 +484,7 @@ class ArcticView {
 				txtInput.height = height;
 			#else flash
 				var txtInput : flash.TextField;
-				if (construct) {
+				if (mode == Create) {
 					txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
 					Reflect.setField(clip, "ti", txtInput);
 				} else {
@@ -485,7 +504,7 @@ class ArcticView {
 					txtInput.background = true;
 					txtInput.backgroundColor = bgColor;
 				}
-				if (construct) {
+				if (mode == Create) {
 					var validate = function() {
 						if (validator == null) {
 							return;
@@ -543,13 +562,16 @@ class ArcticView {
 				}
 
 			var s = getSize(clip);
-			return { clip: clip, width: s.width, height: s.height };
+			return { clip: clip, width: s.width, height: s.height, growWidth: false, growHeight: false };
 
 		case Picture(url, w, h, scaling, resource):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			if (mode == Metrics) {
+				return { clip: null, width : w, height : h, growWidth : false, growHeight : false };
+			}
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			#if flash9
 				// TODO: Resource version probably does not work
-				if (construct) {
+				if (mode == Create) {
 					var loader = new flash.display.Loader();
 					var request = new flash.net.URLRequest(url);
 					loader.load(request);
@@ -562,7 +584,7 @@ class ArcticView {
 				var s = scaling * 100.0;
 				if (resource) {
 					var child;
-					if (construct) {
+					if (mode == Create) {
 						child = clip.attachMovie(url, "picture", clip.getNextHighestDepth());
 						Reflect.setField(clip, "picture", child);
 					} else {
@@ -571,7 +593,7 @@ class ArcticView {
 					child._xscale = s;
 					child._yscale = s;
 				} else {
-					if (construct) {
+					if (mode == Create) {
 						var loader = new flash.MovieClipLoader();
 						var r = loader.loadClip(url, clip);
 					}
@@ -580,23 +602,30 @@ class ArcticView {
 				}
 			#end
 			setSize(clip, w, h);
-			return { clip: clip, width: w, height: h };
+			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case Button(block, hover, action):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			var hover = build(hover, clip, availableWidth, availableHeight, construct, 1);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			var hover = build(hover, clip, availableWidth, availableHeight, mode, 1);
+			if (mode == Metrics) {
+				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			#if flash9
 				child.clip.buttonMode = true;
 				child.clip.mouseChildren = false;
 				hover.clip.buttonMode = true;
 				hover.clip.mouseChildren = false;
+				// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
+				// position yet, so we can't do this yet! The parent would have to position us first, which is a change
+				// for another day.
 				child.clip.visible = true;
 				hover.clip.visible = false;
-				if (construct) {
-					clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function (s) { if (action != null) action(); } ); 
-					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, 
-						function (s) {
+				if (mode == Create) {
+					if (action != null) {
+						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { action(); } ); 
+					}
+					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
 							if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 								child.clip.visible = false;
 								hover.clip.visible = true;
@@ -604,8 +633,7 @@ class ArcticView {
 								child.clip.visible = true;
 								hover.clip.visible = false;
 							}
-						}
-					);
+						} );
 					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
 						child.clip.visible = true;
 						hover.clip.visible = false;
@@ -614,7 +642,7 @@ class ArcticView {
 			#else flash
 				child.clip._visible = true;
 				hover.clip._visible = false;
-				if (construct) {
+				if (mode == Create) {
 					//clip.onRelease = action;
 					clip.onMouseUp = function () {
 						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
@@ -638,62 +666,66 @@ class ArcticView {
 					};
 				}
 			#end
-			return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height) };
+			return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var sel = build(selected, clip, availableWidth, availableHeight, construct, 0);
-			var unsel = build(unselected, clip, availableWidth, availableHeight, construct, 1);
-			#if flash9
-				unsel.clip.buttonMode = true;
-				unsel.clip.mouseChildren = false;
-				sel.clip.buttonMode = true;
-				sel.clip.mouseChildren = false;
-				if (construct) {
-					sel.clip.visible = initialState;
-					unsel.clip.visible = !initialState;
-					var setState = function (newState : Bool) { sel.clip.visible = newState; unsel.clip.visible = !newState; }; 
-					if (null != onInit) {
-						onInit(setState);
-					}
-					clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
-							if (null != onChange) {
-								setState(!sel.clip.visible);
-								onChange(sel.clip.visible);
-							}
-						});
-				}
-			#else flash
-				if (construct) {
-					sel.clip._visible = initialState;
-					unsel.clip._visible = !initialState;
-					var setState = function (newState : Bool) { sel.clip._visible = newState; unsel.clip._visible = !newState; }; 
-					if (null != onInit) {
-						onInit(setState);
-					}
-					clip.onMouseUp = function() {
-						if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
-							setState(!sel.clip._visible);
-							onChange(sel.clip._visible);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var sel = build(selected, clip, availableWidth, availableHeight, mode, 0);
+			var unsel = build(unselected, clip, availableWidth, availableHeight, mode, 1);
+			if (mode != Metrics) {
+				#if flash9
+					unsel.clip.buttonMode = true;
+					unsel.clip.mouseChildren = false;
+					sel.clip.buttonMode = true;
+					sel.clip.mouseChildren = false;
+					if (mode == Create) {
+						sel.clip.visible = initialState;
+						unsel.clip.visible = !initialState;
+						var setState = function (newState : Bool) { sel.clip.visible = newState; unsel.clip.visible = !newState; }; 
+						if (null != onInit) {
+							onInit(setState);
 						}
-					};
-				}
-			#end
-			return { clip: clip, width: Math.max(sel.width, unsel.width), height: Math.max(sel.height, unsel.height) };
+						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
+								if (null != onChange) {
+									setState(!sel.clip.visible);
+									onChange(sel.clip.visible);
+								}
+							});
+					}
+				#else flash
+					if (mode == Create) {
+						sel.clip._visible = initialState;
+						unsel.clip._visible = !initialState;
+						var setState = function (newState : Bool) { sel.clip._visible = newState; unsel.clip._visible = !newState; }; 
+						if (null != onInit) {
+							onInit(setState);
+						}
+						clip.onMouseUp = function() {
+							if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
+								setState(!sel.clip._visible);
+								onChange(sel.clip._visible);
+							}
+						};
+					}
+				#end
+			}
+			return { clip: clip, width: Math.max(sel.width, unsel.width), height: Math.max(sel.height, unsel.height), growWidth: sel.growWidth, growHeight: sel.growHeight};
 
 		case Filler:
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			setSize(clip, availableWidth, availableHeight);
-			return { clip: clip, width: availableWidth, height: availableHeight };
+			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: true, growHeight: true };
 		
 		case Fixed(width, height):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			setSize(clip, width, height);
-			return { clip: clip, width: width, height: height };
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode != Metrics) {
+				setSize(clip, width, height);
+			}
+			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
 
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-            var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, construct, 0);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+            var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
 			if (child.width < minimumWidth) {
 				setSize(clip, minimumWidth, child.height);
 				child.width = minimumWidth;
@@ -702,11 +734,13 @@ class ArcticView {
 				clipSize(clip, maximumWidth, child.height);
 				child.width = maximumWidth;
 			}
-            return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			child.growWidth = false;
+            return child;
 
         case ConstrainHeight(minimumHeight, maximumHeight, block) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), construct, 0);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, 0);
 			if (child.height < minimumHeight) {
 				setSize(clip, child.width, minimumHeight);
 				child.height = minimumHeight;
@@ -715,22 +749,30 @@ class ArcticView {
 				clipSize(clip, child.width, maximumHeight);
 				child.height = maximumHeight;
 			}
-            return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			child.growHeight = false;
+            return child;
 
 		case ColumnStack(blocks):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// The number of children which wants to grow (including our own fillers)
 			var numberOfWideChildren = 0;
 			var childMetrics = [];
 			var width = 0.0;
 			for (r in blocks) {
 				// We want the minimum size, so do not give any extra width to this
-				var m = calcMetrics(r, 0, availableHeight);
-				childMetrics.push(m);
-				if (m.growWidth) {
+				var cm = build(r, clip, 0, availableHeight, Metrics, 0);
+				childMetrics.push(cm);
+				if (cm.growWidth) {
 					numberOfWideChildren++;
 				}
-				width += m.width;
+				m.growWidth = m.growWidth || cm.growWidth;
+				// A filler here should in itself not impact height growth in this situation
+				if (r != Filler) {
+					m.growHeight = m.growHeight || cm.growHeight;
+				}
+				width += cm.width;
 			}
 
 			// Next, determine how much space children get
@@ -748,27 +790,31 @@ class ArcticView {
 			var h = 0.0;
 			var x = 0.0;
 			var i = 0;
-            var children = [];
 			for (l in blocks) {
 				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
-                var child = build(l, clip, w, availableHeight, construct, i);
-				#if flash9
-					child.clip.x = x;
-				#else flash
-					child.clip._x = x;
-				#end
-                children.push(child);				
+                var child = build(l, clip, w, availableHeight, mode, i);
+				if (mode != Metrics) {
+					#if flash9
+						child.clip.x = x;
+					#else flash
+						child.clip._x = x;
+					#end
+				}
 				x += child.width;
-				h = Math.max(h, child.height);
+				if (l != Filler) {
+					h = Math.max(h, child.height);
+				}
    				++i;
 			}
-			
-			return { clip: clip, width: x, height: h };
+			m.width = x;
+			m.height = h;
+			return m;
 
 		case LineStack(blocks, ensureVisibleIndex):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// Get child 0
-			var child = getOrMakeClip(clip, construct, 0);
+			var child = getOrMakeClip(clip, mode, 0);
 
 			// The number of children which wants to grow (including our own fillers)
 			var numberOfTallChildren = 0;
@@ -776,7 +822,7 @@ class ArcticView {
 			var minimumHeight = 0.0;
 			for (r in blocks) {
 				// We want the minimum size, so do not give any extra height to this
-				var m = calcMetrics(r, availableWidth, 0);
+				var m = build(r, clip, availableWidth, 0, Metrics, 0);
 				childMetrics.push(m);
 				if (m.growHeight) {
 					numberOfTallChildren++;
@@ -799,18 +845,25 @@ class ArcticView {
 			for (l in blocks) {
 				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
 				h = Math.max(0, h);
-                var line = build(l, child, availableWidth, h, construct, i);
-				#if flash9
-					line.clip.y = y;
-				#else flash
-					line.clip._y = y;
-				#end
+                var line = build(l, child, availableWidth, h, mode, i);
+				if (mode != Metrics) {
+					#if flash9
+						line.clip.y = y;
+					#else flash
+						line.clip._y = y;
+					#end
+				}
 				if (i == ensureVisibleIndex) {
 					ensureY = y;
 				}
                 children.push(line);
 				y += line.height;
 				w = Math.max(w, line.width);
+				// A filler here should in itself not impact width growth in this situation
+				if (l != Filler) {
+					m.growWidth = m.growWidth || line.growWidth;
+				}
+				m.growHeight = m.growHeight || line.growHeight;
    				++i;
 			}
 			if (i == ensureVisibleIndex) {
@@ -820,18 +873,22 @@ class ArcticView {
 			if (y > availableHeight && availableHeight >= 10) {
 				// Scrollbar
 				w += 12;
-				Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
+				if (mode != Metrics) {
+					Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
+				}
 				y = availableHeight;
 			} else {
-				if (!construct) {
+				if (mode == Reuse) {
 					Scrollbar.removeScrollbar(clip, child);
 				}
 			}
-			return { clip: clip, width: w, height: y };
+			m.width = w;
+			m.height = y;
+			return m;
 		
 		case Grid(cells):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = getOrMakeClip(clip, construct, 0);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = getOrMakeClip(clip, mode, 0);
 
 			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			var columnWidths = [];
@@ -842,7 +899,7 @@ class ArcticView {
 				var lineHeight = 0.0;
 				for (block in line) {
 					// We want the minimum size, so do not give any extra space to this
-					var m = calcMetrics(block, 0, 0);
+					var m = build(block, clip, 0, 0, Metrics, 0);
 					if (columnWidths.length <= x) {
 						columnWidths.push(m.width);
 					} else {
@@ -870,14 +927,16 @@ class ArcticView {
 				var x = 0;
 				var xc = 0.0;
 				for (block in line) {
-					var b = build(block, child, columnWidths[x], lineHeights[y], construct, i);
-					#if flash9
-						b.clip.x = xc;
-						b.clip.y = yc;
-					#else flash
-						b.clip._x = xc;
-						b.clip._y = yc;
-					#end
+					var b = build(block, child, columnWidths[x], lineHeights[y], mode, i);
+					if (mode != Metrics) {
+						#if flash9
+							b.clip.x = xc;
+							b.clip.y = yc;
+						#else flash
+							b.clip._x = xc;
+							b.clip._y = yc;
+						#end
+					}
 					xc += Math.max(b.width, columnWidths[x]);
 					++x;
 					++i;
@@ -894,19 +953,24 @@ class ArcticView {
 				height += h;
 			}
 		
-			return { clip: clip, width: width, height: height };
+			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
 
 		case ScrollBar(block, availableWidth, availableHeight):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-            var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-            Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, child.height, 0);
-            return { clip: clip, width: availableWidth, height: availableHeight };
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+            var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode != Metrics) {
+				Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, child.height, 0);
+			}
+			child.clip = clip;
+			child.width = availableWidth;
+			child.height = availableHeight;
+            return child;
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
-            var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (construct) {
+            var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
 				activeClips.push(child.clip);
 			}
 
@@ -914,59 +978,69 @@ class ArcticView {
 			var height = child.height;
 			if (stayWithin) {
 				if (sideMotion) {
-					width = Math.max(width, availableWidth);
+					child.growWidth = true;
+					child.width = Math.max(child.width, availableWidth);
 				}
 				if (upDownMotion) {
-					height = Math.max(height, availableHeight);
+					child.growHeight = true;
+					child.height = Math.max(child.height, availableHeight);
 				}
 			}
 			
+			if (mode == Metrics) {
+				child.clip = clip;
+				return child;
+			}
+
 			var info : BlockInfo;
-			if (construct) {
+			if (mode == Create) {
 				info = {
 					available: { width: availableWidth, height: availableHeight },
 					totalDx: 0.0,
 					totalDy: 0.0,
-					childWidth: child.width,
-					childHeight: child.height
+					childWidth: width,
+					childHeight: height
 				};
 				setBlockInfo(child.clip, info);
-			} else {
+			} else if (mode == Reuse) {
 				info = getBlockInfo(child.clip);
 				info.available = { width: availableWidth, height: availableHeight };
-				info.childWidth = child.width;
-				info.childHeight = child.height;
+				info.childWidth = width;
+				info.childHeight = height;
 			}
+			
 			if (stayWithin) {
 				setSize(clip, availableWidth, availableHeight);
 			}
 			
 			var me = this;
+			var dragClip = child.clip;
 			var setOffset = function (dx : Float, dy : Float) {
-				var info = me.getBlockInfo(child.clip);
+				var info = me.getBlockInfo(dragClip);
 				if (stayWithin) {
 					dx = Math.min(info.available.width - info.childWidth, dx);
 					dy = Math.min(info.available.height - info.childHeight, dy);
 				}
-				moveClip(child.clip, dx, dy);
+				moveClip(dragClip, dx, dy);
 				info.totalDx = dx;
 				info.totalDy = dy;
 			}; 
 			
-			if (!construct) {
+			if (mode != Create) {
 				if (null != onInit) {
 					// Reverse movement so it's back in a second
-					moveClip(child.clip, -info.totalDx, -info.totalDy);
+					moveClip(dragClip, -info.totalDx, -info.totalDy);
 					onInit(setOffset);
 				}
-				return { clip: clip, width: width, height: height};
+				child.clip = clip;
+				return child;
 			}
 			
 			var dragX = -1.0;
 			var dragY = -1.0;
 			
 			var doDrag = function (dx : Float, dy : Float) {
-				var info = me.getBlockInfo(child.clip);
+				var info = me.getBlockInfo(dragClip);
 				if (!sideMotion) {
 					dx = 0;
 				}
@@ -978,7 +1052,7 @@ class ArcticView {
 					while (Math.abs(dx) > 0) {
 						var newTotalDx = info.totalDx + dx;
 						if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childWidth)) {
-							moveClip(child.clip, dx, 0);
+							moveClip(dragClip, dx, 0);
 							info.totalDx = newTotalDx;
 							motion = true;
 							break;
@@ -995,7 +1069,7 @@ class ArcticView {
 					while (Math.abs(dy) > 0) {
 						var newTotalDy = info.totalDy + dy;
 						if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childHeight)) {
-							moveClip(child.clip, 0, dy);
+							moveClip(dragClip, 0, dy);
 							info.totalDy = newTotalDy;
 							motion = true;
 							break;
@@ -1038,7 +1112,7 @@ class ArcticView {
 					};
 				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
-						if (me.getActiveClip() == child.clip) {
+						if (me.getActiveClip() == dragClip) {
 							dragX = clip.stage.mouseX;
 							dragY = clip.stage.mouseY;
 							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
@@ -1063,7 +1137,7 @@ class ArcticView {
 				);
 			#else flash
 				clip.onMouseDown = function() {
-					if (me.getActiveClip() == child.clip) {
+					if (me.getActiveClip() == dragClip) {
 						// TODO: Check we do not hit a child which wants drags
 						dragX = flash.Lib.current._xmouse;
 						dragY = flash.Lib.current._ymouse;
@@ -1092,7 +1166,7 @@ class ArcticView {
 					onMouseMove : function() {},
 					onMouseUp : function() {},
 					onMouseWheel : function ( delta : Float, target ) {
-						if (child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+						if (dragClip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
 							if (upDownMotion) {
 								doDrag(0, -10 * delta);
 							} else if (sideMotion) {
@@ -1109,15 +1183,20 @@ class ArcticView {
 			if (null != onInit) {
 				onInit(setOffset);
 			}
-			return { clip: clip, width: width, height: height };
+			child.clip = clip;
+			return child;
 		
 		case Cursor(block, cursor, keepNormalCursor) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Metrics) {
+				child.clip = clip;
+				return child;
+			}
 			var me = this;
 			var cursorMc = null;
 			// We need to construct the cursor lazily because we want it to come on top of everything
-			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, construct, 1);};
+			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, mode, 1);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
@@ -1138,7 +1217,7 @@ class ArcticView {
 						showMouse();
 					}
 				};
-				if (construct) {
+				if (mode == Create) {
 					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
 					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
 							if (cursorMc != null) {
@@ -1169,7 +1248,7 @@ class ArcticView {
 								showMouse();
 							}
 						};
-				if (construct) {
+				if (mode == Create) {
 					if (clip.onMouseMove == null) {
 						clip.onMouseMove = onMove;
 					}
@@ -1187,266 +1266,67 @@ class ArcticView {
 				}
 				onMove();
 			#end
-			
-			return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			return child;
 
 		case Offset(dx, dy, block) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			if (construct) {
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
 				moveClip(child.clip, dx, dy);
 			}
-			return { clip: clip, width: child.width, height: child.height };
+			child.clip = clip;
+			return child;
 			
 		case OnTop(base, overlay) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			var child = build(base, clip, availableWidth, availableHeight, construct, 0);
-			var over = build(overlay, clip, availableWidth, availableHeight, construct, 1);
-			return { clip: clip, width: Math.max(child.width, over.width), height: Math.max(child.height, over.height) };
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(base, clip, availableWidth, availableHeight, mode, 0);
+			var over = build(overlay, clip, availableWidth, availableHeight, mode, 1);
+			return { clip: clip, width: Math.max(child.width, over.width), height: Math.max(child.height, over.height),
+					growWidth: child.growWidth || over.growWidth, growHeight: child.growHeight || over.growHeight};
 		 
 		case Id(id, block) :
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (updates.exists(id)) {
 				// TODO: Refine this to only send true if it's a new update
-				var child = build(updates.get(id), clip, availableWidth, availableHeight, construct, 0);
-				idMovieClip.set(id, child.clip);
-				return { clip: clip, width: child.width, height: child.height };
+				var child = build(updates.get(id), clip, availableWidth, availableHeight, mode, 0);
+				if (mode != Metrics) {
+					idMovieClip.set(id, child.clip);
+				}
+				child.clip = clip;
+				return child;
 			}
-			var child = build(block, clip, availableWidth, availableHeight, construct, 0);
-			idMovieClip.set(id, child.clip);
-			return { clip: clip, width: child.width, height: child.height };
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode != Metrics) {
+				idMovieClip.set(id, child.clip);
+			}
+			child.clip = clip;
+			return child;
 
-		case CustomBlock(data, calcMetricsFun, buildFun):
-			var clip : MovieClip = getOrMakeClip(p, construct, childNo);
-			if (construct) {
-				var result = buildFun(data, clip, availableWidth, availableHeight, null);
+		case CustomBlock(data, buildFun):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode == Create) {
+				var result = buildFun(data, mode, clip, availableWidth, availableHeight, null);
 				Reflect.setField(clip, "customClip", result.clip);
 				return result;
+			} else if (mode == Reuse) {
+				var dclip = Reflect.field(clip, "customClip");
+				return buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
 			} else {
-				var clip = Reflect.field(clip, "customClip");
-				return buildFun(data, clip, availableWidth, availableHeight, clip);
+				return buildFun(data, mode, null, availableWidth, availableHeight, null);
 			}
 		}
 		return null;
 	}
 
-	/**
-	 * This calculates the size of the given blocks, when the given space is available
-	 * for layout.
-	 * Special case: If availableWidth & availableHeight is 0, we calculate the minimum
-	 * size required to display the block (i.e. without using scrollbars).
-	 * For some blocks (like Text), we find the size of the block by temporarily constructing it,
-	 * because Flash does not provide reliable APIs for getting the size in other ways.
-	 * We cache the metrics for Text blocks, though.
-	 */
-	private function calcMetrics(c : ArcticBlock, availableWidth : Float, availableHeight : Float) : Metrics {
-#if false
-		var m = doCalcMetrics(c, availableWidth, availableHeight);
-		trace("calcMetrics: " + m.width + "," + m.height + " " + m.growWidth + "," + m.growHeight + " avail: " + availableWidth + "," + availableHeight + ":" + c);
-		return m;
-	}
-	
-	private function doCalcMetrics(c : ArcticBlock, availableWidth : Float, availableHeight : Float) : Metrics {
-#end
-		var text = null;
-		var growing = false;
-		switch (c) {
-		case Border(x, y, block):
-			var m = calcMetrics(block, availableWidth, availableHeight);
-			m.width += 2 * x;
-			m.height += 2 * y;
-			return m;
-		case Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing):		
-			if (xspacing == null) xspacing = 0;
-			if (yspacing == null) yspacing = 0;
-			if (thickness == null) thickness = 0;
-			var x = xspacing + thickness;
-			var y = yspacing + thickness;
-			if (x != 0 || y != 0) {
-				block = Border(x, y, block);
-			}
-			return calcMetrics(block, availableWidth, availableHeight);
-		case Shadow(block, distance, angle, color, alpha):
-			return calcMetrics(block, availableWidth, availableHeight);
-		case Background(color, block, alpha, roundRadius):
-			return calcMetrics(block, availableWidth, availableHeight);
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
-			return calcMetrics(block, availableWidth, availableHeight);
-		case Text(html, embeddedFont, wordWrap):
-			if (!wordWrap && metricsCache.exists(html)) {
-				var m = metricsCache.get(html);
-				return { width : m.width, height : m.height, growWidth : false, growHeight : false };
-			}
-			
-			text = html;
-			if (wordWrap) {
-				growing = true;
-			}
-				
-			// Fall-through to creation
-		case Picture(url, w, h, scaling, resource):
-			return { width : w, height : h, growWidth : false, growHeight : false };
-		case Button(block, hover, action):
-			return calcMetrics(block, availableWidth, availableHeight);
-		case ToggleButton(selected, unselected, initialState, onChange, onInit):
-			return calcMetrics(selected, availableWidth, availableHeight);
-		case Filler:
-			return { width : availableWidth, height : availableHeight, growWidth : true, growHeight : true };
-		case Fixed(width, height):
-			return { width : width, height : height, growWidth : false, growHeight : false };
-        case ConstrainWidth(minimumWidth, maximumWidth, block) :
-			var m = calcMetrics(block, Math.min(availableWidth, minimumWidth), availableHeight);
-			m.width = Math.min(minimumWidth, Math.max(maximumWidth, m.width));
-			m.growWidth = false;
-			return m;
-        case ConstrainHeight(minimumHeight, maximumHeight, block) :
-			var m = calcMetrics(block, availableWidth, Math.min(maximumHeight, availableHeight));
-			m.height = Math.min(minimumHeight, Math.max(maximumHeight, m.height));
-			m.growHeight = false;
-			return m;
-		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embedFont):
-			return { width : width, height : height, growWidth : false, growHeight : false };
-		case ColumnStack(columns):
-			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			for (c in columns) {
-				var cm = calcMetrics(c, 0, availableHeight);
-				m.width += cm.width;
-				m.height = Math.max(cm.height, m.height);
-				m.growWidth = m.growWidth || cm.growWidth;
-				// A filler here should in itself not impact height growth in this situation
-				if (c != Filler) {
-					m.growHeight = m.growHeight || cm.growHeight;
-				}
-			}
-			return m;
-		case LineStack(blocks, ensureVisibleIndex):
-			var m = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			for (c in blocks) {
-				var cm = calcMetrics(c, availableWidth, 0);
-				m.width = Math.max(cm.width, m.width);
-				m.height += cm.height;
-				// A filler here should in itself not impact width growth in this situation
-				if (c != Filler) {
-					m.growWidth = m.growWidth || cm.growWidth;
-				}
-				m.growHeight = m.growHeight || cm.growHeight;
-			}
-			// If we are higher, a scrollbar is added, so the resulting height is never more than availableHeight
-			// except if there is no height available for the scrollbar
-			if (m.height > availableHeight && availableHeight >= 10) {
-				m.width += 12;
-			}
-			return m;
-
-		case Grid(cells):
-			var gridMetrics = { width : 0.0, height : 0.0, growWidth : false, growHeight : false };
-			var columnWidths = [];
-			var lineHeights = [];
-			var y = 0;
-			for (line in cells) {
-				var x = 0;
-				var lineHeight = 0.0;
-				for (block in line) {
-					var m = calcMetrics(block, 0, 0);
-					if (columnWidths.length <= x) {
-						columnWidths.push(m.width);
-					} else {
-						if (columnWidths[x] < m.width) {
-							columnWidths[x] = m.width;
-						}
-					}
-					lineHeight = Math.max(lineHeight, m.height);
-					++x;
-				}
-				if (lineHeights.length <= y) {
-					lineHeights.push(lineHeight);
-				} else {
-					if (lineHeights[y] < lineHeight) {
-						lineHeights[y] = lineHeight;
-					}
-				}
-				++y;
-			}
-			for (w in columnWidths) {
-				gridMetrics.width += w;
-			}
-			for (h in lineHeights) {
-				gridMetrics.height += h;
-			}
-			return gridMetrics;
-		
-	    case ScrollBar(block, availableWidth, availableHeight):
-			var cm = calcMetrics(block, availableWidth, availableHeight);
-			if (cm.height > availableHeight) {
-				cm.height = availableHeight;
-			}
-			return cm;
-		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
-			var m = calcMetrics(block, availableWidth, availableHeight);
-			if (stayWithin) {
-				if (sideMotion) {
-					m.growWidth = true;
-					m.width = Math.max(m.width, availableWidth);
-				}
-				if (upDownMotion) {
-					m.growHeight = true;
-					m.height = Math.max(m.height, availableHeight);
-				}
-			}
-			return m;
-		case Cursor(block, cursor, keepNormalCursor) :
-			return calcMetrics(block, availableWidth, availableHeight);
-		case Offset(dx, dy, block):
-			return calcMetrics(block, availableWidth, availableHeight);
-		case OnTop(base, overlay) :
-			var m1 = calcMetrics(base, availableWidth, availableHeight);
-			var m2 = calcMetrics(overlay, availableWidth, availableHeight);
-			m1.width = Math.max(m1.width, m2.width);
-			m1.height = Math.max(m1.height, m2.height);
-			m1.growWidth = m1.growWidth || m2.growWidth;
-			m1.growHeight = m1.growHeight || m2.growHeight;
-			return m1;
-		case Id(id, block) :
-			if (updates.exists(id)) {
-				return calcMetrics(updates.get(id), availableWidth, availableHeight);
-			}
-			return calcMetrics(block, availableWidth, availableHeight);
-		case CustomBlock(data, calcMetricsFun, buildFun):
-			if (calcMetricsFun != null) {
-				return calcMetricsFun(data, availableWidth, availableHeight);
-			}
-			// Fall through to creation
-		}
-
-		// The sad fall-back scenario: Create the fucker and ask it, and then destroy it again
-		#if flash9
-			var tempMovie = new MovieClip();
-			parent.addChild(tempMovie);
-			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
-			var m = { width : mc.width, height : mc.height, growWidth: growing, growHeight: growing };
-			parent.removeChild(tempMovie);
-		#else flash
-			var d = parent.getNextHighestDepth();
-			var tempMovie = parent.createEmptyMovieClip("c" + d, d);
-			var mc = build(c, tempMovie, availableWidth, availableHeight, true, 0);
-			var m = { width : mc.width, height : mc.height, growWidth: growing, growHeight: growing };
-			tempMovie.removeMovieClip();
-//			mc.removeMovieClip();
-		#end
-		if (!growing && text != null) {
-			metricsCache.set(text, { width: m.width, height : m.height });
-		}
-		return m;
-	}
-	
 	/// For text elements, we cache the sizes
 	static private var metricsCache : Hash< { width: Float, height : Float } >;
 
 	/**
 	 * Creates a clip (if construct is true) as childNo, otherwise gets existing movieclip at that point.
 	 */ 
-	private function getOrMakeClip(p : MovieClip, construct : Bool, childNo : Int) : MovieClip {
-		if (construct) {
+	private function getOrMakeClip(p : MovieClip, buildMode : BuildMode, childNo : Int) : MovieClip {
+		if (buildMode == Create) {
 			#if flash9
 				var clip = new MovieClip();
 				p.addChild(clip);
@@ -1463,11 +1343,11 @@ class ArcticView {
 			movieClips.push(clip);
 			clip.tabEnabled = false;
 			return clip;
-		} else {
+		} else if (buildMode == Reuse) {
 			#if flash9
 				if (p.numChildren < childNo) {
 					// Fallback - should never happen
-					return getOrMakeClip(p, true, childNo);
+					return getOrMakeClip(p, Create, childNo);
 				} else {
 					var d : Dynamic= p.getChildAt(childNo);
 					return d;
@@ -1477,8 +1357,10 @@ class ArcticView {
 					return Reflect.field(p, "c" + childNo);
 				}
 				// Fallback - should never happen
-				return getOrMakeClip(p, true, childNo);
+				return getOrMakeClip(p, Create, childNo);
 			#end
+		} else {
+			return null;
 		}
 	}
 
@@ -1531,6 +1413,9 @@ class ArcticView {
 	 * Notice also that it clears out any graphics that might exist in the clip.
 	 */
 	static public function setSize(clip : MovieClip, width : Float, height : Float) {
+		if (clip == null) {
+			return;
+		}
 		#if flash9
 			// Set the size
 			clip.graphics.clear();
@@ -1564,6 +1449,9 @@ class ArcticView {
 
 	/// Get the size of a MovieClip, respecting clipping
 	static public function getSize(clip : MovieClip) : { width : Float, height : Float } {
+		if (clip == null) {
+			return { width : 0.0, height : 0.0 };
+		}
 		if (clip.scrollRect != null) {
 			return { width : clip.scrollRect.width, height : clip.scrollRect.height };
 		}

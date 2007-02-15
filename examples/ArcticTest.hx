@@ -17,6 +17,8 @@ class ArcticTest {
 		parent = parent_;
 		
 		showHelloWorld1();
+		//draggable();
+		//wideText();
 	}
 
 	public function showHelloWorld1() {
@@ -139,40 +141,39 @@ class ArcticTest {
 	public function customBlock() {
 		arcticView.destroy();
 	
-		// A custom block needs two functions. One to tell Arctic the size and desired resizing behaviour:
-		var calcMetrics = function(data : Int, availableWidth, availableHeight) : Metrics {
-			return { width: 100.0, height : 100.0, growHeight : false, growWidth : false };
-		}
-		// And another one which should paint & construct the block when ready
-		var build = function(data : Int, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
-			#if flash9
-				parentMc.graphics.beginFill(data);
-				parentMc.graphics.moveTo(50, 0);
-				parentMc.graphics.lineTo(100, 100);
-				parentMc.graphics.lineTo(0, 100);
-				parentMc.graphics.lineTo(50, 0);
-				parentMc.graphics.endFill();
-			#else flash
-				parentMc.beginFill(data);
-				parentMc.moveTo(50, 0);
-				parentMc.lineTo(100, 100);
-				parentMc.lineTo(0, 100);
-				parentMc.lineTo(50, 0);
-				parentMc.endFill();
-			#end
-			return { clip: parentMc, width: 100.0, height: 100.0 };
+		// A custom block needs a function which can tell Arctic the size and desired resizing behaviour,
+		// and paint & construct the block when ready
+		var build = function(data : Int, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
+			if (mode != Metrics) {
+				#if flash9
+					parentMc.graphics.beginFill(data);
+					parentMc.graphics.moveTo(50, 0);
+					parentMc.graphics.lineTo(100, 100);
+					parentMc.graphics.lineTo(0, 100);
+					parentMc.graphics.lineTo(50, 0);
+					parentMc.graphics.endFill();
+				#else flash
+					parentMc.beginFill(data);
+					parentMc.moveTo(50, 0);
+					parentMc.lineTo(100, 100);
+					parentMc.lineTo(0, 100);
+					parentMc.lineTo(50, 0);
+					parentMc.endFill();
+				#end
+			}
+			return { clip: parentMc, width: 100.0, height: 100.0, growHeight : false, growWidth : false };
 		}
 		
 		var custom = Background( 0x000000,
 						Border( 10, 10, 
 							LineStack( [ 
 								// The first custom block is inserted here - the payload data is the color of our custom block
-								CustomBlock( 0xff0000, calcMetrics, build ), 
+								CustomBlock( 0xff0000, build ), 
 								// Notice that we give it null as metrics here
 								// Then, arctic will build the block behind the scenes to get the metrics
-								CustomBlock( 0xffff00, null, build), 
+								CustomBlock( 0xffff00, build), 
 								// The final one
-								CustomBlock( 0x00ff00, calcMetrics, build) 
+								CustomBlock( 0x00ff00, build) 
 							] )
 						)
 					);
@@ -182,7 +183,7 @@ class ArcticTest {
 	}
 	
 	public function draggable() {
-		arcticView.destroy();
+		if (arcticView != null) { arcticView.destroy(); }
 
 		// Small example showing the different kinds of draggable blocks possible in Arctic
 		var makeText = function (text) {
@@ -199,12 +200,23 @@ class ArcticTest {
 	}
 	
 	public function wideText() {
-		arcticView.destroy();
-		var gui = ColumnStack( [ 
-			Filler, 
-			Text("Arctic is a simple haXe GUI framework which allows you to create user interfaces for flash applications. It is unique by supporting both Flash 8 and Flash 9 targets using the same client code.", 
-				null, true),
-			Filler ] );
+		if (arcticView != null) {
+			arcticView.destroy();
+		}
+		var gui = 
+		Background(0x00ff00,
+			LineStack([
+				Filler,
+				ColumnStack( [ 
+					Filler, 
+					Background(0xff0000, 
+						Arctic.makeText("Arctic is a simple haXe GUI framework which allows you to create user interfaces for flash applications. It is unique by supporting both Flash 8 and Flash 9 targets using the same client code.", 20, "#ffffff", null, null, true)
+					),
+					Filler 
+				] ),
+				Filler
+			])
+		);
 		arcticView = new ArcticView(gui, parent);
 		var root = arcticView.display(true);
 	}
