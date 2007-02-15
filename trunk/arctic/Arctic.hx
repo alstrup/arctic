@@ -88,21 +88,20 @@ class Arctic {
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
-		var calcMetrics = function(data, availableWidth, availableHeight) {
-			return { width: 13.0, height: 13.0, growWidth : false, growHeight : false };
-		}
-		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
+		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var size = 12;
-			DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
-			if (state) {
-				size -= 4;
-				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
+			if (mode != Metrics) {
+				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
+				if (state) {
+					size -= 4;
+					DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
+				}
 			}
-			return { clip: parentMc, width: 13.0, height: 13.0 };
+			return { clip: parentMc, width: 13.0, height: 13.0, growWidth : false, growHeight : false };
 		}
 
-		var notSelectedBlock = ColumnStack( [ CustomBlock(false, calcMetrics, build), block ] );
-		var selectedBlock = ColumnStack( [ CustomBlock(true, calcMetrics, build), block ] );
+		var notSelectedBlock = ColumnStack( [ CustomBlock(false, build), block ] );
+		var selectedBlock = ColumnStack( [ CustomBlock(true, build), block ] );
 		return ToggleButton(selectedBlock, notSelectedBlock, selected, ourOnCheck, ourOnInit);
 	}
 	
@@ -116,24 +115,25 @@ class Arctic {
 			textSize = 12;
 		}
 		// Callback fn for the CustomBlock to draw Radio button
-		var calcMetrics = function(data, availableWidth, availableHeight) {
-			return { width: 13.0, height: 13.0, growWidth : false, growHeight : false };
-		}
-		var build = function(state : Bool, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
+		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var radius = 6;
-			DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
-			if (state) {
-				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
+			if (mode != Metrics) {
+				if (mode == Create) {
+					DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
+					if (state) {
+						DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
+					}
+				}
 			}
-			return { clip: parentMc, width: 13.0, height: 13.0 };
+			return { clip: parentMc, width: 13.0, height: 13.0, growWidth : false, growHeight : false };
 		}
 		
 		var entries : Array<{ selected: ArcticBlock, unselected: ArcticBlock, value : String }> = [];
 		var i = 0;
 		for (text in texts) {
-			var selected = Border(1, 1, ColumnStack([CustomBlock(true, calcMetrics, build),
+			var selected = Border(1, 1, ColumnStack([CustomBlock(true, build),
 													 makeText(text, textSize)]));
-			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, calcMetrics, build),
+			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, build),
 													   makeText(text, textSize)]));
 			entries.push( { selected: selected, unselected: unselected, value: text } );
 		}
