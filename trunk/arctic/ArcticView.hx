@@ -727,11 +727,15 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
 			if (child.width < minimumWidth) {
-				setSize(clip, minimumWidth, child.height);
+				if (mode != Metrics) {
+					setSize(clip, minimumWidth, child.height);
+				}
 				child.width = minimumWidth;
 			}
 			if (child.width > maximumWidth) {
-				clipSize(clip, maximumWidth, child.height);
+				if (mode != Metrics) {
+					clipSize(clip, maximumWidth, child.height);
+				}
 				child.width = maximumWidth;
 			}
 			child.clip = clip;
