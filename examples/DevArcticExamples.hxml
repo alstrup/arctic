@@ -43,6 +43,7 @@
 # HelloWorld
 -swf HelloWorld.swf
 -main HelloWorld
+-debug
 -cp ..
 
 --next
@@ -50,4 +51,5 @@
 -swf HelloWorld9.swf
 -swf-version 9
 -main HelloWorld
+-debug
 -cp ..
