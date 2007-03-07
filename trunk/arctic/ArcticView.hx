@@ -136,7 +136,7 @@ class ArcticView {
 		if (true) {
 			/// This is smart refresh, where we reuse MovieClips to reduce flicker
 			var stage = getStageSize(parent);
-			var result = build(gui, parent, stage.width, stage.height, Reuse, 0);
+			var result = build(gui, parent, stage.width, stage.height, Reuse, firstChild);
 			base = result.clip;
 		} else {
 			/// This is dumb refresh, where we rebuilt everything from scratch
@@ -162,6 +162,11 @@ class ArcticView {
 			activeClips = [];
 			idMovieClip = new Hash<ArcticMovieClip>();
 			showMouse();
+			#if flash9
+			firstChild = parent.numChildren;
+			#else flash
+			firstChild = parent.getNextHighestDepth();
+			#end
 		}
 		var size;
 		if (useStageSize) {
@@ -169,10 +174,12 @@ class ArcticView {
 		} else {
 			size = getSize(parent);
 		}
-
-		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, 0);
+		
+		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
 		base = result.clip;
 	}
+	/// What child number is the root block on the parent clip?
+	private var firstChild : Int;
 
 	/**
 	 * Use this to change the named block to the new block. You have to

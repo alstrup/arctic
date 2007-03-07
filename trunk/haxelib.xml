@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.7.0">Consolidation build and calcMetrics: It was difficult to keep these synchronised, so bite the bullet and consolidate them. This means that CustomBlock API has changed. Fix bug with grid: A grid is never growing. Change word wrapping text behaviour: Does not grow in height in the same way, although there are still bugs</version>
+    <version name="0.7.1">Support resizing ArcticViews on MovieClips with other stuff on them, do not change sizes during metrics</version>
 </project>
