@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.7.1">Support resizing ArcticViews on MovieClips with other stuff on them, do not change sizes during metrics</version>
+    <version name="0.7.2">adjustToFit returns the resulting size. Fix spurious scrollbars due to floating inaccuracy. Support clearing Id-updates. TextInput-validator is called on every change in Flash 9 as well as Flash 8 (</version>
 </project>
