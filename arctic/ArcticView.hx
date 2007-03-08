@@ -537,7 +537,7 @@ class ArcticView {
 					txtInput.defaultTextFormat = txtFormat;
 					// Set the text again to enforce the formatting
 					txtInput.htmlText = html;
-					var listener = function (e:Event) { validate(); };
+					var listener = function (e) { validate(); };
 					txtInput.addEventListener(flash.events.Event.CHANGE, listener);
 					clip.addChild(txtInput);
 					txtInput.type = TextFieldType.INPUT;
