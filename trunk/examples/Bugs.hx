@@ -48,9 +48,9 @@ class Bugs {
 				]);
 			case 3:
 			// Nested LineStack become too big:
-			screen = Border(0, 120, Background(0xf08000, 
+			screen = Border(20, 120, Background(0xf08000, 
 				LineStack( [ 
-					LineStack( [ Arctic.makeText("Text", 100), Filler ] ),
+					LineStack( [ Arctic.makeText("Text", 50), Filler ] ),
 					Arctic.makeSimpleButton( "Next bug", next )
 				] )));
 			case 4:
@@ -64,11 +64,19 @@ class Bugs {
 			// This should be a clickable 20x20 red box
 			screen = Background(0xff0000, Button(Fixed(20, 20), Fixed(20, 20), next) );
 //			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
-//			fullsize = false;
+			fullsize = false;
 			case 6:
 			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
 			screen = LineStack( [ Arctic.makeText("Text", 200), Arctic.makeSimpleButton( "Next bug", next ) ] );
 			case 7:
+			screen = LineStack( [
+								  LineStack( [ Filler, Background(0xff0000, Button(Fixed(50, 50), Fixed(50, 50), next)) ]),
+								  LineStack( [ Filler, Background(0x00ff00, Fixed(10, 10)) ] )
+					] );
+			fullsize = false;
+			case 8:
+			screen = LineStack( [ Filler, ColumnStack( [ Filler, Arctic.makeSimpleButton( "Next bug", next ) ] ) ] );
+			case 9:
 			screen =
 			Border(10,10,
 				Background( 0x8888ff,
@@ -107,9 +115,17 @@ class Bugs {
 		}
 		 // Then construct the arctic object
 		arcticView = new ArcticView( screen, parent );
+		#if false
+			if (false) {
+				arcticView.debug = true;
+				arcticView.adjustToFit(400, 400);
+				arcticView.debug = false;
+			}
+		#end
 		if (!fullsize) {
 			arcticView.adjustToFit(0, 0);
 		}
+		//arcticView.debug = true;
 		// And finally display on the given movieclip
 		var root = arcticView.display(fullsize);
 		++count;

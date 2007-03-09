@@ -218,6 +218,7 @@ class ArcticTest {
 			])
 		);
 		arcticView = new ArcticView(gui, parent);
+//		arcticView.debug = true;
 		var root = arcticView.display(true);
 	}
 

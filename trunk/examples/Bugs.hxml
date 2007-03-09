@@ -1,7 +1,10 @@
 # bugs.swf
 -swf bugs.swf
 -main Bugs
+-debug
 -cp ..
+#-swf-header 800:1000:50
+
 
 --next
 # bugs9.swf
