@@ -252,10 +252,26 @@ class ArcticView {
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #if false
+		if (mode == Metrics && debug) {
+			if (nesting == null) {
+				nesting = "";
+			} else {
+				nesting = nesting + "  ";
+			}
+			trace(nesting + "Calling build ( " + availableWidth + "," + availableHeight + ") on "+ gui);
+		}
 		var clip = doBuild(gui, p, availableWidth, availableHeight, mode, childNo);
-		trace("build (" + availableWidth + "," + availableHeight + "): (" + clip.width + "," + clip.height + ") on " + gui );
+		if (mode == Metrics && debug) {
+			trace(nesting + "build (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
+				+ clip.width + "," + clip.height + " " + clip.growWidth + "," + clip.growHeight + ") on " + gui );
+			nesting = nesting.substr(0, nesting.length - 2);
+		}
+
 		return clip;
 	}
+	
+	public var debug : Bool;
+	private var nesting : String;
 	
 	private function doBuild(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
@@ -773,10 +789,12 @@ class ArcticView {
 			var numberOfWideChildren = 0;
 			var childMetrics = [];
 			var width = 0.0;
+			var maxHeight = 0.0;
 			for (r in blocks) {
 				// We want the minimum size, so do not give any extra width to this
 				var cm = build(r, clip, 0, availableHeight, Metrics, 0);
 				childMetrics.push(cm);
+				maxHeight = Math.max(maxHeight, cm.height);
 				if (cm.growWidth) {
 					numberOfWideChildren++;
 				}
@@ -785,6 +803,9 @@ class ArcticView {
 					m.growHeight = m.growHeight || cm.growHeight;
 				}
 				width += cm.width;
+			}
+			if (m.growHeight) {
+				maxHeight = Math.max(maxHeight, availableHeight);
 			}
 
 			// Next, determine how much space children get
@@ -805,7 +826,8 @@ class ArcticView {
 			var i = 0;
 			for (l in blocks) {
 				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
-                var child = build(l, clip, w, availableHeight, mode, i);
+				var child = build(l, clip, w, maxHeight, mode, i);
+                // var child = build(l, clip, w, availableHeight, mode, i);
 				if (mode != Metrics) {
 					#if flash9
 						child.clip.x = x;
@@ -833,20 +855,29 @@ class ArcticView {
 			var numberOfTallChildren = 0;
 			var childMetrics = [];
 			var minimumHeight = 0.0;
+			var maxWidth = 0.0;
 			for (r in blocks) {
 				// We want the minimum size, so do not give any extra height to this
-				var m = build(r, clip, availableWidth, 0, Metrics, 0);
-				childMetrics.push(m);
-				if (m.growHeight) {
+				var rm = build(r, clip, availableWidth, 0, Metrics, 0);
+				maxWidth = Math.max(maxWidth, rm.width);
+				childMetrics.push(rm);
+				if (rm.growHeight) {
 					numberOfTallChildren++;
 				}
-				minimumHeight += m.height;
+				minimumHeight += rm.height;
+				// A filler here should in itself not impact width growth in this situation
+				if (r != Filler) {
+					m.growWidth = m.growWidth || rm.growWidth;
+				}
 			}
 
+			if (m.growWidth) {
+				maxWidth = Math.max(maxWidth, availableWidth);
+			}
 			// Next, determine how much space children get
             var freeSpace = availableHeight - minimumHeight;
 			var freeSpacePerChild = 0.0;
-			if (numberOfTallChildren > 0) {
+			if (numberOfTallChildren > 0 && freeSpace > 0) {
 				freeSpacePerChild = freeSpace / numberOfTallChildren;
 			}
 
@@ -858,7 +889,8 @@ class ArcticView {
 			for (l in blocks) {
 				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
 				h = Math.max(0, h);
-                var line = build(l, child, availableWidth, h, mode, i);
+                var line = build(l, child, maxWidth, h, mode, i);
+                // var line = build(l, child, availableWidth, h, mode, i);
 				if (mode != Metrics) {
 					#if flash9
 						line.clip.y = y;
