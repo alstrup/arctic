@@ -21,6 +21,7 @@ class Bugs {
 		var me = this;
 		var screen;
 		var fullsize = true;
+		var nextButton = Arctic.makeSimpleButton( "Next bug", next );
 		switch (count) {
 			case 0:
 			// Tooltips were underneath following elements
@@ -29,7 +30,7 @@ class Bugs {
 				ColumnStack( [
 					Arctic.makeTooltip( Text("This text has a tooltip."), "This tooltip should come on top of everything"),
 					Text("Don't go beneath this stuff"),
-					Arctic.makeSimpleButton( "Next bug", next )
+					nextButton
 				] ) );
 			case 1:
 			// Not possible to select text in textinput nested in dragable
@@ -37,46 +38,64 @@ class Bugs {
 				LineStack( [
 					Arctic.makeDragable(true, true, true, Background(0x8080ff, Border(10, 10, TextInput("Selection with mouse should work", 200, 20)))),
 					Arctic.makeDragable(true, true, true, Background(0x8080ff, Border(10, 10, TextInput("Selection with mouse should work", 200, 20)))),
-					Arctic.makeSimpleButton( "Next bug", next )
+					nextButton
 				]);
 			case 2:
 			// Nested dragables were dually dragged
 			screen = 
 				LineStack( [
 					Arctic.makeDragable(true, true, true, ConstrainWidth(300, 300, ConstrainHeight(100, 100, Background(0x8080ff, Border(10, 10, Arctic.makeDragable(true, true, true, Background(0x80ff80, Border(10, 10, TextInput("Selection with mouse should work", 200, 20))))))))),
-					Arctic.makeSimpleButton( "Next bug", next )
+					nextButton
 				]);
 			case 3:
 			// Nested LineStack become too big:
 			screen = Border(20, 120, Background(0xf08000, 
 				LineStack( [ 
 					LineStack( [ Arctic.makeText("Text", 50), Filler ] ),
-					Arctic.makeSimpleButton( "Next bug", next )
+					nextButton
 				] )));
 			case 4:
 			// Text radio-choice does not work
 			screen = 
 					LineStack( [ 
 						Arctic.makeTextChoice([ "See custom block", "See dragable blocks" ], function(i : Int, text : String) { }, 0, 20).block,
-						Arctic.makeSimpleButton( "Next bug", next )
+						nextButton
 					]);
 			case 5:
 			// This should be a clickable 20x20 red box
+			// TODO: This does not work with Flash 9!
 			screen = Background(0xff0000, Button(Fixed(20, 20), Fixed(20, 20), next) );
 //			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
 			fullsize = false;
 			case 6:
 			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
-			screen = LineStack( [ Arctic.makeText("Text", 200), Arctic.makeSimpleButton( "Next bug", next ) ] );
+			screen = LineStack( [ Arctic.makeText("Text", 200), nextButton ] );
 			case 7:
+			// This should be a red 50x50 box with a green 10x10 box below - the fillers become 0 height, because we do not fullsize it
 			screen = LineStack( [
 								  LineStack( [ Filler, Background(0xff0000, Button(Fixed(50, 50), Fixed(50, 50), next)) ]),
 								  LineStack( [ Filler, Background(0x00ff00, Fixed(10, 10)) ] )
 					] );
 			fullsize = false;
 			case 8:
-			screen = LineStack( [ Filler, ColumnStack( [ Filler, Arctic.makeSimpleButton( "Next bug", next ) ] ) ] );
+			// Should be in the bottom right corner
+			screen = LineStack( [ Filler, ColumnStack( [ Filler, nextButton ] ) ] );
 			case 9:
+			// Innermost linestack should get scrollbar, not outermost
+			screen = LineStack( [ 
+						Background(0xff0000, Fixed(100, 100)),
+						Background(0x00ff00, 
+							LineStack( [
+								Filler,
+								Fixed(100, 600),
+								nextButton
+							])
+						),
+						Filler,
+						Background(0xff0000, Fixed(100, 100))
+					]);
+			case 10:
+			// TextInputs should not go outside screen
 			screen =
 			Border(10,10,
 				Background( 0x8888ff,
@@ -116,7 +135,7 @@ class Bugs {
 		 // Then construct the arctic object
 		arcticView = new ArcticView( screen, parent );
 		#if false
-			if (false) {
+			if (true) {
 				arcticView.debug = true;
 				arcticView.adjustToFit(400, 400);
 				arcticView.debug = false;
@@ -125,7 +144,9 @@ class Bugs {
 		if (!fullsize) {
 			arcticView.adjustToFit(0, 0);
 		}
-		//arcticView.debug = true;
+		#if false
+			arcticView.debug = true;
+		#end
 		// And finally display on the given movieclip
 		var root = arcticView.display(fullsize);
 		++count;
