@@ -11,4 +11,5 @@
 -swf bugs9.swf
 -swf-version 9
 -main Bugs
+-debug
 -cp ..

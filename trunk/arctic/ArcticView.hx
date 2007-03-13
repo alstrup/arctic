@@ -794,13 +794,13 @@ class ArcticView {
 				// We want the minimum size, so do not give any extra width to this
 				var cm = build(r, clip, 0, availableHeight, Metrics, 0);
 				childMetrics.push(cm);
-				maxHeight = Math.max(maxHeight, cm.height);
 				if (cm.growWidth) {
 					numberOfWideChildren++;
 				}
 				// A filler here should in itself not impact height growth in this situation
 				if (r != Filler) {
 					m.growHeight = m.growHeight || cm.growHeight;
+					maxHeight = Math.max(maxHeight, cm.height);
 				}
 				width += cm.width;
 			}
@@ -859,7 +859,6 @@ class ArcticView {
 			for (r in blocks) {
 				// We want the minimum size, so do not give any extra height to this
 				var rm = build(r, clip, availableWidth, 0, Metrics, 0);
-				maxWidth = Math.max(maxWidth, rm.width);
 				childMetrics.push(rm);
 				if (rm.growHeight) {
 					numberOfTallChildren++;
@@ -868,6 +867,7 @@ class ArcticView {
 				// A filler here should in itself not impact width growth in this situation
 				if (r != Filler) {
 					m.growWidth = m.growWidth || rm.growWidth;
+					maxWidth = Math.max(maxWidth, rm.width);
 				}
 			}
 
