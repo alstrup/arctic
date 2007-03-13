@@ -3,7 +3,7 @@
 -main Bugs
 -debug
 -cp ..
-#-swf-header 800:1000:50
+#-swf-header 800:400:50
 
 
 --next
