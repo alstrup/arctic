@@ -86,9 +86,9 @@ class Bugs {
 						Background(0xff0000, Fixed(100, 100)),
 						Background(0x00ff00, 
 							LineStack( [
+								nextButton,
 								Filler,
-								Fixed(100, 600),
-								nextButton
+								Background(0x0000ff, Fixed(100, 300))
 							])
 						),
 						Filler,

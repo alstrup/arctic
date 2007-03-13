@@ -1,5 +1,5 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.7.3">Fix bug with spurious scrollbars with nested LineStacks. Change sizing behaviour of LineStacks and ColumnStacks in case children are not filling in opposite direction.</version>
+    <version name="0.7.4">Make it such that scrollbars appear in innermost LineStacks, rather than outermost</version>
 </project>

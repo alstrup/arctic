@@ -877,6 +877,31 @@ class ArcticView {
 			// Next, determine how much space children get
             var freeSpace = availableHeight - minimumHeight;
 			var freeSpacePerChild = 0.0;
+			
+			// This is logic to try to make it such that innermost children get scrollbars, rather than outermost
+			if (freeSpace < 0) {
+				// See if we can free space up by shrinking children enough
+				var gh = 0.0;
+				var shrinkable = 0;
+				var cutoffHeight = 20;
+				for (cm in childMetrics) {
+					if (cm.growHeight && cm.height > cutoffHeight) {
+						gh += (cm.height - cutoffHeight);
+						shrinkable++;
+					}
+				}
+				if (gh >= -freeSpace) {
+					// We could use knapsack to reduce children instead
+					var reductionPerGrowingChild = freeSpace / shrinkable;
+					for (cm in childMetrics) {
+						if (cm.growHeight && cm.height > cutoffHeight) {
+							cm.height += reductionPerGrowingChild;
+						}
+					}
+					freeSpace = 0;
+				}
+			}
+			
 			if (numberOfTallChildren > 0 && freeSpace > 0) {
 				freeSpacePerChild = freeSpace / numberOfTallChildren;
 			}
