@@ -1,9 +1,3 @@
-#if flash9
-import flash.display.MovieClip;
-#else flash
-import flash.MovieClip;
-#end
-
 import arctic.Arctic;
 import arctic.ArcticView;
 import arctic.ArcticBlock;
@@ -14,7 +8,7 @@ class DynamicExample  {
 		new DynamicExample(flash.Lib.current);
 	}
 	
-	public function new(parent_ : MovieClip) {
+	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 		
 		showDialog();
@@ -27,14 +21,13 @@ class DynamicExample  {
 		var screen = Border(100, 20, Background(0xf08000, 
 			LineStack( [ 
 				Id("elements", Filler), 
-				Arctic.makeSimpleButton("Add row",  function() { me.addRow(); }, 50),
-				Arctic.makeSimpleButton("Close",  function() { me.remove(); }, 50) 
+				Arctic.makeSimpleButton("Add row", addRow, 50),
+				Arctic.makeSimpleButton("Next screen", nextScreen, 50) 
 			] ) ) );
 
 		// Then construct the arctic object
 		arcticView = new ArcticView( screen, parent );
 		// And finally display on the given movieclip
-//		ArcticView.setSize(parent, 100, 100);
 		var root = arcticView.display(true);
 	}
 	
@@ -49,7 +42,7 @@ class DynamicExample  {
 		arcticView.refresh(true);
 	}
 	
-	private function remove() {
+	private function nextScreen() {
 		arcticView.destroy();
 		arcticView = null;
 		
@@ -69,5 +62,5 @@ class DynamicExample  {
 	
 	private var rows : Array<String>;
 	private var arcticView : ArcticView;
-	private var parent : MovieClip;
+	private var parent : ArcticMovieClip;
 }

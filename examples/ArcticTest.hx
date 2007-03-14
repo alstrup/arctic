@@ -1,19 +1,14 @@
-#if flash9
-import flash.display.MovieClip;
-#else flash
-import flash.MovieClip;
-#end
-
 import arctic.Arctic;
-import arctic.ArcticView;
+import arctic.ArcticMC;
 import arctic.ArcticBlock;
+import arctic.ArcticView;
 
 class ArcticTest {
 	static public function main() {
 		new ArcticTest(flash.Lib.current);
 	}
 	
-	public function new(parent_ : MovieClip) {
+	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 		
 		showHelloWorld1();
@@ -40,7 +35,7 @@ class ArcticTest {
 								Filler, 
 								ColumnStack( [
 									Filler,
-									Shadow( Text("<font face='arial' size='40'>Hello world!</font>"), 7, 45, 0x777777, 0.5 ),
+									Shadow( Arctic.makeText("Hello world!", 40, null, "arial"), 7, 45, 0x777777, 0.5 ),
 									Filler ]
 								),
 								Filler,
@@ -78,7 +73,7 @@ class ArcticTest {
 				Border(5, 5,
 					GradientBackground( "radial", [0xffffCE, 0xffee77], 0.2, 0.4,
 						ColumnStack( [
-							Border(10, 35, Text("<font face='arial' size='28'>" + c.time + "</font>") ),
+							Border(10, 35, Arctic.makeText(c.time, 28, null, "arial") ),
 							Border(5, 5, Picture("images/" + c.icon + ".jpg", 80, 100, 1.0) ),
 							LineStack( [
 								Text("<font face='arial' size='18'><b>" + c.name + "</b><br/><font size='16'>" + c.reason + "</font></font>"),
@@ -102,7 +97,7 @@ class ArcticTest {
 								ColumnStack( [
 									Frame(Arctic.makeDateView(Date.now()), 1, 0x777777, 2, 100, 2, 2), 
 									Border( 20, 20, 
-										Text("<b><font face='arial' size='24' color='#ffffff'>Today's appointments</font></b>")
+										Arctic.makeText("<b>Today's appointments</b>", 24, "#ffffff", "arial")
 									)
 								] )
 							),
@@ -110,7 +105,7 @@ class ArcticTest {
 							Border( 10, 10,
 								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
-							Border( 10, 10, Arctic.makeCheckbox( Text(Arctic.wrapWithDefaultFont("Check box", 20))) ),
+							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)) ),
 							ColumnStack( [
 								Filler,
 								Arctic.makeSimpleButton("Continue",  screen1next, 25)
@@ -145,21 +140,15 @@ class ArcticTest {
 		// and paint & construct the block when ready
 		var build = function(data : Int, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			if (mode != Metrics) {
-				#if flash9
-					parentMc.graphics.beginFill(data);
-					parentMc.graphics.moveTo(50, 0);
-					parentMc.graphics.lineTo(100, 100);
-					parentMc.graphics.lineTo(0, 100);
-					parentMc.graphics.lineTo(50, 0);
-					parentMc.graphics.endFill();
-				#else flash
-					parentMc.beginFill(data);
-					parentMc.moveTo(50, 0);
-					parentMc.lineTo(100, 100);
-					parentMc.lineTo(0, 100);
-					parentMc.lineTo(50, 0);
-					parentMc.endFill();
-				#end
+				// This is used both for creation and update
+				var g = ArcticMC.getGraphics(parentMc);
+				g.clear();
+				g.beginFill(data);
+				g.moveTo(50, 0);
+				g.lineTo(100, 100);
+				g.lineTo(0, 100);
+				g.lineTo(50, 0);
+				g.endFill();
 			}
 			return { clip: parentMc, width: 100.0, height: 100.0, growHeight : false, growWidth : false };
 		}
@@ -169,8 +158,7 @@ class ArcticTest {
 							LineStack( [ 
 								// The first custom block is inserted here - the payload data is the color of our custom block
 								CustomBlock( 0xff0000, build ), 
-								// Notice that we give it null as metrics here
-								// Then, arctic will build the block behind the scenes to get the metrics
+								// The middle one
 								CustomBlock( 0xffff00, build), 
 								// The final one
 								CustomBlock( 0x00ff00, build) 
@@ -187,7 +175,7 @@ class ArcticTest {
 
 		// Small example showing the different kinds of draggable blocks possible in Arctic
 		var makeText = function (text) {
-			return Background(0x202020, Border(5, 5, Text("<font size='20' face='arial' color='#ffffff'>" + text + "</font>")), 100, 5);
+			return Background(0x202020, Border(5, 5, Arctic.makeText(text, 20, "#ffffff", "arial")), 100, 5);
 		}
 		var drag = LineStack( [
 					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area"), 300 ) ),
@@ -222,11 +210,11 @@ class ArcticTest {
 		var root = arcticView.display(true);
 	}
 
-	public var arcticView : ArcticView;
-	public var radioChoice : Int;
+	var arcticView : ArcticView;
+	var radioChoice : Int;
 	
-	public var parent : MovieClip;
-	public var screen1 : ArcticBlock;
-	public var screen2 : ArcticBlock;
-	public var screen3 : ArcticBlock;
+	var parent : ArcticMovieClip;
+	var screen1 : ArcticBlock;
+	var screen2 : ArcticBlock;
+	var screen3 : ArcticBlock;
 }

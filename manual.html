@@ -228,3 +228,22 @@ block]) wrapper to position things correctly.</p>
 <p>If you need to align blocks to a baseline of a font, or something like that,
 you'll have to do a CustomBlock, or use Fixed and Border elements with exact
 pixel offsets to do the trick.</p>
+
+<h2>What now?</h2>
+
+Next, read the <code>arctic/ArcticBlock.hx</code> file, which lists and documents all
+available blocks in Arctic. Be sure to also have a look at <code>arctic/Arctic.hx</code>
+to see which helpers are available. These also serve as great examples of
+how to use Arctic.
+
+<p>
+To see more examples of how to do more advanced things, be sure to read
+the code of the examples in the <code>examples</code> directory.
+</p>
+
+<p>
+To make user interfaces work in both Flash 8 and 9 can be cumbersome, because of the
+slight API changes between these two versions. Arctic provides a helper class,
+<code>ArcticMC</code>, which can help avoid a lot of <code>#if flash9 ... #else flash ... #end</code>
+blocks in your code.
+</p>

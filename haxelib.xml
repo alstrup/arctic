@@ -1,5 +1,12 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.7.4">Make it such that scrollbars appear in innermost LineStacks, rather than outermost</version>
+    <version name="0.8.0">
+		- Add ArcticMC helper class that makes it easier to make Flash 8 & Flash 9 compatible code. Move some methods from ArcticView there.
+		- More comments describing Blocks.
+		- Disabled buttons in Flash 9 surely works now (they might have before, not sure)
+		- ToggleButtons respect hiding and disabling
+		- All hitTests use "true" such that vector contents are correctly checked. Buttons containing bitmaps with alpha channels are not handled correctly, though. That requires some BitmapData magic before that can work.
+		- Clean up ArcticTest.hx and DynamicExample.hx
+</version>
 </project>

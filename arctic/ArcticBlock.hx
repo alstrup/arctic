@@ -1,14 +1,16 @@
 package arctic;
 
+// We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
-typedef ArcticMovieClip = flash.display.MovieClip
+	typedef ArcticMovieClip = flash.display.MovieClip
 #else flash
-typedef ArcticMovieClip = flash.MovieClip
+	typedef ArcticMovieClip = flash.MovieClip
 #end
 
 /**
  * Arctic is an embedded Domain Specific Language for making user interfaces.
- * A user interface is built from ArcticBlocks.
+ * A user interface is built from ArcticBlocks. Read this file to learn which
+ * blocks are available.
  */
 enum ArcticBlock {
 	/**
@@ -43,14 +45,16 @@ enum ArcticBlock {
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
-	 * The validator callback is called on each change in Flash 8, but only on loss of focus in Flash 9. You can use this callback to
-	 * extract the contents of the text input.
+	 * The validator callback is called on each change. You can use this callback to extract the contents of the text input.
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
-	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9.
+	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiLine: true } as style is portable.)
 	 */
 	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool, ?embeddedFont : Bool);
 
-	/// A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size
+	/**
+	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.
+	* Notice that the width & height should be the size of this block, not the original size of the picture.
+	*/
 	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Bool);
 
 	/**
@@ -64,8 +68,8 @@ enum ArcticBlock {
 	 * Though technically the ArcticBlock can be of any type, the most appropriate ones are Text & Picture.
 	 * Notice that the selected and unselected blocks should have the exact same size, because we do not
 	 * do a relayout when the state is changed. The onInit method is called when the view is constructed
-	 * with the state we have. This can be used to implement connected radio button groups - like the factory
-	 * Arctic.makeRadioButtonGroup does.
+	 * with the state we have. This can be used to implement connected radio button groups - like Arctic.makeTextChoice
+	 * and Arctic.makeRadioButtonGroup do. This can also be used to implement check boxes - see Arctic.makeCheckbox.
 	 */ 
 	ToggleButton(selected : ArcticBlock, unselected : ArcticBlock, initialState : Bool, onChange : Bool -> Void, ?onInit : (Bool -> Void) -> Void);
 
@@ -132,18 +136,20 @@ enum ArcticBlock {
 	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Bool);
 
 	/**
-	 * Translate a block in some direction - notice layout does not take this into account.
+	 * Translate a block in some direction - notice layout does not take this offset
+	 * into account.
 	 */
 	Offset(xOffset : Float, yOffset : Float, block : ArcticBlock);
 
 	/**
-	 * Place a block on top of another block (overlay).
+	 * Place a block on top of another block (overlay). The size is the maximum of the
+	 * two blocks in each dimension.
 	 */
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
 
 	/**
 	 * Name this block so that we can get to it, and update it using ArcticView.update
-	 * and ArcticView.getRawMovieClip.
+	 * and ArcticView.getRawMovieClip. Has no visual effect besides this.
 	 */
 	Id(name : String, block : ArcticBlock);
 
@@ -152,23 +158,22 @@ enum ArcticBlock {
 	 * with your own basic blocks. Parameters:
 	 * 
 	 *  data: an optional payload.
-
 	 *  buildFunc: This is called with the optional data payload as first parameter,
 	 *       the build mode requested (see enum below), the parent MovieClip where the 
 	 *       block should be put or drawn, and the available height and width for the 
-	 *       element.
-	 *       If this is null, the intent is that this function should construct a new view from
-	 *       stratch. If this is not null, the code should update the given MovieClip.
+	 *       element. The final parameter is any existing MovieClip. This is useful in
+	 *       Reuse mode, where the code should update the looks of this MovieClip.
+	 * 
 	 *       The function should return the metrics for the block. The different build modes
 	 *       should be consistent in the metrics - otherwise, layout bugs can occur.
 	 * 
 	 * Notice that you have to build the custom blocks such that their work with
-	 * both Flash 8 and 9.
+	 * both Flash 8 and 9. See ArcticMC for a helper functions that makes this simpler.
 	 */
 	CustomBlock( data : Dynamic, buildFunc : Dynamic -> BuildMode -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> Metrics );
 
 	/**
-	 * Draws a frame around the given block
+	 * Draws a frame around the given block. Alpha is optional between 0 and 100.
 	 */
 	Frame(block: ArcticBlock, ?thickness: Float, ?color: Int, ?roundRadius: Float, ?alpha: Float, ?xspacing: Float, ?yspacing: Float);
 
