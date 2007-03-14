@@ -1,6 +1,7 @@
 package arctic;
 
 import arctic.ArcticBlock;
+import arctic.ArcticMC;
 
 #if flash9
 import flash.display.MovieClip;
@@ -69,7 +70,7 @@ class ArcticView {
 	/// This resizes the hosting movieclip to make room for our GUI block minimumsize, plus some extra space
 	public function adjustToFit(extraWidth : Float, extraHeight : Float) : { width: Float, height : Float} {
 		var w = build(gui, parent, 0, 0, Metrics, 0);
-		setSize(parent, w.width + extraWidth, w.height + extraHeight);
+		ArcticMC.setSize(parent, w.width + extraWidth, w.height + extraHeight);
 		return { width: w.width + extraWidth, height: w.height + extraHeight };
 	}
 
@@ -83,7 +84,7 @@ class ArcticView {
 	public function display(useStageSize0 : Bool) : MovieClip {
 		useStageSize = useStageSize0;
 		if (useStageSize) {
-			stageSize(parent);
+			ArcticMC.stageSize(parent);
 		}
 		
 		refresh(true);
@@ -116,7 +117,7 @@ class ArcticView {
 	public function destroy() {
 		remove();
 		gui = null;
-		showMouse();
+		ArcticMC.showMouse();
 		
 		#if flash9
 			for (e in stageEventHandlers) {
@@ -136,7 +137,7 @@ class ArcticView {
 	public function onResize() {
 		if (true) {
 			/// This is smart refresh, where we reuse MovieClips to reduce flicker
-			var stage = getStageSize(parent);
+			var stage = ArcticMC.getStageSize(parent);
 			var result = build(gui, parent, stage.width, stage.height, Reuse, firstChild);
 			base = result.clip;
 		} else {
@@ -144,7 +145,7 @@ class ArcticView {
 			if (base != null) {
 				remove();
 			}
-			stageSize(parent);
+			ArcticMC.stageSize(parent);
 			refresh(true);
 		}
 	}
@@ -162,7 +163,7 @@ class ArcticView {
 			movieClips = [];
 			activeClips = [];
 			idMovieClip = new Hash<ArcticMovieClip>();
-			showMouse();
+			ArcticMC.showMouse();
 			#if flash9
 			firstChild = parent.numChildren;
 			#else flash
@@ -171,9 +172,9 @@ class ArcticView {
 		}
 		var size;
 		if (useStageSize) {
-			size = getStageSize(parent);
+			size = ArcticMC.getStageSize(parent);
 		} else {
-			size = getSize(parent);
+			size = ArcticMC.getSize(parent);
 		}
 		
 		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
@@ -215,11 +216,7 @@ class ArcticView {
 			return;
 		}
 		for (m in movieClips) {
-			#if flash9
-				m.parent.removeChild(m);
-			#else flash
-				m.removeMovieClip();
-			#end
+			ArcticMC.remove(m);
 		}
 		movieClips = [];
 		activeClips = [];
@@ -264,7 +261,9 @@ class ArcticView {
 		if (mode == Metrics && debug) {
 			trace(nesting + "build (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
 				+ clip.width + "," + clip.height + " " + clip.growWidth + "," + clip.growHeight + ") on " + gui );
-			nesting = nesting.substr(0, nesting.length - 2);
+			if (nesting != null) {
+				nesting = nesting.substr(0, nesting.length - 2);
+			}
 		}
 
 		return clip;
@@ -295,14 +294,8 @@ class ArcticView {
 			child.width += 2 * x;
 			child.height += 2 * y;
 			if (mode != Metrics) {
-				#if flash9
-					child.clip.x = x;
-					child.clip.y = y;
-				#else flash
-					child.clip._x = x;
-					child.clip._y = y;
-				#end
-				setSize(clip, child.width, child.height);
+				ArcticMC.setXY(child.clip, x, y);
+				ArcticMC.setSize(clip, child.width, child.height);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		
@@ -319,13 +312,9 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode != Metrics && thickness != 0) {
 				var delta = thickness / 2;
-				#if flash9
-					clip.graphics.clear();
-					clip.graphics.lineStyle(thickness, color, if (alpha != null) alpha / 100.0 else 1.0);
-				#else flash
-					clip.clear();
-					clip.lineStyle(thickness, color, if (alpha != null) alpha else 100);
-				#end
+				var g = ArcticMC.getGraphics(clip);
+				g.clear();
+				g.lineStyle(thickness, color, ArcticMC.getAlpha(alpha));
 				DrawUtils.drawRect(clip, delta, delta, child.width - thickness, child.height - thickness, roundRadius);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -349,21 +338,13 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			// a fill will not be created if the color is equal to null
 			if (mode != Metrics) {
-				#if flash9
-					clip.graphics.clear();
-					if (color != null) {
-						clip.graphics.beginFill(color, if (alpha != null) alpha / 100.0 else 100.0);
-						DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-						clip.graphics.endFill();
-					}
-				#else flash
-					clip.clear();
-					if (color != null) {
-						clip.beginFill(color, if (alpha != null) alpha else 100.0);
-						DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-						clip.endFill();
-					}
-				#end
+				var g = ArcticMC.getGraphics(clip);
+				g.clear();
+				if (color != null) {
+					g.beginFill(color, ArcticMC.getAlpha(alpha));
+					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+					g.endFill();
+				}
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
@@ -381,38 +362,23 @@ class ArcticView {
 				ratios.push(r);
 				r += dt;
 				if (alpha == null) {
-					#if flash9
-						alphas.push(1.0);
-					#else flash
-						alphas.push(100.0);
-					#end
+					alphas.push(ArcticMC.getAlpha(100.0));
+				} else {
+					alphas.push(ArcticMC.getAlpha(alpha[i]));
 				}
 			}
 			if (rotation == null) rotation = 0;
+			var matrix = new flash.geom.Matrix();
+			matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
+			var g = ArcticMC.getGraphics(clip);
+			g.clear();
 			#if flash9
-				var matrix = new flash.geom.Matrix();
-				matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
-				if (alpha != null) {
-					alphas = [];
-					for (a in alpha) {
-						alphas.push(a / 100.0);
-					}
-				}
-				clip.graphics.clear();
-				clip.graphics.beginGradientFill(flash.display.GradientType.RADIAL, colors, alphas, ratios, matrix);
-				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-				clip.graphics.endFill();
+				g.beginGradientFill(flash.display.GradientType.RADIAL, colors, alphas, ratios, matrix);
 			#else flash
-				var matrix = new flash.geom.Matrix();
-				if (alpha != null) {
-					alphas = alpha;
-				}
-				clip.clear();
-				matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
-				clip.beginGradientFill(type, colors, alphas, ratios, matrix);
-				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-				clip.endFill();
+				g.beginGradientFill(type, colors, alphas, ratios, matrix);
 			#end
+			DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+			g.endFill();
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case Text(html, embeddedFont, wordWrap):
@@ -467,7 +433,7 @@ class ArcticView {
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
 			#end
-			var s = getSize(clip);
+			var s = ArcticMC.getSize(clip);
 			if (mode == Metrics) {
 				#if flash9
 					s.width = tf.width;
@@ -518,7 +484,7 @@ class ArcticView {
 				txtInput.embedFonts = true;
 			}
 			txtInput.tabEnabled = true;
-			setSize(clip, width, height);
+			ArcticMC.setSize(clip, width, height);
 			if (null != maxChars) {
 				txtInput.maxChars = maxChars;
 			}
@@ -586,7 +552,7 @@ class ArcticView {
 				#end
 			}
 
-			var s = getSize(clip);
+			var s = ArcticMC.getSize(clip);
 			return { clip: clip, width: s.width, height: s.height, growWidth: false, growHeight: false };
 
 		case Picture(url, w, h, scaling, resource):
@@ -626,7 +592,7 @@ class ArcticView {
 					clip._yscale = s;
 				}
 			#end
-			setSize(clip, w, h);
+			ArcticMC.setSize(clip, w, h);
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case Button(block, hover, action):
@@ -636,22 +602,29 @@ class ArcticView {
 			if (mode == Metrics) {
 				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 			}
+			// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
+			// position yet, so we can't do this yet! The parent would have to position us first, which is a change
+			// for another day.
+			ArcticMC.setVisible(child.clip, true);
+			ArcticMC.setVisible(hover.clip, false);
 			#if flash9
 				child.clip.buttonMode = true;
 				child.clip.mouseChildren = false;
 				hover.clip.buttonMode = true;
 				hover.clip.mouseChildren = false;
-				// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
-				// position yet, so we can't do this yet! The parent would have to position us first, which is a change
-				// for another day.
-				child.clip.visible = true;
-				hover.clip.visible = false;
 				if (mode == Create) {
 					if (action != null) {
-						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { action(); } ); 
+						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
+								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+									action(); 
+								}
+							} ); 
 					}
 					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
-							if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
 								child.clip.visible = false;
 								hover.clip.visible = true;
 							} else {
@@ -665,18 +638,16 @@ class ArcticView {
 					});
 				}
 			#else flash
-				child.clip._visible = true;
-				hover.clip._visible = false;
 				if (mode == Create) {
-					//clip.onRelease = action;
 					clip.onMouseUp = function () {
-						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
+						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
 							action();
 						}
 					}
-
 					clip.onMouseMove = function() {
-						var mouseInside = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false);
+						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+						var mouseInside = child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip);
 						if (mouseInside) {
 							child.clip._visible = false;
 							hover.clip._visible = true;
@@ -711,7 +682,7 @@ class ArcticView {
 							onInit(setState);
 						}
 						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
-								if (null != onChange) {
+								if (null != onChange && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
 									setState(!sel.clip.visible);
 									onChange(sel.clip.visible);
 								}
@@ -726,7 +697,7 @@ class ArcticView {
 							onInit(setState);
 						}
 						clip.onMouseUp = function() {
-							if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false) && isActive(clip)) {
+							if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
 								setState(!sel.clip._visible);
 								onChange(sel.clip._visible);
 							}
@@ -738,13 +709,18 @@ class ArcticView {
 
 		case Filler:
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			setSize(clip, availableWidth, availableHeight);
+			ArcticMC.setSize(clip, availableWidth, availableHeight);
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: true, growHeight: true };
 		
 		case Fixed(width, height):
+			#if debug
+				if (width == null || height == null || Math.isNaN(width) || Math.isNaN(height)) {
+					trace("Broken Fixed(" + width + "," + height + ") block");
+				}
+			#end
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode != Metrics) {
-				setSize(clip, width, height);
+				ArcticMC.setSize(clip, width, height);
 			}
 			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
 
@@ -753,13 +729,13 @@ class ArcticView {
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
 			if (child.width < minimumWidth) {
 				if (mode != Metrics) {
-					setSize(clip, minimumWidth, child.height);
+					ArcticMC.setSize(clip, minimumWidth, child.height);
 				}
 				child.width = minimumWidth;
 			}
 			if (child.width > maximumWidth) {
 				if (mode != Metrics) {
-					clipSize(clip, maximumWidth, child.height);
+					ArcticMC.clipSize(clip, maximumWidth, child.height);
 				}
 				child.width = maximumWidth;
 			}
@@ -770,13 +746,13 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, 0);
 			if (child.height < minimumHeight) {
 				if (mode != Metrics) {
-					setSize(clip, child.width, minimumHeight);
+					ArcticMC.setSize(clip, child.width, minimumHeight);
 				}
 				child.height = minimumHeight;
 			}
 			if (child.height > maximumHeight) {
 				if (mode != Metrics) {
-					clipSize(clip, child.width, maximumHeight);
+					ArcticMC.clipSize(clip, child.width, maximumHeight);
 				}
 				child.height = maximumHeight;
 			}
@@ -829,11 +805,7 @@ class ArcticView {
 				var child = build(l, clip, w, maxHeight, mode, i);
                 // var child = build(l, clip, w, availableHeight, mode, i);
 				if (mode != Metrics) {
-					#if flash9
-						child.clip.x = x;
-					#else flash
-						child.clip._x = x;
-					#end
+					ArcticMC.setXY(child.clip, x, null);
 				}
 				x += child.width;
 				if (l != Filler) {
@@ -917,11 +889,7 @@ class ArcticView {
                 var line = build(l, child, maxWidth, h, mode, i);
                 // var line = build(l, child, availableWidth, h, mode, i);
 				if (mode != Metrics) {
-					#if flash9
-						line.clip.y = y;
-					#else flash
-						line.clip._y = y;
-					#end
+					ArcticMC.setXY(line.clip, null, y);
 				}
 				if (i == ensureVisibleIndex) {
 					ensureY = y;
@@ -999,13 +967,7 @@ class ArcticView {
 				for (block in line) {
 					var b = build(block, child, columnWidths[x], lineHeights[y], mode, i);
 					if (mode != Metrics) {
-						#if flash9
-							b.clip.x = xc;
-							b.clip.y = yc;
-						#else flash
-							b.clip._x = xc;
-							b.clip._y = yc;
-						#end
+						ArcticMC.setXY(b.clip, xc, yc);
 					}
 					xc += Math.max(b.width, columnWidths[x]);
 					++x;
@@ -1076,7 +1038,7 @@ class ArcticView {
 			}
 			
 			if (stayWithin) {
-				setSize(clip, availableWidth, availableHeight);
+				ArcticMC.setSize(clip, availableWidth, availableHeight);
 			}
 			
 			var me = this;
@@ -1087,7 +1049,7 @@ class ArcticView {
 					dx = Math.min(info.available.width - info.childWidth, dx);
 					dy = Math.min(info.available.height - info.childHeight, dy);
 				}
-				moveClip(dragClip, dx, dy);
+				ArcticMC.moveClip(dragClip, dx, dy);
 				info.totalDx = dx;
 				info.totalDy = dy;
 			}; 
@@ -1095,7 +1057,7 @@ class ArcticView {
 			if (mode != Create) {
 				if (null != onInit) {
 					// Reverse movement so it's back in a second
-					moveClip(dragClip, -info.totalDx, -info.totalDy);
+					ArcticMC.moveClip(dragClip, -info.totalDx, -info.totalDy);
 					onInit(setOffset);
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -1117,7 +1079,7 @@ class ArcticView {
 					while (Math.abs(dx) > 0) {
 						var newTotalDx = info.totalDx + dx;
 						if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childWidth)) {
-							moveClip(dragClip, dx, 0);
+							ArcticMC.moveClip(dragClip, dx, 0);
 							info.totalDx = newTotalDx;
 							motion = true;
 							break;
@@ -1134,7 +1096,7 @@ class ArcticView {
 					while (Math.abs(dy) > 0) {
 						var newTotalDy = info.totalDy + dy;
 						if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childHeight)) {
-							moveClip(dragClip, 0, dy);
+							ArcticMC.moveClip(dragClip, 0, dy);
 							info.totalDy = newTotalDy;
 							motion = true;
 							break;
@@ -1271,13 +1233,13 @@ class ArcticView {
 						cursorMc.clip.visible = true;
 						cursorMc.clip.x = me.parent.mouseX;
 						cursorMc.clip.y = me.parent.mouseY;
-						showMouse(keep);
+						ArcticMC.showMouse(keep);
 						return;
 					} else {
 						if (cursorMc != null) {
 							cursorMc.clip.visible = false;
 						}
-						showMouse();
+						ArcticMC.showMouse();
 					}
 				};
 				if (mode == Create) {
@@ -1286,7 +1248,7 @@ class ArcticView {
 							if (cursorMc != null) {
 								cursorMc.clip.visible = false;
 							}
-							showMouse();
+							ArcticMC.showMouse();
 						}
 					);
 				}
@@ -1302,13 +1264,13 @@ class ArcticView {
 								cursorMc.clip._visible = true;
 								cursorMc.clip._x = me.parent._xmouse;
 								cursorMc.clip._y = me.parent._ymouse;
-								showMouse(keep);
+								ArcticMC.showMouse(keep);
 								return;
 							} else {
 								if (cursorMc != null) {
 									cursorMc.clip._visible = false;
 								}
-								showMouse();
+								ArcticMC.showMouse();
 							}
 						};
 				if (mode == Create) {
@@ -1323,7 +1285,7 @@ class ArcticView {
 							if (cursorMc != null) {
 								cursorMc.clip._visible = false;
 							}
-							showMouse();
+							ArcticMC.showMouse();
 						};
 					}
 				}
@@ -1335,7 +1297,7 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Create) {
-				moveClip(child.clip, dx, dy);
+				ArcticMC.moveClip(child.clip, dx, dy);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			
@@ -1450,7 +1412,7 @@ class ArcticView {
 					return clip;
 				}
 			#else flash
-				if (clip.hitTest(x, y, false)) {
+				if (clip.hitTest(x, y, true)) {
 					return clip;
 				}
 			#end
@@ -1465,127 +1427,5 @@ class ArcticView {
 		stageEventHandlers.push( { obj: d, event: event, handler: handler });
 	}
 	#end
-	
-	/**
-	 * A helper function which forces a movieclip to have at least a certain size.
-	 * Notice, that this will never shrink a movieclip. Use clipSize for that.
-	 * Notice also that it clears out any graphics that might exist in the clip.
-	 */
-	static public function setSize(clip : MovieClip, width : Float, height : Float) {
-		if (clip == null) {
-			return;
-		}
-		#if flash9
-			// Set the size
-			clip.graphics.clear();
-			clip.graphics.moveTo(0,0);
-			clip.graphics.lineTo(width, height);
-		#else flash
-			// Set the size
-			clip.clear();
-			clip.moveTo(0,0);
-			clip.lineTo(width, height);
-		#end
-	}
-	
-	/// Will force a MovieClip to have a certain size - by clipping or enlarging
-	static public function clipSize(clip : MovieClip, width : Float, height : Float) {
-		setSize(clip, width, height);
-		#if flash9
-			if (clip.width > width || clip.height > height) {
-				// We need to make it smaller - do a scrollRect
-				clip.scrollRect = new Rectangle(0.0, 0.0, width, height);
-				return;
-			}
-		#else flash
-			if (clip._width > width || clip._height > height) {
-				// We need to make it smaller - do a scrollRect
-				clip.scrollRect = new Rectangle<Float>(0.0, 0.0, width, height);
-				return;
-			}
-		#end
-	}
 
-	/// Get the size of a MovieClip, respecting clipping
-	static public function getSize(clip : MovieClip) : { width : Float, height : Float } {
-		if (clip == null) {
-			return { width : 0.0, height : 0.0 };
-		}
-		if (clip.scrollRect != null) {
-			return { width : clip.scrollRect.width, height : clip.scrollRect.height };
-		}
-		#if flash9
-			return { width: clip.width, height : clip.height };
-		#else flash
-			return { width: clip._width, height : clip._height };
-		#end
-	}
-	
-	/// A helper function which sets the size of the clip to the size of the stage
-	static public function stageSize(clip : MovieClip) {
-		#if flash9
-			setSize(clip, clip.stage.stageWidth, clip.stage.stageHeight);
-		#else flash
-			setSize(clip, flash.Stage.width, flash.Stage.height);
-		#end
-	}
-	
-	static public function getStageSize(clip : MovieClip) : { width : Float, height : Float } {
-		#if flash9
-			return { width: cast(clip.stage.stageWidth, Float), height: cast(clip.stage.stageHeight, Float) };
-		#else flash
-			return { width: flash.Stage.width, height: flash.Stage.height };
-		#end
-	}
-
-	/// Move a movieclip
-	static public function moveClip(clip : MovieClip, dx : Float, dy : Float) {
-		#if flash9
-			clip.x += dx;
-			clip.y += dy;
-		#else flash
-			clip._x += dx;
-			clip._y += dy;
-		#end
-	}
-	
-	/// Turn the normal cursor on or off
-	static public function showMouse(?show : Bool) {
-		#if flash9
-			if (show == null || show) {
-				flash.ui.Mouse.show();
-			} else {
-				flash.ui.Mouse.hide();
-			}
-		#else flash
-			if (show == null || show) {
-				flash.Mouse.show();
-			} else {
-				flash.Mouse.hide();
-			}
-		#end
-	}
-	
-	/// Returns true when the clip is visible and enabled
-	static function isActive(clip: MovieClip): Bool {
-		if (clip == null) return false;
-		
-		var active = true;
-		#if flash9
-			active = clip.visible && clip.enabled;
-			var parent = clip.parent;
-			while (null != parent && active) {
-				active = active && parent.visible && parent.mouseEnabled;
-				parent = parent.parent;
-			}	
-		#else flash
-			var parent = clip;
-			while (null != parent && active) {
-				active = active && parent._visible && parent.enabled;
-				parent = parent._parent;
-			}
-		#end
-		
-		return active;
-	}
 }
