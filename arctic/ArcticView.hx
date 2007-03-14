@@ -314,7 +314,7 @@ class ArcticView {
 				var delta = thickness / 2;
 				var g = ArcticMC.getGraphics(clip);
 				g.clear();
-				g.lineStyle(thickness, color, ArcticMC.getAlpha(alpha));
+				g.lineStyle(thickness, color, ArcticMC.convertAlpha(alpha));
 				DrawUtils.drawRect(clip, delta, delta, child.width - thickness, child.height - thickness, roundRadius);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -341,7 +341,7 @@ class ArcticView {
 				var g = ArcticMC.getGraphics(clip);
 				g.clear();
 				if (color != null) {
-					g.beginFill(color, ArcticMC.getAlpha(alpha));
+					g.beginFill(color, ArcticMC.convertAlpha(alpha));
 					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
 					g.endFill();
 				}
@@ -362,9 +362,9 @@ class ArcticView {
 				ratios.push(r);
 				r += dt;
 				if (alpha == null) {
-					alphas.push(ArcticMC.getAlpha(100.0));
+					alphas.push(ArcticMC.convertAlpha(100.0));
 				} else {
-					alphas.push(ArcticMC.getAlpha(alpha[i]));
+					alphas.push(ArcticMC.convertAlpha(alpha[i]));
 				}
 			}
 			if (rotation == null) rotation = 0;
