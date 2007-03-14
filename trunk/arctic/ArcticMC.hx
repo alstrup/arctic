@@ -13,6 +13,7 @@ import flash.Mouse;
  * A class which makes it simpler to make Flash 8 / 9 compatible code.
  */
 class ArcticMC {
+	/// Create a new clip on the given parent
 	static public function create(parent : ArcticMovieClip) : ArcticMovieClip {
 		#if flash9
 			var clip = new ArcticMovieClip();
@@ -24,6 +25,7 @@ class ArcticMC {
 		#end
 	}
 
+	/// Remove this clip from it's parent
 	static public function remove(m : ArcticMovieClip) {
 	#if flash9
 		m.parent.removeChild(m);
@@ -31,7 +33,11 @@ class ArcticMC {
 		m.removeMovieClip();
 	#end
 	}
-	
+
+	/**
+	 * Set the position of the clip. x and/or y can be null, in which case
+	 * that position is not changed.
+	 */
 	static public function setXY(m : ArcticMovieClip, x : Float, y : Float) {
 		if (x != null) {
 			#if flash9
@@ -48,7 +54,33 @@ class ArcticMC {
 			#end
 		}
 	}
+	
+	/**
+	 * Test whether the point is in the given clip. Notice! Pixels with an alpha
+	 * channel of 0 are hit! Only exception is vector-based graphics where it
+	 * correctly detects misses.
+	 */
+	static public function hitTest(m : ArcticMovieClip, x : Float, y : Float) {
+		#if flash9
+			return m.hitTestPoint(x, y, true);
+		#else flash
+			return m.hitTest(x, y, true);
+		#end
+	}
 
+	static public function getMouseXY() : { x: Float, y : Float } {
+		#if flash9
+			return { x: flash.Lib.current.mouseX, y: flash.Lib.current.mouseY };
+		#else flash
+			return { x: flash.Lib.current._xmouse, y: flash.Lib.current._ymouse };
+		#end
+	}
+	
+	/**
+	 * Get the object on which graphics should be drawn.
+	 * I.e. clear(), moveTo(x,y), lineTo(x,y) and so on are
+	 * done on this object.
+	 */
 	static public function getGraphics(m : ArcticMovieClip) {
 		#if flash9
 			return m.graphics;
@@ -57,6 +89,17 @@ class ArcticMC {
 		#end
 	}
 	
+	static public function getVisible(m : ArcticMovieClip) : Bool {
+		#if flash9
+			return m.visible;
+		#else flash
+			return m._visible;
+		#end
+	}
+
+	/**
+	 * Changes visiblity of a clip.
+	 */
 	static public function setVisible(m : ArcticMovieClip, v : Bool) {
 		#if flash9
 			if (m.visible != v) {
@@ -69,8 +112,17 @@ class ArcticMC {
 		#end
 	}
 	
-	/// Converts an alpha from 0 to 100 to the correct range depending on the flash target
-	static public function getAlpha(a : Float) : Float {
+	/// Sets the alpha value of a clip to a value between 0 and 100
+	static public function setAlpha(m : ArcticMovieClip, alpha : Float) {
+		#if flash9
+			m.alpha = convertAlpha(alpha);
+		#else flash
+			m._alpha = convertAlpha(alpha);
+		#end
+	}
+	
+	/// Converts an alpha value from 0 to 100 range to the correct range depending on the flash target
+	static public function convertAlpha(a : Float) : Float {
 		#if flash9
 			if (a == null) 
 				return 1.0;
@@ -146,6 +198,7 @@ class ArcticMC {
 		#end
 	}
 	
+	/// How big is the stage? I.e. the Flash movie in itself. Pass any visible movieclip
 	static public function getStageSize(clip : ArcticMovieClip) : { width : Float, height : Float } {
 		#if flash9
 			return { width: cast(clip.stage.stageWidth, Float), height: cast(clip.stage.stageHeight, Float) };
@@ -182,11 +235,11 @@ class ArcticMC {
 		#end
 	}
 	
-	/// Returns true when the clip is visible and enabled
+	/// Returns true when the clip is visible and enabled (also considering parents)
 	static public function isActive(clip: ArcticMovieClip) : Bool {
 		if (clip == null) return false;
 		
-		// TODO: This could integrate with DialogManager later to check if we should respond or not
+		// TODO: This could integrate with a DialogManager later to check if we should respond or not
 		
 		var active = true;
 		#if flash9
