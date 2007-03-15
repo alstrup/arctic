@@ -41,6 +41,15 @@ class ArcticMC {
 	#end
 	}
 
+	/// Get position of the clip
+	static public function getXY(m : ArcticMovieClip) : { x : Float, y : Float } {
+		#if flash9
+			return { x: m.x, y: m.y };
+		#else flash
+			return { x: m._x, y: m._y };
+		#end
+	}
+
 	/**
 	 * Set the position of the clip. x and/or y can be null, in which case
 	 * that position is not changed.
@@ -141,6 +150,15 @@ class ArcticMC {
 		#end
 	}
 	
+	/// Gets the alpha value of a clip, between 0 and 100
+	static public function getAlpha(m : ArcticMovieClip) : Float {
+		#if flash9
+			return m.alpha * 100.0;
+		#else flash
+			return m._alpha;
+		#end
+	}
+
 	/// Sets the alpha value of a clip to a value between 0 and 100
 	static public function setAlpha(m : ArcticMovieClip, alpha : Float) {
 		#if flash9
