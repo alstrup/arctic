@@ -4,10 +4,17 @@ import arctic.ArcticBlock;
 
 #if flash9
 import flash.geom.Rectangle;
+typedef ArcticRectangle = Rectangle
+
 #else flash
 import flash.geom.Rectangle;
+
+typedef ArcticRectangle = Rectangle<Float>
+
 import flash.Mouse;
 #end
+
+
 
 /**
  * A class which makes it simpler to make Flash 8 / 9 compatible code.
@@ -55,6 +62,36 @@ class ArcticMC {
 		}
 	}
 	
+	/// Get scaling of clip in X and Y directions. Original size (no scaling) is 1.
+	static public function getScaleXY(m : ArcticMovieClip) : { x : Float, y : Float } {
+		#if flash9
+			return { x: m.scaleX, y: m.scaleY };
+		#else flash
+			return { x: m._xscale / 100.0, y: m._yscale / 100.0 };
+		#end
+	}
+
+	/**
+	 * Set the scaling of the clip. scaleX and/or scaleY can be null, in which case
+	 * that scaling is not changed. Original size is 1.
+	 */
+	static public function setScaleXY(m : ArcticMovieClip, x : Float, y : Float) {
+		if (x != null) {
+			#if flash9
+				m.scaleX = x;
+			#else flash
+				m._xscale = x * 100.0;
+			#end
+		}
+		if (y != null) {
+			#if flash9
+				m.scaleY = y;
+			#else flash
+				m._yscale = y * 100.0;
+			#end
+		}
+	}
+
 	/**
 	 * Test whether the point is in the given clip. Notice! Pixels with an alpha
 	 * channel of 0 are hit! Only exception is vector-based graphics where it
@@ -68,14 +105,6 @@ class ArcticMC {
 		#end
 	}
 
-	static public function getMouseXY() : { x: Float, y : Float } {
-		#if flash9
-			return { x: flash.Lib.current.mouseX, y: flash.Lib.current.mouseY };
-		#else flash
-			return { x: flash.Lib.current._xmouse, y: flash.Lib.current._ymouse };
-		#end
-	}
-	
 	/**
 	 * Get the object on which graphics should be drawn.
 	 * I.e. clear(), moveTo(x,y), lineTo(x,y) and so on are
@@ -215,6 +244,21 @@ class ArcticMC {
 		#else flash
 			clip._x += dx;
 			clip._y += dy;
+		#end
+	}
+	
+	/**
+	 * Get the mouse position in coordinates of the passing movieclip. If
+	 * none are passed, stage position is returned.
+	 */
+	static public function getMouseXY(?m : ArcticMovieClip) : { x: Float, y : Float } {
+		if (m == null) {
+			m = flash.Lib.current;
+		}
+		#if flash9
+			return { x: m.mouseX, y: m.mouseY };
+		#else flash
+			return { x: m._xmouse, y: m._ymouse };
 		#end
 	}
 	
