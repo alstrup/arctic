@@ -53,3 +53,12 @@
 -main HelloWorld
 -debug
 -cp ..
+
+--next
+# ComponentTour
+-swf ComponentTour9.swf
+-swf-version 9
+-main ComponentTour
+-debug
+-swf-header 800:600:50
+-cp ..
