@@ -17,5 +17,7 @@
 </output>
   <output name="HelloWorld" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
   <output name="HelloWorld flash9" mode="swf9" out="HelloWorld9.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
+  <output name="ComponentTour" mode="swf9" out="ComponentTour9.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
   <files path="/" />
 </haxe>

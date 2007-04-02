@@ -373,7 +373,8 @@ class ArcticView {
 			var g = ArcticMC.getGraphics(clip);
 			g.clear();
 			#if flash9
-				g.beginGradientFill(flash.display.GradientType.RADIAL, colors, alphas, ratios, matrix);
+				var t = if (type == "linear") { flash.display.GradientType.LINEAR; } else flash.display.GradientType.RADIAL;
+				g.beginGradientFill(t, colors, alphas, ratios, matrix);
 			#else flash
 				g.beginGradientFill(type, colors, alphas, ratios, matrix);
 			#end
@@ -682,6 +683,7 @@ class ArcticView {
 							onInit(setState);
 						}
 						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
+								// TODO: In fact, we should check that the position at MOUSE_DOWN is on top of us as well
 								if (null != onChange && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
 									setState(!sel.clip.visible);
 									onChange(sel.clip.visible);
