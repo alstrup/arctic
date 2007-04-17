@@ -167,7 +167,7 @@ class ArcticView {
 			#if flash9
 			firstChild = parent.numChildren;
 			#else flash
-			firstChild = parent.getNextHighestDepth();
+			firstChild = ArcticMC.getNextHighestDepth(parent);
 			#end
 		}
 		var size;
@@ -249,17 +249,17 @@ class ArcticView {
     private function build(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #if false
-		if (mode == Metrics && debug) {
+		if (debug) {
 			if (nesting == null) {
 				nesting = "";
 			} else {
 				nesting = nesting + "  ";
 			}
-			trace(nesting + "Calling build ( " + availableWidth + "," + availableHeight + ") on "+ gui);
+			trace(nesting + "Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ gui);
 		}
 		var clip = doBuild(gui, p, availableWidth, availableHeight, mode, childNo);
-		if (mode == Metrics && debug) {
-			trace(nesting + "build (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
+		if (debug) {
+			trace(nesting + "built (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
 				+ clip.width + "," + clip.height + " " + clip.growWidth + "," + clip.growHeight + ") on " + gui );
 			if (nesting != null) {
 				nesting = nesting.substr(0, nesting.length - 2);
@@ -372,8 +372,20 @@ class ArcticView {
 				}
 			}
 			if (rotation == null) rotation = 0;
+			#if flash6
+			// TODO: This is not correct. Find out what is correct
+			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation), c:child.width * xOffset, 
+						d:-Math.sin(rotation), e: child.height * Math.cos(rotation), f:child.height * yOffset, 
+						g:0, h:0, i:1 };
+			#else flash7
+			// TODO: This is not correct. Find out what is correct
+			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation), c:child.width * xOffset, 
+						d:-Math.sin(rotation), e: child.height * Math.cos(rotation), f:child.height * yOffset, 
+						g:0, h:0, i:1 };
+			#else flash
 			var matrix = new flash.geom.Matrix();
 			matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
+			#end
 			var g = ArcticMC.getGraphics(clip);
 			g.clear();
 			#if flash9
@@ -415,8 +427,7 @@ class ArcticView {
 				}
 			#else flash
 				if (mode == Metrics) {
-					var d = parent.getNextHighestDepth();
-					clip = parent.createEmptyMovieClip("c" + d, d);
+					clip = ArcticMC.create(parent);
 				}
 				var tf : flash.TextField;
 				if (mode == Create || mode == Metrics) {
@@ -581,7 +592,8 @@ class ArcticView {
 				if (resource) {
 					var child;
 					if (mode == Create) {
-						child = clip.attachMovie(url, "picture", clip.getNextHighestDepth());
+						var d = ArcticMC.getNextHighestDepth(clip);
+						child = clip.attachMovie(url, "picture", d);
 						Reflect.setField(clip, "picture", child);
 					} else {
 						child = Reflect.field(clip, "picture");
@@ -1354,7 +1366,20 @@ class ArcticView {
 	 */ 
 	private function getOrMakeClip(p : MovieClip, buildMode : BuildMode, childNo : Int) : MovieClip {
 		if (buildMode == Create) {
-			#if flash9
+			#if flash6
+				var d = ArcticMC.getNextHighestDepth(p);
+				p.createEmptyMovieClip("c" + childNo, d);
+				var clip = Reflect.field(p, "c" + childNo);
+				Reflect.setField(p, "c" + childNo, clip);
+			#else flash7
+				var d = p.getNextHighestDepth();
+				var clip = p.createEmptyMovieClip("c" + childNo, d);
+				Reflect.setField(p, "c" + childNo, clip);
+			#else flash8
+				var d = p.getNextHighestDepth();
+				var clip = p.createEmptyMovieClip("c" + childNo, d);
+				Reflect.setField(p, "c" + childNo, clip);
+			#else flash9
 				var clip = new MovieClip();
 				p.addChild(clip);
 				#if debug
@@ -1362,10 +1387,6 @@ class ArcticView {
 						trace("Invariant broken: Expected clip to have at least " + childNo + " children");
 					}
 				#end
-			#else flash
-				var d = p.getNextHighestDepth();
-				var clip = p.createEmptyMovieClip("c" + childNo, d);
-				Reflect.setField(p, "c" + childNo, clip);
 			#end
 			movieClips.push(clip);
 			clip.tabEnabled = false;
