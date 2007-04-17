@@ -5,11 +5,12 @@ import arctic.ArcticBlock;
 #if flash9
 import flash.geom.Rectangle;
 typedef ArcticRectangle = Rectangle
-
+typedef ArcticTextField = flash.text.TextField
 #else flash
 import flash.geom.Rectangle;
 
 typedef ArcticRectangle = Rectangle<Float>
+typedef ArcticTextField = flash.TextField
 
 import flash.Mouse;
 #end
@@ -320,5 +321,54 @@ class ArcticMC {
 		#end
 		
 		return active;
+	}
+	
+	static public function setBitmapCache(mc : ArcticMovieClip, cacheAsBitmap : Bool) {
+		#if flash8
+		mc.cacheAsBitmap = cacheAsBitmap;
+		#else flash9
+		mc.cacheAsBitmap = cacheAsBitmap;
+		#end
+	}
+	
+	static public function createTextField(parent : ArcticMovieClip, x : Float, y : Float, width : Float, height : Float) : ArcticTextField {
+		#if flash8
+		var d = parent.getNextHighestDepth();
+		return parent.createTextField("tf" + d, d, x, y, width, height);
+		#else flash9
+		var tf = new TextField();
+		tf.x = x;
+		tf.y = y;
+		tf.width = width;
+		tf.height = height;
+		parent.addChild(tf);
+		return tf;
+		#else flash
+		var d = parent.getNextHighestDepth();
+		parent.createTextField("tf" + d, d, x, y, width, height);
+		return Reflect.field(parent, "tf" + d);
+		#end
+	}
+
+	/// Set the text rendering quality. If sharpness is null, normal rendering is used. gridFit parameter: 0 is none, 1 is pixel, 2 is subpixel
+	static public function setTextRenderingQuality(tf : ArcticTextField, sharpness : Float, ?gridFit : Int) {
+		#if flash8
+		if (sharpness != null) {
+			tf.sharpness = sharpness;
+			tf.antiAliasType = "advanced";
+			tf.gridFitType = if (gridFit == 1) { "pixel" } else if (gridFit == 2) { "subpixel" } else { "none" };
+		} else {
+			tf.antiAliasType = "normal";
+		}
+		#else flash9
+		if (sharpness != null) {
+			tf.sharpness = sharpness;
+			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
+			tf.gridFitType = if (gridFit == 1) { flash.text.GridFitType.PIXEL } 
+							else if (gridFit == 2) { flash.text.GridFitType.SUBPIXEL } else { flash.text.GridFitType.NONE };
+		} else {
+			tf.antiAliasType = flash.text.AntiAliasType.NORMAL;
+		}
+		#end
 	}
 }
