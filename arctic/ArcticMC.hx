@@ -27,7 +27,14 @@ class ArcticMC {
 			var clip = new ArcticMovieClip();
 			parent.addChild(clip);
 			return clip;
-		#else flash
+		#else flash6
+			var d = ArcticMC.getNextHighestDepth(parent);
+			parent.createEmptyMovieClip("c" + d, d);
+			return Reflect.field(parent, "c" + d);
+		#else flash7
+			var d = parent.getNextHighestDepth();
+			return parent.createEmptyMovieClip("c" + d, d);
+		#else flash8
 			var d = parent.getNextHighestDepth();
 			return parent.createEmptyMovieClip("c" + d, d);
 		#end
@@ -209,17 +216,13 @@ class ArcticMC {
 		setSize(clip, width, height);
 		#if flash9
 			if (clip.width > width || clip.height > height) {
-				// We need to make it smaller - do a scrollRect
-				clip.scrollRect = new Rectangle(0.0, 0.0, width, height);
-				return;
-			}
 		#else flash
 			if (clip._width > width || clip._height > height) {
-				// We need to make it smaller - do a scrollRect
-				clip.scrollRect = new Rectangle<Float>(0.0, 0.0, width, height);
-				return;
-			}
 		#end
+			// We need to make it smaller - do a scrollRect
+			ArcticMC.setScrollRect(clip, new ArcticRectangle(0.0, 0.0, width, height));
+			return;
+		}
 	}
 
 	/// Get the size of a MovieClip, respecting clipping
@@ -227,13 +230,40 @@ class ArcticMC {
 		if (clip == null) {
 			return { width : 0.0, height : 0.0 };
 		}
-		if (clip.scrollRect != null) {
-			return { width : clip.scrollRect.width, height : clip.scrollRect.height };
+		var scrollRect = ArcticMC.getScrollRect(clip);
+		if (scrollRect != null) {
+			return { width : scrollRect.width, height : scrollRect.height };
 		}
 		#if flash9
 			return { width: clip.width, height : clip.height };
 		#else flash
 			return { width: clip._width, height : clip._height };
+		#end
+	}
+	
+	static public function setScrollRect(clip : ArcticMovieClip, rect : ArcticRectangle) {
+		#if flash6
+		// TODO: Use setMask
+		#else flash7
+		// TODO: Use setMask
+		#else flash8
+		clip.scrollRect = rect;
+		#else flash9
+		clip.scrollRect = rect;
+		#end
+	}
+	
+	static public function getScrollRect(clip : ArcticMovieClip) : ArcticRectangle {
+		#if flash6
+		// TODO
+		return null;
+		#else flash7
+		// TODO
+		return null;
+		#else flash8
+		return clip.scrollRect;
+		#else flash9
+		return clip.scrollRect;
 		#end
 	}
 	
@@ -332,21 +362,25 @@ class ArcticMC {
 	}
 	
 	static public function createTextField(parent : ArcticMovieClip, x : Float, y : Float, width : Float, height : Float) : ArcticTextField {
-		#if flash8
+		#if flash6
+		var d = ArcticMC.getNextHighestDepth(parent);
+		parent.createTextField("tf" + d, d, x, y, width, height);
+		return Reflect.field(parent, "tf" + d);
+		#else flash7
+		var d = parent.getNextHighestDepth();
+		parent.createTextField("tf" + d, d, x, y, width, height);
+		return Reflect.field(parent, "tf" + d);
+		#else flash8
 		var d = parent.getNextHighestDepth();
 		return parent.createTextField("tf" + d, d, x, y, width, height);
 		#else flash9
-		var tf = new TextField();
+		var tf = new ArcticTextField();
 		tf.x = x;
 		tf.y = y;
 		tf.width = width;
 		tf.height = height;
 		parent.addChild(tf);
 		return tf;
-		#else flash
-		var d = parent.getNextHighestDepth();
-		parent.createTextField("tf" + d, d, x, y, width, height);
-		return Reflect.field(parent, "tf" + d);
 		#end
 	}
 
@@ -356,7 +390,7 @@ class ArcticMC {
 		if (sharpness != null) {
 			tf.sharpness = sharpness;
 			tf.antiAliasType = "advanced";
-			tf.gridFitType = if (gridFit == 1) { "pixel" } else if (gridFit == 2) { "subpixel" } else { "none" };
+			tf.gridFitType = if (gridFit == 1) { "pixel"; } else if (gridFit == 2) { "subpixel"; } else { "none"; };
 		} else {
 			tf.antiAliasType = "normal";
 		}
@@ -364,11 +398,32 @@ class ArcticMC {
 		if (sharpness != null) {
 			tf.sharpness = sharpness;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
-			tf.gridFitType = if (gridFit == 1) { flash.text.GridFitType.PIXEL } 
-							else if (gridFit == 2) { flash.text.GridFitType.SUBPIXEL } else { flash.text.GridFitType.NONE };
+			tf.gridFitType = if (gridFit == 1) { flash.text.GridFitType.PIXEL; } 
+							else if (gridFit == 2) { flash.text.GridFitType.SUBPIXEL; } else { flash.text.GridFitType.NONE; };
 		} else {
 			tf.antiAliasType = flash.text.AntiAliasType.NORMAL;
 		}
 		#end
 	}
+
+	#if flash9
+	#else flash
+	static public function getNextHighestDepth(clip : ArcticMovieClip) : Int {
+		#if flash6
+			var depth = 0;
+			for (f in Reflect.fields(clip)) {
+				var field = Reflect.field(clip, f);
+				if (Reflect.hasField(field, "getDepth")) {
+					var newDepth = Reflect.callMethod(field, "getDepth", null);
+					if (newDepth > depth) {
+						depth = newDepth;
+					}
+				}
+			}
+			return depth+1;
+		#else flash
+			return clip.getNextHighestDepth();
+		#end
+	}
+	#end
 }

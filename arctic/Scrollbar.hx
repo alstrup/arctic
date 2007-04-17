@@ -91,8 +91,8 @@ class Scrollbar {
 
 
 		var clipRectangle = new Rectangle(0.0, 0.0, availableWidth, availableHeight);
-		clip.scrollRect = clipRectangle;
-		parent.scrollRect = clipRectangle;
+		ArcticMC.setScrollRect(clip, clipRectangle);
+		ArcticMC.setScrollRect(parent, clipRectangle);
 		var squareHeight = 10;
 
 		var height =  7;
@@ -406,8 +406,8 @@ class Scrollbar {
 			#else flash
 				// TODO: Remove all event listeners as well
 				Reflect.field(parent, "scrollbar").removeMovieClip();
-				parent.scrollRect = null;
-				clip.scrollRect = null;
+				ArcticMC.setScrollRect(parent, null);
+				ArcticMC.setScrollRect(clip, null);
 			#end
 			Reflect.deleteField(parent, "scrollbar");
 		}
@@ -475,7 +475,7 @@ class Scrollbar {
 	}
 
 	static private function scroll(clip : MovieClip, scrollHand : MovieClip, scrollMet : ScrollMetrics ) {
-		var rect = clip.scrollRect;
+		var rect = ArcticMC.getScrollRect(clip);
 		
 		#if flash9
 			scrollHand.y = Math.min(scrollMet.endY, Math.max(scrollMet.startY, scrollHand.y));
@@ -487,15 +487,15 @@ class Scrollbar {
 		var increment = scrollMet.toScroll * diff;
 		if (increment < (scrollMet.clipHeight - rect.height) ) {
 			rect.y = increment;
-			clip.scrollRect = rect;
+			ArcticMC.setScrollRect(clip, rect);
 		} else {
 			rect.y = scrollMet.clipHeight - rect.height;
-			clip.scrollRect = rect;
+			ArcticMC.setScrollRect(clip, rect);
 		}
 	}
 
 	static private function moveToY(clip : MovieClip, scrollHand : MovieClip, ensureYVisible : Float ) {
-		var rect = clip.scrollRect;
+		var rect = ArcticMC.getScrollRect(clip);
 		var scrollMet = Reflect.field(clip, "scrollmet");
 		var visibleY = rect.y + rect.height;
 		var moveToY : Float = rect.y;
@@ -510,7 +510,8 @@ class Scrollbar {
 			moveToY = ensureYVisible - rect.height;
 		}           
 		var diff = moveToY / scrollMet.toScroll;
-		clip.scrollRect.y = moveToY;
+		rect.y = moveToY;
+		ArcticMC.setScrollRect(clip, rect);
 		#if flash9
             scrollHand.y = scrollMet.startY + diff ;
 		#else flash 

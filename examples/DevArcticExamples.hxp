@@ -1,5 +1,15 @@
 ﻿<haxe selected="0">
-  <output name="ArcticTest" mode="swf" out="arctictest.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+  <output name="ArcticTest flash6" mode="swf" out="arctictest6.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 6
+</output>
+  <output name="ArcticTest flash7" mode="swf" out="arctictest7.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 7
+</output>
+  <output name="ArcticTest flash8" mode="swf" out="arctictest.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
 -cp ..
 --flash-strict
 </output>
@@ -7,7 +17,17 @@
 -cp ..
 --flash-strict
 </output>
-  <output name="DynamicExample" mode="swf" out="dynamicexample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+  <output name="DynamicExample flash6" mode="swf" out="dynamicexample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 6
+</output>
+  <output name="DynamicExample flash7" mode="swf" out="dynamicexample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 7
+</output>
+  <output name="DynamicExample flash8" mode="swf" out="dynamicexample.swf" class="DynamicExample" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
 -cp ..
 --flash-strict
 </output>
@@ -15,9 +35,23 @@
 -cp ..
 --flash-strict
 </output>
-  <output name="HelloWorld" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
+  <output name="HelloWorld flash6" mode="swf" out="HelloWorld6.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..
+-swf-version 6
+-swf-header 800:600:50</output>
+  <output name="HelloWorld flash7" mode="swf" out="HelloWorld7.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..
+-swf-version 7
+</output>
+  <output name="HelloWorld flash8" mode="swf" out="HelloWorld.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
   <output name="HelloWorld flash9" mode="swf9" out="HelloWorld9.swf" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
-  <output name="ComponentTour" mode="swf9" out="ComponentTour9.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+  <output name="ComponentTour flash6" mode="swf" out="ComponentTour6.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-swf-version 6
+-cp ..</output>
+  <output name="ComponentTour flash7" mode="swf" out="ComponentTour7.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-swf-version 7
+-cp ..</output>
+  <output name="ComponentTour flash8" mode="swf" out="ComponentTour.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+-cp ..</output>
+  <output name="ComponentTour flash9" mode="swf9" out="ComponentTour9.swf" class="ComponentTour" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
 -cp ..</output>
   <files path="/" />
 </haxe>
