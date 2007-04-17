@@ -322,6 +322,9 @@ class ArcticView {
 		case Shadow(block, distance, angle, color, alpha):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			#if flash6
+			#else flash7
+			#else flash
 			if (mode == Create) {
 				// TODO: We do not support changing of Shadow parameters in an update
 				var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
@@ -330,6 +333,7 @@ class ArcticView {
 				_filters.push(dropShadow);
 				clip.filters = _filters;
 			}
+			#end
 			// Notice: We do not let the shadow affect the size
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			
@@ -416,7 +420,7 @@ class ArcticView {
 				}
 				var tf : flash.TextField;
 				if (mode == Create || mode == Metrics) {
-					tf = clip.createTextField("tf", clip.getNextHighestDepth(), 0, 0, if (wordWrap) availableWidth else 0, 100);
+					tf = ArcticMC.createTextField(clip, 0, 0, if (wordWrap) availableWidth else 0, 100);
 					Reflect.setField(clip, "tf", tf);
 				} else {
 					tf = Reflect.field(clip, "tf");
@@ -474,7 +478,7 @@ class ArcticView {
 			#else flash
 				var txtInput : flash.TextField;
 				if (mode == Create) {
-					txtInput = clip.createTextField("ti", clip.getNextHighestDepth(), 0, 0, width, height);
+					txtInput = ArcticMC.createTextField(clip, 0, 0, width, height);
 					Reflect.setField(clip, "ti", txtInput);
 				} else {
 					txtInput = Reflect.field(clip, "ti");
