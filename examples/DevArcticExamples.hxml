@@ -1,14 +1,3 @@
-# ArcticTest flash6
--swf arctictest6.swf
--main ArcticTest
--debug
--swf-header 800:600:50
--cp ..
---flash-strict
--swf-version 6
-
-
---next
 # ArcticTest flash7
 -swf arctictest7.swf
 -main ArcticTest
@@ -21,7 +10,7 @@
 
 --next
 # ArcticTest flash8
--swf arctictest.swf
+-swf arctictest8.swf
 -main ArcticTest
 -debug
 -swf-header 800:600:50
@@ -41,19 +30,8 @@
 
 
 --next
-# DynamicExample flash6
--swf dynamicexample.swf
--main DynamicExample
--debug
--swf-header 800:600:50
--cp ..
---flash-strict
--swf-version 6
-
-
---next
 # DynamicExample flash7
--swf dynamicexample.swf
+-swf dynamicexample7.swf
 -main DynamicExample
 -debug
 -swf-header 800:600:50
@@ -64,7 +42,7 @@
 
 --next
 # DynamicExample flash8
--swf dynamicexample.swf
+-swf dynamicexample8.swf
 -main DynamicExample
 -debug
 -swf-header 800:600:50
@@ -84,15 +62,6 @@
 
 
 --next
-# HelloWorld flash6
--swf HelloWorld6.swf
--main HelloWorld
--debug
--cp ..
--swf-version 6
--swf-header 800:600:50
-
---next
 # HelloWorld flash7
 -swf HelloWorld7.swf
 -main HelloWorld
@@ -103,7 +72,7 @@
 
 --next
 # HelloWorld flash8
--swf HelloWorld.swf
+-swf HelloWorld8.swf
 -main HelloWorld
 -debug
 -cp ..
@@ -117,15 +86,6 @@
 -cp ..
 
 --next
-# ComponentTour flash6
--swf ComponentTour6.swf
--main ComponentTour
--debug
--swf-header 800:600:50
--swf-version 6
--cp ..
-
---next
 # ComponentTour flash7
 -swf ComponentTour7.swf
 -main ComponentTour
@@ -135,8 +95,8 @@
 -cp ..
 
 --next
-# ComponentTour flash8
--swf ComponentTour.swf
+# 
+-swf ComponentTour8.swf
 -main ComponentTour
 -debug
 -swf-header 800:600:50
