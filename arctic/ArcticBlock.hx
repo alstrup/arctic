@@ -125,7 +125,7 @@ enum ArcticBlock {
 	 * Arctic.makeDragable if you want to preserve the dragged distance across canvas resizes.
 	 */
 	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
-			onDrag : Float -> Float -> Void, ?onInit : (Float -> Float -> Void) -> Void);
+			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void);
 
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
@@ -195,4 +195,14 @@ enum BuildMode {
 	Reuse;
 	/// Do not create or change any movieclips - just calculate metrics
 	Metrics;
+}
+
+/// Information returned about draggable blocks
+typedef DragInfo = {
+	// How much we have moved so far in pixels?
+	x : Float,
+	y : Float,
+	// How much room is available for dragging in pixels?
+	totalWidth : Float,
+	totalHeight : Float
 }

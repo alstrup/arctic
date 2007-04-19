@@ -53,21 +53,61 @@ class Arctic {
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
-					block : ArcticBlock, ?onDrag : Float -> Float -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
+					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
 		// Local closured variables to remember drag offset
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
-		var ourOnInit = function (onDragFun) {
+		var ourOnInit = function (di : DragInfo, onDragFun) {
 			onDragFun(dragX, dragY);
 		};
-		var ourOnDrag = function (dx : Float, dy : Float) : Void {
-			dragX = dx;
-			dragY = dy;
+		var ourOnDrag = function (di : DragInfo) : Void {
+			dragX = di.x;
+			dragY = di.y;
 			if (onDrag != null) {
-				onDrag(dx, dy);
+				onDrag(di);
 			}
 		}
 		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
+	}
+
+	/// Make a slider with it's own coordinate system. The call-back gives results in slider coordinates
+	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, block : ArcticBlock,
+							onDrag : Float -> Float -> Void, ?initialX : Float, ? initialY : Float) {
+		// The current position in slider coordinate system
+		var currentX = if (initialX == null) minimumX else initialX;
+		var currentY = if (initialY == null) minimumY else initialY;
+		// The current position in pixels
+		var currentXPixels : Float = null;
+		var currentYPixels : Float = null;
+		var ourOnInit = function (di : DragInfo, onDragFun) {
+			currentXPixels = 0;
+			if (minimumX != maximumX) {
+				currentXPixels = (currentX - minimumX) / (maximumX - minimumX) * di.totalWidth;
+			}
+			currentYPixels = 0;
+			if (minimumY != maximumY) {
+				currentYPixels = (currentY - minimumY) / (maximumY - minimumY) * di.totalHeight;
+			}
+			onDragFun(currentXPixels, currentYPixels);
+		};
+		var ourOnDrag = function (di : DragInfo) : Void {
+			currentXPixels = di.x;
+			currentYPixels = di.y;
+			if (onDrag != null) {
+				var x = minimumX;
+				if (minimumX != maximumX) {
+					x = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
+					currentX = x;
+				}
+				var y = minimumY;
+				if (minimumY != maximumY) {
+					y = di.y / di.totalHeight * (maximumY - minimumY) + minimumY;
+					currentY = y;
+				}
+				onDrag(x, y);
+			}
+		}
+		return Dragable(true, minimumX != maximumX, minimumY != maximumY, block, ourOnDrag, ourOnInit);
 	}
 
 	/// Add a check-box in front on the given block
