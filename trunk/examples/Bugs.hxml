@@ -1,5 +1,5 @@
-# bugs.swf
--swf bugs.swf
+# bugs8.swf
+-swf bugs8.swf
 -main Bugs
 -debug
 -cp ..
@@ -13,3 +13,12 @@
 -main Bugs
 -debug
 -cp ..
+
+--next
+# bugs7.swf
+-swf bugs7.swf
+-main Bugs
+-debug
+-cp ..
+-swf-version 7
+--flash-strict

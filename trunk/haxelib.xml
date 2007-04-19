@@ -3,5 +3,8 @@
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
     <version name="0.8.1">
 		- makeSlider helper which makes a one-dimensional or two-dimensional slider with it's own coordinate system
+		- Add component tour with simple examples of how to use most arctic blocks and helpers
+		- Add portability wrapping helpers for TextField in ArcticMC
+		- Minimal Flash 7 support added (no shadows, no scrolling)
 	</version>
 </project>

@@ -1,34 +1,40 @@
-Bug-fixes:
+Scrollbar bugs:
+- Fix scrolling for Flash 7
 - Remove scrollbar event handlers when scrollbar is removed
-
-- Hover effect does not automatically trigger on refresh (see dynamic example)
-- Dragable should not capture movements from scrollbars.
-- Add API for text elements to set focus to them, and ask whether they have focus
-
 - Change scrollbar drag in Flash 9 to work outside of the window as well
+- Dragable should not capture movements from scrollbars.
+
+Bugs:
+- Hover effect does not automatically trigger on refresh (see dynamic example)
+
+Extend blocks with new APIs:
+- Add hover state for ToggleButton
+- Add API for text elements to set focus to them, and ask whether they have focus, and to change contents dynamically
+- Add API for changing slider position after construction
+- Add API for changing state of toggle button
+
 - Make tooltip have a delay, and make sure they do not go outside the stage
 - Add filling behaviour to grid
 
-New features to consider, in order of priority:
+New features to consider:
 
-  // A slider has it's own coordinate system
-- Slider( totalHeight, onChange, ?initialPos, ?dragBarHeight )
-   = Dragable( Handle )
+- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc.
+  Maybe by making a new Toggle-like element like ToggleButton, except that it does not capture clicks
 
 - Scrollbar = LineStack(Button, Slider, Button);
 
-- Nice default, light-weight look for widgets
+- Combo-box
 
 - Progress-bar
 
 - Dialog
+
+- Nice default, light-weight look for widgets
 
 - Add horizontal scrollbar (and extend columnstack to add one if needed)
 
 - Resizable bitmap with aspect-ratio preservation
 
 - Calendar widget
-
-- Combo-box
 
 - Simple audio/video player
