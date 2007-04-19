@@ -11,8 +11,8 @@ class ArcticTest {
 	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 		
-		showHelloWorld1();
-		//draggable();
+		//showHelloWorld1();
+		draggable();
 		//wideText();
 	}
 
@@ -177,11 +177,16 @@ class ArcticTest {
 		var makeText = function (text) {
 			return Background(0x202020, Border(5, 5, Arctic.makeText(text, 20, "#ffffff", "arial")), 100, 5);
 		}
+		var doTrace = function(s) {
+		//	trace(s);
+		};
+		var sliderfun = function(x : Float, y : Float) { doTrace(x + "," + y); };
+		var dragfun = function(di : DragInfo) { doTrace("x: " + di.x + "/" + di.totalWidth + " y: " + di.y + "/" + di.totalHeight); };
 		var drag = LineStack( [
-					Background(0x808080, Arctic.makeDragable(true, true, false, makeText("I can be dragged from side to side within my area"), 300 ) ),
-					Background(0xa0a080, Arctic.makeDragable(true, true, true, makeText("I can be dragged within my area"), 100, 100 ) ),
-					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), 0, 200 ) ),
-					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere") )
+					Background(0x808080, Arctic.makeSlider(0, 100, 0, 0, makeText("I can be dragged from side to side within my area"), sliderfun) ),
+					Background(0xa0a080, Arctic.makeSlider(-100, 100, 10, 20, makeText("I can be dragged within my area"), sliderfun, 0, 15 ) ),
+					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), dragfun, 0, 200 ) ),
+					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere"), dragfun )
 				] );
 		arcticView = new ArcticView(drag, parent);
 		var root = arcticView.display(true);

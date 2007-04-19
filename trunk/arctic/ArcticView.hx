@@ -1073,10 +1073,16 @@ class ArcticView {
 			}; 
 			
 			if (mode != Create) {
-				if (null != onInit) {
+				if (mode == Reuse && null != onInit) {
 					// Reverse movement so it's back in a second
 					ArcticMC.moveClip(dragClip, -info.totalDx, -info.totalDy);
-					onInit(setOffset);
+					var dragInfo = { 
+						x : info.totalDx, 
+						y : info.totalDy, 
+						totalWidth : info.available.width - info.childWidth, 
+						totalHeight : info.available.height - info.childHeight 
+					};
+					onInit(dragInfo, setOffset);
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
@@ -1129,7 +1135,13 @@ class ArcticView {
 				}
 				if (motion) {
 					if (onDrag != null) {
-						onDrag(info.totalDx, info.totalDy);
+						var dragInfo = { 
+							x : info.totalDx, 
+							y : info.totalDy, 
+							totalWidth : info.available.width - info.childWidth, 
+							totalHeight : info.available.height - info.childHeight 
+						};
+						onDrag(dragInfo);
 					}
 				}
 			}
@@ -1226,7 +1238,13 @@ class ArcticView {
 			#end
 
 			if (null != onInit) {
-				onInit(setOffset);
+				var dragInfo = { 
+					x : info.totalDx, 
+					y : info.totalDy, 
+					totalWidth : info.available.width - info.childWidth, 
+					totalHeight : info.available.height - info.childHeight 
+				};
+				onInit(dragInfo, setOffset);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		
