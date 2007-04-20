@@ -719,6 +719,27 @@ class ArcticView {
 			}
 			return { clip: clip, width: Math.max(sel.width, unsel.width), height: Math.max(sel.height, unsel.height), growWidth: sel.growWidth, growHeight: sel.growHeight};
 
+		case Mutable(arcticState):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode != Metrics) {
+				arcticState.availableWidth = availableWidth;
+				arcticState.availableHeight = availableHeight;
+			}
+			if (mode == Create) {
+				var me = this;
+				arcticState.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
+					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
+					if (oldClip != null) {
+						ArcticMC.remove(oldClip);
+					}
+					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
+					return me.build(arcticState.block, childClip, w, h, mode, 0);
+				};
+			}
+			var childClip : MovieClip = getOrMakeClip(clip, mode, 0);
+			var result = build(arcticState.block, childClip, availableWidth, availableHeight, mode, 0);
+			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
+
 		case Filler:
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			ArcticMC.setSize(clip, availableWidth, availableHeight);

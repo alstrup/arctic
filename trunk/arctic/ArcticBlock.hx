@@ -147,6 +147,9 @@ enum ArcticBlock {
 	 */
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
 
+	/// A state-full block which can be updated from the outside with a new block. See MutableBlock below for more info
+	Mutable( state : MutableBlock );
+	
 	/**
 	 * Name this block so that we can get to it, and update it using ArcticView.update
 	 * and ArcticView.getRawMovieClip. Has no visual effect besides this.
@@ -206,3 +209,37 @@ typedef DragInfo = {
 	totalWidth : Float,
 	totalHeight : Float
 }
+
+/**
+ * A MutableBlock object encapsulates a block which can be updated later.
+ * Just assign a new ArcticBlock to the block member variable, and the display will be updated
+ * automatically. See the Mutable ArcticBlock above.
+ * This has also been wrapped as an easy-to-use state block. See ArcticState for more info
+ * on this.
+ */
+class MutableBlock {
+	public function new(initialBlock : ArcticBlock) {
+		myBlock = initialBlock;
+		arcticUpdater = null;
+	}
+	public var block(get, set) : ArcticBlock;
+	private var myBlock : ArcticBlock;
+	private function get() : ArcticBlock {
+		return myBlock;
+	}
+	private function set(block : ArcticBlock) : ArcticBlock {
+		myBlock = block;
+		update();
+		return myBlock;
+	}
+	
+	/// For safety, provide an explicit way to update the view (should never be necessary)
+	public function update() : Metrics {
+		return arcticUpdater(block, availableWidth, availableHeight);
+	}
+
+	/// Updated by ArcticView.build
+	public var arcticUpdater(null, default) : ArcticBlock -> Float -> Float -> Metrics;
+	public var availableWidth(null, default) : Float;
+	public var availableHeight(null, default) : Float;
+}	
