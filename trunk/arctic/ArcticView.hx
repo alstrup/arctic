@@ -374,13 +374,17 @@ class ArcticView {
 			if (rotation == null) rotation = 0;
 			#if flash6
 			// TODO: This is not correct. Find out what is correct
-			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation), c:child.width * xOffset, 
-						d:-Math.sin(rotation), e: child.height * Math.cos(rotation), f:child.height * yOffset, 
+			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation) * child.height, c: child.width * Math.cos(rotation) * child.width * xOffset 
+								+ Math.sin(rotation) * child.height * child.height * yOffset,
+						d: child.width * -Math.sin(rotation), e: child.height * Math.cos(rotation), f: child.width * -Math.sin(rotation) * child.width * xOffset
+								+ child.height * Math.cos(rotation) * child.height * yOffset, 
 						g:0, h:0, i:1 };
 			#else flash7
 			// TODO: This is not correct. Find out what is correct
-			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation), c:child.width * xOffset, 
-						d:-Math.sin(rotation), e: child.height * Math.cos(rotation), f:child.height * yOffset, 
+			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation) * child.height, c: child.width * Math.cos(rotation) * child.width * xOffset 
+								+ Math.sin(rotation) * child.height * child.height * yOffset,
+						d: child.width * -Math.sin(rotation), e: child.height * Math.cos(rotation), f: child.width * -Math.sin(rotation) * child.width * xOffset
+								+ child.height * Math.cos(rotation) * child.height * yOffset, 
 						g:0, h:0, i:1 };
 			#else flash
 			var matrix = new flash.geom.Matrix();

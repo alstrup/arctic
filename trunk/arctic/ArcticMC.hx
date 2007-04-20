@@ -6,10 +6,28 @@ import arctic.ArcticBlock;
 import flash.geom.Rectangle;
 typedef ArcticRectangle = Rectangle
 typedef ArcticTextField = flash.text.TextField
-#else flash
+#else flash8
 import flash.geom.Rectangle;
 
 typedef ArcticRectangle = Rectangle<Float>
+typedef ArcticTextField = flash.TextField
+
+import flash.Mouse;
+
+#else flash7
+
+class ArcticRectangle {
+	public function new(left0 : Float, top0 : Float, width0 : Float, height0 : Float) {
+		left = left0;
+		top = top0;
+		width = width0;
+		height = height0;
+	}
+	public var left : Float;
+	public var top : Float;
+	public var width : Float;
+	public var height : Float;
+}
 typedef ArcticTextField = flash.TextField
 
 import flash.Mouse;
@@ -214,11 +232,8 @@ class ArcticMC {
 	/// Will force a MovieClip to have a certain size - by clipping or enlarging
 	static public function clipSize(clip : ArcticMovieClip, width : Float, height : Float) {
 		setSize(clip, width, height);
-		#if flash9
-			if (clip.width > width || clip.height > height) {
-		#else flash
-			if (clip._width > width || clip._height > height) {
-		#end
+		var size = getSize(clip);
+		if (size.width > width || size.height > height) {
 			// We need to make it smaller - do a scrollRect
 			ArcticMC.setScrollRect(clip, new ArcticRectangle(0.0, 0.0, width, height));
 			return;
@@ -245,7 +260,28 @@ class ArcticMC {
 		#if flash6
 		// TODO: Use setMask
 		#else flash7
-		// TODO: Use setMask
+		Reflect.setField(clip, "scrollRect", rect);
+		var maskClip = Reflect.field(clip, "scrollMask");
+		if (rect == null) {
+			if (maskClip == null) {
+				return;
+			}
+			remove(maskClip);
+			Reflect.setField(clip, "scrollMask", null);
+			return;
+		}
+		if (maskClip == null) {
+			maskClip = create(clip);
+			Reflect.setField(clip, "scrollMask", maskClip);
+		}
+		var g = ArcticMC.getGraphics(maskClip);
+		g.clear();
+		g.beginFill(0xffffff);
+		DrawUtils.drawRect(maskClip, rect.left, rect.top, rect.width, rect.height);
+		g.endFill();
+		clip.setMask(maskClip);
+		ArcticMC.setXY(clip, -rect.left, -rect.top);
+		
 		#else flash8
 		clip.scrollRect = rect;
 		#else flash9
@@ -258,8 +294,7 @@ class ArcticMC {
 		// TODO
 		return null;
 		#else flash7
-		// TODO
-		return null;
+		return Reflect.field(clip, "scrollRect");
 		#else flash8
 		return clip.scrollRect;
 		#else flash9

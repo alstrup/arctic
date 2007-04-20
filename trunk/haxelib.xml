@@ -5,6 +5,6 @@
 		- makeSlider helper which makes a one-dimensional or two-dimensional slider with it's own coordinate system
 		- Add component tour with simple examples of how to use most arctic blocks and helpers
 		- Add portability wrapping helpers for TextField in ArcticMC
-		- Minimal Flash 7 support added (no shadows, no scrolling)
+		- Flash 7 support added (all should work, except shadows which requires filters)
 	</version>
 </project>

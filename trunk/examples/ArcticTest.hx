@@ -11,8 +11,9 @@ class ArcticTest {
 	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 		
-		//showHelloWorld1();
-		draggable();
+		showHelloWorld1();
+		//nextWorld();
+		//draggable();
 		//wideText();
 	}
 
@@ -27,7 +28,7 @@ class ArcticTest {
 	
 	public function showHelloWorld2() {
 		// Clear out the old screen
-		arcticView.destroy();
+		if (arcticView != null) { arcticView.destroy(); }
 		
 		// To make a nicer screen, we use a background and some more layout
 		var helloWorld = GradientBackground( "radial", [ 0xffceff, 0xff77ee], 0.2, 0.4,
@@ -56,7 +57,7 @@ class ArcticTest {
 	
 	public function nextWorld() {
 		// This is called when "Continue" is clicked above
-		arcticView.destroy();
+		if (arcticView != null) { arcticView.destroy(); }
 
 		// Again, build the screen as a data structure of ArcticBlocks, through a couple of intermediate data structures
 		// This illustrates the "lego"-construction of user interfaces when you use Arctic
@@ -122,7 +123,7 @@ class ArcticTest {
 	}
 
 	public function screen1next() {
-		arcticView.destroy();
+		if (arcticView != null) { arcticView.destroy(); }
 		
 		if (radioChoice == 0) {
 			customBlock();
@@ -134,7 +135,7 @@ class ArcticTest {
 	}
 	
 	public function customBlock() {
-		arcticView.destroy();
+		if (arcticView != null) { arcticView.destroy(); }
 	
 		// A custom block needs a function which can tell Arctic the size and desired resizing behaviour,
 		// and paint & construct the block when ready
@@ -193,9 +194,7 @@ class ArcticTest {
 	}
 	
 	public function wideText() {
-		if (arcticView != null) {
-			arcticView.destroy();
-		}
+		if (arcticView != null) { arcticView.destroy(); }
 		var gui = 
 		Background(0x00ff00,
 			LineStack([
