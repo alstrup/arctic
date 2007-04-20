@@ -1,11 +1,11 @@
 package arctic;
 
-#if flash9
-import flash.display.MovieClip;
-import flash.geom.Rectangle;
-#else true
-import flash.MovieClip;
-import flash.geom.Rectangle;
+import arctic.ArcticMC;
+import arctic.ArcticBlock;
+
+#if flash8
+import flash.Mouse;
+#else flash7
 import flash.Mouse;
 #end
 
@@ -25,13 +25,13 @@ class Scrollbar {
     // This movieclips should have a parent, which will also be the parent of the scroll bar 
     // rendered.
     // This can be seperated out and written as a seperate class - ideally it should use ArcticBlocks to construct itself
-    public static function drawScrollBar(parent : MovieClip, clip : MovieClip, availableWidth : Float,
+    public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
                                                          availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
-		var scrollBar : MovieClip;
-		var upperChild : MovieClip;
-		var scrollOutline : MovieClip;
-		var scrollHand : MovieClip;
-		var lowerChild : MovieClip;
+		var scrollBar : ArcticMovieClip;
+		var upperChild : ArcticMovieClip;
+		var scrollOutline : ArcticMovieClip;
+		var scrollHand : ArcticMovieClip;
+		var lowerChild : ArcticMovieClip;
 		var construct : Bool;
 		if (Reflect.hasField(parent, "scrollbar")) {
 			construct = false;
@@ -51,20 +51,20 @@ class Scrollbar {
 		} else {
 			construct = true;
 			#if flash9
-				scrollBar = new MovieClip();
+				scrollBar = new ArcticMovieClip();
 				Reflect.setField(parent, "scrollbar", scrollBar);
 				parent.addChild(scrollBar);
 
-				upperChild = new MovieClip();
+				upperChild = new ArcticMovieClip();
 				scrollBar.addChild(upperChild);
 
-				scrollOutline = new MovieClip();
+				scrollOutline = new ArcticMovieClip();
 				scrollBar.addChild(scrollOutline);
 
-				scrollHand = new MovieClip();
+				scrollHand = new ArcticMovieClip();
 				scrollBar.addChild(scrollHand);
 
-				lowerChild = new MovieClip();
+				lowerChild = new ArcticMovieClip();
 				scrollBar.addChild(lowerChild);
 			#else flash
 				var d = parent.getNextHighestDepth();
@@ -90,7 +90,7 @@ class Scrollbar {
 		}
 
 
-		var clipRectangle = new Rectangle(0.0, 0.0, availableWidth, availableHeight);
+		var clipRectangle = new ArcticRectangle(0.0, 0.0, availableWidth, availableHeight);
 		ArcticMC.setScrollRect(clip, clipRectangle);
 		ArcticMC.setScrollRect(parent, clipRectangle);
 		var squareHeight = 10;
@@ -102,25 +102,15 @@ class Scrollbar {
 			//Drawing upper white squate    
 			DrawUtils.drawRectangle(upperChild, 0, 0, 12, squareHeight, 0, 
 									0x000000, 0x000000 );
-			
-			#if flash9
-				//Drawing upper scrollbar triangle
-				upperChild.graphics.beginFill(0xFFFFFF);
-				upperChild.graphics.moveTo(2 , height );
-				upperChild.graphics.lineTo(2 , height );
-				upperChild.graphics.lineTo(2 + 8 , height );
-				upperChild.graphics.lineTo(2 + 4 , height - 4 );
-				upperChild.graphics.endFill();
-			#else flash
-				//Drawing upper scrollbar triangle
-				upperChild.lineStyle(0.2, 0xFFFFFF);
-				upperChild.beginFill(0xFFFFFF);
-				upperChild.moveTo(2 , height );
-				upperChild.lineTo(2 , height );
-				upperChild.lineTo(2 + 7 , height );
-				upperChild.lineTo(2 + 3.5 , height - 4 );
-				upperChild.endFill();
-			#end
+			var g = ArcticMC.getGraphics(upperChild);
+			//Drawing upper scrollbar triangle
+			g.lineStyle(0.2, 0xFFFFFF);
+			g.beginFill(0xFFFFFF);
+			g.moveTo(2 , height );
+			g.lineTo(2 , height );
+			g.lineTo(2 + 7 , height );
+			g.lineTo(2 + 3.5 , height - 4 );
+			g.endFill();
 		}
 
 		// The slider background part
@@ -128,19 +118,11 @@ class Scrollbar {
 
 		DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 0x000000, 0x000000,0);
 
-		#if flash9
-			scrollOutline.graphics.clear();
-		#else flash
-			scrollOutline.clear();
-		#end
+		ArcticMC.getGraphics(scrollOutline).clear();
 
 		DrawUtils.drawRectangle(scrollOutline, 0, 0, 10, scrollHeight, 0, 0x000000, 0x000000, 0);
 
-		#if flash9
-			scrollOutline.y = upperChild.height;
-		#else flash
-			scrollOutline._y = upperChild._height;
-		#end
+		ArcticMC.setXY(scrollOutline, null, ArcticMC.getSize(upperChild).height);
 		
 		// The slider hand
 		var scrollHandHeight = 10.0;
@@ -148,20 +130,12 @@ class Scrollbar {
 			scrollHandHeight = scrollHeight - (realHeight - availableHeight);
 		}
 		
-		#if flash9
-			scrollHand.graphics.clear();
-		#else flash
-			scrollHand.clear();
-		#end
+		ArcticMC.getGraphics(scrollHand).clear();
 		DrawUtils.drawRectangle(scrollHand, 0, 0, 6, scrollHandHeight - 0.5, 0, 0x000000, 0x000000);
 
 		var scrollMetrics = { 
 				startX : 2.0, 
-				#if flash9
-					startY : upperChild.height + 0.5, 
-				#else flash
-					startY : upperChild._height + 0.5, 
-				#end
+				startY : ArcticMC.getSize(upperChild).height + 0.5,
 				endY : 0.0, 
 				scrollHeight : scrollHeight - scrollHandHeight - 1, 
 				toScroll : 0.0,
@@ -173,43 +147,24 @@ class Scrollbar {
 		
 		Reflect.setField(clip, "scrollmet", scrollMetrics);
 
-		#if flash9
-			scrollHand.y = scrollMetrics.startY;
-			scrollHand.x = scrollMetrics.startX;
-		#else flash
-			scrollHand._y = scrollMetrics.startY;
-			scrollHand._x = scrollMetrics.startX;
-		#end
+		ArcticMC.setXY(scrollHand, scrollMetrics.startX, scrollMetrics.startY);
 
 		// The lower button
 		if (construct) {
 			DrawUtils.drawRectangle(lowerChild, 0, 0, 12, squareHeight, 0, 0x000000, 0x000000 );
 			
 			height = 3;
-			#if flash9
-				// Drawing lower scrollbar triangle
-				lowerChild.graphics.beginFill(0xFFFFFF);
-				lowerChild.graphics.moveTo(2 , height );
-				lowerChild.graphics.lineTo(2, height );
-				lowerChild.graphics.lineTo(2 + 8, height );
-				lowerChild.graphics.lineTo(2 + 4, height + 4 );
-				lowerChild.graphics.endFill();
-			#else flash
-				//Drawing lower scrollbar triangle
-				lowerChild.lineStyle(0.2, 0xFFFFFF);
-				lowerChild.beginFill(0xFFFFFF);
-				lowerChild.moveTo(2 , height );
-				lowerChild.lineTo(2, height );
-				lowerChild.lineTo(2 + 7, height );
-				lowerChild.lineTo(2 + 3.5, height + 4 );
-				lowerChild.endFill();
-			#end
+			var g = ArcticMC.getGraphics(lowerChild);
+			//Drawing lower scrollbar triangle
+			g.lineStyle(0.2, 0xFFFFFF);
+			g.beginFill(0xFFFFFF);
+			g.moveTo(2 , height );
+			g.lineTo(2, height );
+			g.lineTo(2 + 7, height );
+			g.lineTo(2 + 3.5, height + 4 );
+			g.endFill();
 		}
-		#if flash9
-			lowerChild.y = availableHeight - 10 ;
-		#else flash
-			lowerChild._y = availableHeight - 10 ;
-		#end
+		ArcticMC.setXY(lowerChild, null, availableHeight - 10);
 
 		// Behaviour
 		#if flash9
@@ -218,7 +173,7 @@ class Scrollbar {
 					flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) {
 						var scrollMet = Reflect.field(clip, "scrollmet");
-						scrollHand.startDrag(false, new Rectangle( scrollMet.startX, scrollMet.startY, 0, scrollMet.dragHeight) );
+						scrollHand.startDrag(false, new ArcticRectangle( scrollMet.startX, scrollMet.startY, 0, scrollMet.dragHeight) );
 						Reflect.setField(Bool, "dragging", true);
 						scrollTimer(clip, scrollHand);
 					 } ); 
@@ -396,24 +351,22 @@ class Scrollbar {
 		moveToY(clip, scrollHand, ensureYVisible);
     }
 
-	static public function removeScrollbar(parent : MovieClip, clip : MovieClip) {
+	static public function removeScrollbar(parent : ArcticMovieClip, clip : ArcticMovieClip) {
 		if (Reflect.hasField(parent, "scrollbar")) {
 			#if flash9
 				// TODO: Remove all event listeners as well
 				parent.removeChild(Reflect.field(parent, "scrollbar"));
-				parent.scrollRect = null;
-				clip.scrollRect = null;
 			#else flash
 				// TODO: Remove all event listeners as well
 				Reflect.field(parent, "scrollbar").removeMovieClip();
-				ArcticMC.setScrollRect(parent, null);
-				ArcticMC.setScrollRect(clip, null);
 			#end
+			ArcticMC.setScrollRect(parent, null);
+			ArcticMC.setScrollRect(clip, null);
 			Reflect.deleteField(parent, "scrollbar");
 		}
 	}
 
-   static public function scrollTimer(clip : MovieClip, scrollHand : MovieClip) {
+   static public function scrollTimer(clip : ArcticMovieClip, scrollHand : ArcticMovieClip) {
 		var scrollMet = Reflect.field(clip, "scrollmet");
 		var interval = new haxe.Timer(100);                
 		interval.run = function () {
@@ -425,7 +378,7 @@ class Scrollbar {
 		}
 	}
 
-	static private function moveBy(clip : MovieClip, scrollHand : MovieClip, 
+	static private function moveBy(clip : ArcticMovieClip, scrollHand : ArcticMovieClip, 
 					 scrollMet : ScrollMetrics, scrollDown : Bool, unit : Int) {
 		#if flash9
 			if (scrollDown) {
@@ -459,7 +412,7 @@ class Scrollbar {
 		scroll(clip, scrollHand, scrollMet);
 	}
 
-	static private function scrollByOne(clip : MovieClip, scrollHand : MovieClip, 
+	static private function scrollByOne(clip : ArcticMovieClip, scrollHand : ArcticMovieClip, 
 						scrollMet : ScrollMetrics, scrollDown : Bool) {
 		var interval = new haxe.Timer(15);                
 		interval.run = function () {
@@ -474,7 +427,7 @@ class Scrollbar {
 		}
 	}
 
-	static private function scroll(clip : MovieClip, scrollHand : MovieClip, scrollMet : ScrollMetrics ) {
+	static private function scroll(clip : ArcticMovieClip, scrollHand : ArcticMovieClip, scrollMet : ScrollMetrics ) {
 		var rect = ArcticMC.getScrollRect(clip);
 		
 		#if flash9
@@ -486,41 +439,56 @@ class Scrollbar {
 		#end
 		var increment = scrollMet.toScroll * diff;
 		if (increment < (scrollMet.clipHeight - rect.height) ) {
+			#if flash7
+			rect.top = increment;
+			#else true
+			// Using .y does not change height of rectangle in Flash 8 & 9, while using .top *will* change height
 			rect.y = increment;
+			#end
 			ArcticMC.setScrollRect(clip, rect);
 		} else {
+			#if flash7
+			rect.top = scrollMet.clipHeight - rect.height;
+			#else true
+			// Using .y does not change height of rectangle in Flash 8 & 9, while using .top *will* change height
 			rect.y = scrollMet.clipHeight - rect.height;
+			#end
 			ArcticMC.setScrollRect(clip, rect);
 		}
 	}
 
-	static private function moveToY(clip : MovieClip, scrollHand : MovieClip, ensureYVisible : Float ) {
+	static private function moveToY(clip : ArcticMovieClip, scrollHand : ArcticMovieClip, ensureYVisible : Float ) {
 		var rect = ArcticMC.getScrollRect(clip);
 		var scrollMet = Reflect.field(clip, "scrollmet");
-		var visibleY = rect.y + rect.height;
-		var moveToY : Float = rect.y;
-		if ( (ensureYVisible >= rect.y) && (ensureYVisible <= visibleY) ) {
+		var visibleY = rect.top + rect.height;
+		var moveToY : Float = rect.top;
+		if ( (ensureYVisible >= rect.top) && (ensureYVisible <= visibleY) ) {
 			return;
 		}
 
-		if (ensureYVisible < rect.y) {
+		if (ensureYVisible < rect.top) {
 			moveToY = ensureYVisible;
 		}
 		if (ensureYVisible > visibleY) {
 			moveToY = ensureYVisible - rect.height;
 		}           
 		var diff = moveToY / scrollMet.toScroll;
+		#if flash7
+		rect.top = moveToY;
+		#else true
+		// Using .y does not change height of rectangle in Flash 8 & 9, while using top *will* change height
 		rect.y = moveToY;
+		#end
 		ArcticMC.setScrollRect(clip, rect);
 		#if flash9
-            scrollHand.y = scrollMet.startY + diff ;
+            scrollHand.y = scrollMet.startY + diff;
 		#else flash 
-            scrollHand._y = scrollMet.startY + diff ;
+            scrollHand._y = scrollMet.startY + diff;
 		#end
     }
 
     #if flash9 
-		private static function getChild(m : MovieClip, n : Int)  : MovieClip {
+		private static function getChild(m : ArcticMovieClip, n : Int)  : ArcticMovieClip {
 			var d : Dynamic = m.getChildAt(n);
 			return d;
 		}
