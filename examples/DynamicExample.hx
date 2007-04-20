@@ -17,10 +17,12 @@ class DynamicExample  {
 	private function showDialog() {
 		// To make a screen, first build the data structure representing the contents
 		var me = this;
+
 		rows = [];
+		rowsBlock = new MutableBlock(Filler);
 		var screen = Border(100, 20, Background(0xf08000, 
 			LineStack( [ 
-				Id("elements", Filler), 
+				Mutable(rowsBlock),
 				Arctic.makeSimpleButton("Add row", addRow, 50),
 				Arctic.makeSimpleButton("Next screen", nextScreen, 50) 
 			] ) ) );
@@ -38,8 +40,8 @@ class DynamicExample  {
 			elements.push(Arctic.makeText(r, 100));
 		}
 		elements.push(Filler);
-		arcticView.update("elements", LineStack(elements, rows.length) );
-		arcticView.refresh(true);
+		rowsBlock.block = LineStack(elements, rows.length);
+		arcticView.refresh(false);
 	}
 	
 	private function nextScreen() {
@@ -48,7 +50,22 @@ class DynamicExample  {
 		
 		grid();
 	}
-	
+/*	
+	private function mutable() {
+		var counter = new ArcticState(0, function(number : Int) : ArcticBlock {
+				return Arctic.makeText("Number: " + number);
+			});
+		var texter = new ArcticState("A", function(text : String) : ArcticBlock {
+				return ColumnStack([ Filler, Arctic.makeText("Text: " + text) ]);
+			});
+		var example = LineStack( [ 
+				counter.block, 
+				Arctic.makeSimpleButton( "Increase counter", function () { counter.state++; } ),
+				texter.block,
+				Arctic.makeSimpleButton( "More text", function () { texter.state += "A"; } ),
+			] );
+	}
+*/
 	private function grid() {
 		var screen = Background(0x808080, Border( 1, 1, Grid( [ 
 			[ Text("First cell"), Text("Second cell"), Filler ],
@@ -61,6 +78,7 @@ class DynamicExample  {
 	}
 	
 	private var rows : Array<String>;
+	private var rowsBlock : MutableBlock;
 	private var arcticView : ArcticView;
 	private var parent : ArcticMovieClip;
 }
