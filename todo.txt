@@ -1,5 +1,4 @@
 Scrollbar bugs:
-- Fix scrolling for Flash 7
 - Remove scrollbar event handlers when scrollbar is removed
 - Change scrollbar drag in Flash 9 to work outside of the window as well
 - Dragable should not capture movements from scrollbars.

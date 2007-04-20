@@ -373,19 +373,9 @@ class ArcticView {
 			}
 			if (rotation == null) rotation = 0;
 			#if flash6
-			// TODO: This is not correct. Find out what is correct
-			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation) * child.height, c: child.width * Math.cos(rotation) * child.width * xOffset 
-								+ Math.sin(rotation) * child.height * child.height * yOffset,
-						d: child.width * -Math.sin(rotation), e: child.height * Math.cos(rotation), f: child.width * -Math.sin(rotation) * child.width * xOffset
-								+ child.height * Math.cos(rotation) * child.height * yOffset, 
-						g:0, h:0, i:1 };
+			var matrix = {matrixType:"box", x:child.width * xOffset, y:child.height * yOffset, w:child.width , h: child.height , r: rotation};
 			#else flash7
-			// TODO: This is not correct. Find out what is correct
-			var matrix = { a : child.width * Math.cos(rotation), b: Math.sin(rotation) * child.height, c: child.width * Math.cos(rotation) * child.width * xOffset 
-								+ Math.sin(rotation) * child.height * child.height * yOffset,
-						d: child.width * -Math.sin(rotation), e: child.height * Math.cos(rotation), f: child.width * -Math.sin(rotation) * child.width * xOffset
-								+ child.height * Math.cos(rotation) * child.height * yOffset, 
-						g:0, h:0, i:1 };
+			var matrix = {matrixType:"box", x:child.width * xOffset, y:child.height * yOffset, w:child.width , h: child.height , r: rotation};
 			#else flash
 			var matrix = new flash.geom.Matrix();
 			matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
