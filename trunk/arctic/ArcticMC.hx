@@ -4,12 +4,15 @@ import arctic.ArcticBlock;
 
 #if flash9
 import flash.geom.Rectangle;
+import flash.geom.Point;
 typedef ArcticRectangle = Rectangle
+typedef ArcticPoint = Point;
 typedef ArcticTextField = flash.text.TextField
 #else flash8
 import flash.geom.Rectangle;
-
+import flash.geom.Point;
 typedef ArcticRectangle = Rectangle<Float>
+typedef ArcticPoint = Point<Float>
 typedef ArcticTextField = flash.TextField
 
 import flash.Mouse;
@@ -23,11 +26,42 @@ class ArcticRectangle {
 		width = width0;
 		height = height0;
 	}
+	public function intersects(r : ArcticRectangle) : Bool {
+		var rangeOverlap = function (a1 : Float, a2 : Float, b1 : Float, b2 : Float) : Bool {
+			if (a2 < b1) return false;
+			if (a1 > b2) return false;
+			return true;
+		}
+		// Rectangles intersect if both X and Y ranges overlap
+		return rangeOverlap(left, left + width, r.left, r.left + r.width)
+			&& rangeOverlap(top, top + height, r.top, r.top + r.height);
+	}
+	public function containsPoint(p : ArcticPoint) : Bool {
+		var pointIn = function (a1 : Float, a2 : Float, p : Float) : Bool {
+			if (a1 < p) return false;
+			if (a2 > p) return false;
+			return true;
+		}
+		return pointIn(left, left + width, p.x) && pointIn(top, top + height, p.y);
+	}
 	public var left : Float;
 	public var top : Float;
 	public var width : Float;
 	public var height : Float;
 }
+
+class ArcticPoint {
+	public function new(x0 : Float, y0 : Float) {
+		x = x0;
+		y = y0;
+	}
+	static public function distance(p1 : ArcticPoint, p2 : ArcticPoint) : Float {
+		return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+	}
+	public var x : Float;
+	public var y : Float;
+}
+
 typedef ArcticTextField = flash.TextField
 
 import flash.Mouse;
@@ -280,7 +314,7 @@ class ArcticMC {
 		DrawUtils.drawRect(maskClip, rect.left, rect.top, rect.width, rect.height);
 		g.endFill();
 		clip.setMask(maskClip);
-		ArcticMC.setXY(clip, -rect.left, -rect.top);
+//		ArcticMC.setXY(clip, -rect.left, -rect.top);
 		
 		#else flash8
 		clip.scrollRect = rect;

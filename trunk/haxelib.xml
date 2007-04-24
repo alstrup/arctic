@@ -4,5 +4,7 @@
     <version name="0.8.2">
 		- Introduce type-safe Mutable block which is a mechanism for updating Arctic user interfaces, as an alternative to the Id blocks
 		- Add ArcticState which is an easy-to-use stateful block
+		- Add ArcticPoint
+		- Implement a few methods for ArcticPoint and ArcticRectangle
 	</version>
 </project>
