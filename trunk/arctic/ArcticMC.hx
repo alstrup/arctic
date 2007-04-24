@@ -314,7 +314,7 @@ class ArcticMC {
 		DrawUtils.drawRect(maskClip, rect.left, rect.top, rect.width, rect.height);
 		g.endFill();
 		clip.setMask(maskClip);
-//		ArcticMC.setXY(clip, -rect.left, -rect.top);
+		ArcticMC.setXY(clip, -rect.left, -rect.top);
 		
 		#else flash8
 		clip.scrollRect = rect;
