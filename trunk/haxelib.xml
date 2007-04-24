@@ -1,10 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.8.2">
-		- Introduce type-safe Mutable block which is a mechanism for updating Arctic user interfaces, as an alternative to the Id blocks
-		- Add ArcticState which is an easy-to-use stateful block
-		- Add ArcticPoint
-		- Implement a few methods for ArcticPoint and ArcticRectangle
+    <version name="0.8.3">
+		- Brown-paper bag bug fixed
 	</version>
 </project>
