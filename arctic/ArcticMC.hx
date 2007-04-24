@@ -6,7 +6,7 @@ import arctic.ArcticBlock;
 import flash.geom.Rectangle;
 import flash.geom.Point;
 typedef ArcticRectangle = Rectangle
-typedef ArcticPoint = Point;
+typedef ArcticPoint = Point
 typedef ArcticTextField = flash.text.TextField
 #else flash8
 import flash.geom.Rectangle;
