@@ -25,6 +25,16 @@ import arctic.ArcticBlock;
 class ArcticState<T> {
 	public function new(initialState : T, getBlock0 : T -> ArcticBlock) {
 		myState = initialState;
+		setFunction(getBlock0);
+	}
+	
+	public function setFunction(getBlock0 : T -> ArcticBlock) {
+		if (getBlock0 == null) {
+			getBlock = null;
+			mutableBlock = null;
+			block = null;
+			return;
+		}
 		getBlock = getBlock0;
 		mutableBlock = new MutableBlock(getBlock(myState));
 		block = Mutable(mutableBlock);
