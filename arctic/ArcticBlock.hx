@@ -235,7 +235,11 @@ class MutableBlock {
 	
 	/// For safety, provide an explicit way to update the view (should never be necessary)
 	public function update() : Metrics {
-		return arcticUpdater(block, availableWidth, availableHeight);
+		if (arcticUpdater != null) {
+			return arcticUpdater(block, availableWidth, availableHeight);
+		} else {
+			return null;
+		}
 	}
 
 	/// Updated by ArcticView.build

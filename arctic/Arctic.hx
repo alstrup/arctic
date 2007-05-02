@@ -112,19 +112,11 @@ class Arctic {
 
 	/// Add a check-box in front on the given block
 	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
+		
 		// Local closured variables to remember state
 		var selected = defaultSelected;
 		if (selected == null) {
 			selected = false;
-		}
-		var ourOnInit = function (onCheckFun) {
-			onCheckFun(selected);
-		};
-		var ourOnCheck = function (state : Bool) : Void {
-			selected = state;
-			if (onCheck != null) {
-				onCheck(selected);
-			}
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
@@ -142,7 +134,23 @@ class Arctic {
 
 		var notSelectedBlock = ColumnStack( [ CustomBlock(false, build), block ] );
 		var selectedBlock = ColumnStack( [ CustomBlock(true, build), block ] );
-		return ToggleButton(selectedBlock, notSelectedBlock, selected, ourOnCheck, ourOnInit);
+				
+		var checkBox = new ArcticState(selected, null);
+		checkBox.setFunction(function(selected : Bool) {
+			if (onCheck != null) {
+				onCheck(selected);
+			}
+			if (selected) {
+				return Button(selectedBlock, selectedBlock, function() {
+					checkBox.state = false;
+				});
+			} else {
+				return Button(notSelectedBlock, notSelectedBlock, function() {
+					checkBox.state = true;
+				});
+			}
+		});
+		return checkBox.block;
 	}
 	
 	/**

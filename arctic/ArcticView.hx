@@ -731,6 +731,7 @@ class ArcticView {
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
 					if (oldClip != null) {
 						ArcticMC.remove(oldClip);
+						me.movieClips.remove(oldClip);
 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
 					return me.build(arcticState.block, childClip, w, h, mode, 0);
