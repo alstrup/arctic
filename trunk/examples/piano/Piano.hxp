@@ -1,0 +1,6 @@
+﻿<haxe selected="0">
+  <output name="tuneshoot.swf" mode="swf" out="tuneshoot.swf" class="TuneShoot" lib="" cmd="" main="True" debug="True">-swf-header 230:280:31
+-lib arctic
+-swf-version 7</output>
+  <files path="/" />
+</haxe>
