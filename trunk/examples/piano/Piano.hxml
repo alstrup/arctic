@@ -1,7 +1,8 @@
-# tuneshoot.swf
+# Piano.swf
 -swf Piano.swf
 -main Piano
--debug
--swf-header 230:280:31
--lib arctic
+-swf-header 1230:280:31
+#-lib arctic
+-cp ../../
 -swf-version 7
+-D profile
