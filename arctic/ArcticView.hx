@@ -293,7 +293,7 @@ class ArcticView {
 			var child = build(block, clip, Math.max(0.0, availableWidth - 2 * x), Math.max(availableHeight - 2 * y, 0.0), mode, 0);
 			child.width += 2 * x;
 			child.height += 2 * y;
-			if (mode != Metrics) {
+			if (mode != Metrics && child.clip != null) {
 				ArcticMC.setXY(child.clip, x, y);
 				ArcticMC.setSize(clip, child.width, child.height);
 			}
@@ -613,6 +613,12 @@ class ArcticView {
 			if (mode == Metrics) {
 				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 			}
+			if (child.clip == null || hover.clip == null) {
+				#if debug
+				trace("Can not make button of empty clip");
+				#end
+				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
 			// position yet, so we can't do this yet! The parent would have to position us first, which is a change
 			// for another day.
@@ -680,42 +686,48 @@ class ArcticView {
 			var sel = build(selected, clip, availableWidth, availableHeight, mode, 0);
 			var unsel = build(unselected, clip, availableWidth, availableHeight, mode, 1);
 			if (mode != Metrics) {
-				#if flash9
-					unsel.clip.buttonMode = true;
-					unsel.clip.mouseChildren = false;
-					sel.clip.buttonMode = true;
-					sel.clip.mouseChildren = false;
-					if (mode == Create) {
-						sel.clip.visible = initialState;
-						unsel.clip.visible = !initialState;
-						var setState = function (newState : Bool) { sel.clip.visible = newState; unsel.clip.visible = !newState; }; 
-						if (null != onInit) {
-							onInit(setState);
-						}
-						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
-								// TODO: In fact, we should check that the position at MOUSE_DOWN is on top of us as well
-								if (null != onChange && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
-									setState(!sel.clip.visible);
-									onChange(sel.clip.visible);
-								}
-							});
-					}
-				#else flash
-					if (mode == Create) {
-						sel.clip._visible = initialState;
-						unsel.clip._visible = !initialState;
-						var setState = function (newState : Bool) { sel.clip._visible = newState; unsel.clip._visible = !newState; }; 
-						if (null != onInit) {
-							onInit(setState);
-						}
-						clip.onMouseUp = function() {
-							if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
-								setState(!sel.clip._visible);
-								onChange(sel.clip._visible);
+				if (sel.clip == null || unsel.clip == null) {
+					#if debug
+					trace("Can not make ToggleButton of empty blocks");
+					#end
+				} else {
+					#if flash9
+						unsel.clip.buttonMode = true;
+						unsel.clip.mouseChildren = false;
+						sel.clip.buttonMode = true;
+						sel.clip.mouseChildren = false;
+						if (mode == Create) {
+							sel.clip.visible = initialState;
+							unsel.clip.visible = !initialState;
+							var setState = function (newState : Bool) { sel.clip.visible = newState; unsel.clip.visible = !newState; }; 
+							if (null != onInit) {
+								onInit(setState);
 							}
-						};
-					}
-				#end
+							clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) {
+									// TODO: In fact, we should check that the position at MOUSE_DOWN is on top of us as well
+									if (null != onChange && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+										setState(!sel.clip.visible);
+										onChange(sel.clip.visible);
+									}
+								});
+						}
+					#else flash
+						if (mode == Create) {
+							sel.clip._visible = initialState;
+							unsel.clip._visible = !initialState;
+							var setState = function (newState : Bool) { sel.clip._visible = newState; unsel.clip._visible = !newState; }; 
+							if (null != onInit) {
+								onInit(setState);
+							}
+							clip.onMouseUp = function() {
+								if (null != onChange && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
+									setState(!sel.clip._visible);
+									onChange(sel.clip._visible);
+								}
+							};
+						}
+					#end
+				}
 			}
 			return { clip: clip, width: Math.max(sel.width, unsel.width), height: Math.max(sel.height, unsel.height), growWidth: sel.growWidth, growHeight: sel.growHeight};
 
@@ -742,9 +754,7 @@ class ArcticView {
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
 		case Filler:
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			ArcticMC.setSize(clip, availableWidth, availableHeight);
-			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: true, growHeight: true };
+			return { clip: null, width: availableWidth, height: availableHeight, growWidth: true, growHeight: true };
 		
 		case Fixed(width, height):
 			#if debug
@@ -752,11 +762,7 @@ class ArcticView {
 					trace("Broken Fixed(" + width + "," + height + ") block");
 				}
 			#end
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			if (mode != Metrics) {
-				ArcticMC.setSize(clip, width, height);
-			}
-			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
+			return { clip: null, width: width, height: height, growWidth: false, growHeight: false };
 
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
@@ -838,7 +844,7 @@ class ArcticView {
 				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
 				var child = build(l, clip, w, maxHeight, mode, i);
                 // var child = build(l, clip, w, availableHeight, mode, i);
-				if (mode != Metrics) {
+				if (mode != Metrics && child.clip != null) {
 					ArcticMC.setXY(child.clip, x, null);
 				}
 				x += child.width;
@@ -922,7 +928,7 @@ class ArcticView {
 				h = Math.max(0, h);
                 var line = build(l, child, maxWidth, h, mode, i);
                 // var line = build(l, child, availableWidth, h, mode, i);
-				if (mode != Metrics) {
+				if (mode != Metrics && line.clip != null) {
 					ArcticMC.setXY(line.clip, null, y);
 				}
 				if (i == ensureVisibleIndex) {
@@ -1000,7 +1006,7 @@ class ArcticView {
 				var xc = 0.0;
 				for (block in line) {
 					var b = build(block, child, columnWidths[x], lineHeights[y], mode, i);
-					if (mode != Metrics) {
+					if (mode != Metrics && b.clip != null) {
 						ArcticMC.setXY(b.clip, xc, yc);
 					}
 					xc += Math.max(b.width, columnWidths[x]);
@@ -1033,6 +1039,16 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			
+			if (mode != Metrics) {
+				if (child.clip == null) {
+					#if debug
+					trace("Can not make dragable with empty block");
+					#end
+					return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+				}
+			}
+			
 			if (mode == Create) {
 				activeClips.push(child.clip);
 			}
@@ -1270,6 +1286,12 @@ class ArcticView {
 			if (mode == Metrics) {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
+			if (child.clip == null) {
+				#if debug
+				trace("Can not make cursor of empty block");
+				#end
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			var me = this;
 			var cursorMc = null;
 			// We need to construct the cursor lazily because we want it to come on top of everything
@@ -1348,7 +1370,7 @@ class ArcticView {
 		case Offset(dx, dy, block) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode == Create) {
+			if (mode == Create && child.clip != null) {
 				ArcticMC.moveClip(child.clip, dx, dy);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
