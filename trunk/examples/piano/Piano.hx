@@ -2,6 +2,7 @@ import arctic.Arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticView;
 import arctic.ArcticMC;
+import arctic.ArcticState;
 
 class Piano {
 	static public function main() {
@@ -9,19 +10,7 @@ class Piano {
 	}
 	
 	public function new() {
-		
-		// c#: 10,0 -> 35,90
-		// d#: 35,0 -> 64,90
-		
-		var me = this;
-		var blackkey = function(note) {
-			return Button(Background(0x808080, Fixed(25, 78), 0), Background(0xffffff, Fixed(25, 78), 50),
-					callback(me.press, note));
-		}
-		var key = function(note, width) {
-			return Button(Background(0x808080, Fixed(width, 45), 0), Background(0x000000, Fixed(width, 45), 50),
-					callback(me.press, note));
-		}
+	
 		var keys =
 			LineStack( [
 				Fixed(0, 5),
@@ -45,12 +34,19 @@ class Piano {
 				])
 			]);
 		
+		noteDisplay = new ArcticState("", function(s : String) {
+			return Arctic.makeText(s);
+		});
+		
 		var ui = 
 			LineStack( [
 				Fixed(0, 10),
-				Border( 20, 0,
-					Picture("staff.swf", 0.25 * 420.0, 0.25 * 420.0, 1.0)
-				),
+				ColumnStack( [
+					Fixed(20, 0),
+					Picture("staff.swf", 0.25 * 420.0, 0.25 * 420.0, 1.0),
+					Fixed(20, 0),
+					noteDisplay.block
+				] ),
 				Fixed(0, 10),
 				Background( 0x1C1B1C, 
 					Border(20, 2,
@@ -63,12 +59,24 @@ class Piano {
 			]);
 		
 		view = new ArcticView(ui, flash.Lib.current);
+		var start = haxe.Timer.stamp();
 		view.display(true);
+		noteDisplay.state = Std.string(haxe.Timer.stamp() - start);
 	}
 	
 	private function press(k) {
-		trace(k);
+		noteDisplay.state = k;
 	}
 	
+	private function blackkey(note) {
+		return Button(Background(0x808080, Fixed(25, 78), 0), Background(0xffffff, Fixed(25, 78), 50),
+				callback(press, note));
+	}
+	private function key(note, width) {
+		return Button(Background(0x808080, Fixed(width, 45), 0), Background(0x000000, Fixed(width, 45), 50),
+				callback(press, note));
+	}
 	private var view : ArcticView;
+	private var noteDisplay : ArcticState<String>;
 }
+
