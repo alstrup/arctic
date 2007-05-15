@@ -1300,17 +1300,20 @@ class ArcticView {
 			#if flash9
 				var onMove = function (s) {
 					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+						ArcticMC.showMouse(keep);
 						if (cursorMc == null) {
 							cursorMc = cursorMcFn();
 							cursorMcFn = null;
 						}
+						if (cursorMc.clip == null) {
+							return;
+						}
 						cursorMc.clip.visible = true;
 						cursorMc.clip.x = me.parent.mouseX;
 						cursorMc.clip.y = me.parent.mouseY;
-						ArcticMC.showMouse(keep);
 						return;
 					} else {
-						if (cursorMc != null) {
+						if (cursorMc != null && cursorMc.clip != null) {
 							cursorMc.clip.visible = false;
 						}
 						ArcticMC.showMouse();
@@ -1319,7 +1322,7 @@ class ArcticView {
 				if (mode == Create) {
 					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
 					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
-							if (cursorMc != null) {
+							if (cursorMc != null && cursorMc.clip != null) {
 								cursorMc.clip.visible = false;
 							}
 							ArcticMC.showMouse();
