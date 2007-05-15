@@ -275,10 +275,12 @@ class ArcticView {
 	private function doBuild(gui : ArcticBlock, p : MovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #end
-		if (this == null) {
-			// This should not happen, but just to be safe
-			return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
-		}
+		#if debug
+			if (this == null) {
+				// This should not happen, but just to be safe
+				return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
+			}
+		#end
 		switch (gui) {
 		case Border(x, y, block):
 			if (mode != Metrics) {
@@ -338,17 +340,18 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			
 		case Background(color, block, alpha, roundRadius):
+			if (mode == Metrics) {
+				return build(block, null, availableWidth, availableHeight, Metrics, 0);
+			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			// a fill will not be created if the color is equal to null
-			if (mode != Metrics) {
-				var g = ArcticMC.getGraphics(clip);
-				g.clear();
-				if (color != null) {
-					g.beginFill(color, ArcticMC.convertAlpha(alpha));
-					DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
-					g.endFill();
-				}
+			var g = ArcticMC.getGraphics(clip);
+			g.clear();
+			if (color != null) {
+				g.beginFill(color, ArcticMC.convertAlpha(alpha));
+				DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
+				g.endFill();
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
@@ -607,12 +610,14 @@ class ArcticView {
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case Button(block, hover, action):
+			if (mode == Metrics) {
+				var child = build(block, null, availableWidth, availableHeight, Metrics, 0);
+				var hover = build(hover, null, availableWidth, availableHeight, Metrics, 1);
+				return { clip: null, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			var hover = build(hover, clip, availableWidth, availableHeight, mode, 1);
-			if (mode == Metrics) {
-				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
-			}
 			if (child.clip == null || hover.clip == null) {
 				#if debug
 				trace("Can not make button of empty clip");
@@ -1424,6 +1429,9 @@ class ArcticView {
 	 * Creates a clip (if construct is true) as childNo, otherwise gets existing movieclip at that point.
 	 */ 
 	private function getOrMakeClip(p : MovieClip, buildMode : BuildMode, childNo : Int) : MovieClip {
+		if (buildMode == Metrics) {
+			return null;
+		}
 		if (buildMode == Create) {
 			#if flash6
 				var d = ArcticMC.getNextHighestDepth(p);
@@ -1452,32 +1460,30 @@ class ArcticView {
 			movieClips.push(clip);
 			clip.tabEnabled = false;
 			return clip;
-		} else if (buildMode == Reuse) {
-			#if flash9
-				if (p != parent) {
-					if (Reflect.hasField(p, "c" + childNo)) {
-						return Reflect.field(p, "c" + childNo);
-					}
-					// Fallback - should never happen
-					return getOrMakeClip(p, Create, childNo);
-				}
-				if (p.numChildren < childNo) {
-					// Fallback - should never happen
-					return getOrMakeClip(p, Create, childNo);
-				} else {
-					var d : Dynamic= p.getChildAt(childNo);
-					return d;
-				}
-			#else flash
+		}
+		// Reuse case
+		#if flash9
+			if (p != parent) {
 				if (Reflect.hasField(p, "c" + childNo)) {
 					return Reflect.field(p, "c" + childNo);
 				}
 				// Fallback - should never happen
 				return getOrMakeClip(p, Create, childNo);
-			#end
-		} else {
-			return null;
-		}
+			}
+			if (p.numChildren < childNo) {
+				// Fallback - should never happen
+				return getOrMakeClip(p, Create, childNo);
+			} else {
+				var d : Dynamic= p.getChildAt(childNo);
+				return d;
+			}
+		#else flash
+			if (Reflect.hasField(p, "c" + childNo)) {
+				return Reflect.field(p, "c" + childNo);
+			}
+			// Fallback - should never happen
+			return getOrMakeClip(p, Create, childNo);
+		#end
 	}
 
 	/// Get to the book keeping details of the given clip
