@@ -11,12 +11,8 @@ class ComponentTour {
 	}
 	
 	public function new() {
-		selected = 0;
-		update();
-	}
-	
-	private function update() {
-		var components = [ 
+		var selected = 0;
+		components = [ 
 			[ "<font color='#c0c0c0'>Background(0xc0c0ff</font>, Fixed(200, 200)<font color='#c0c0c0'>)</font>", Background(0xc0c0ff, Fixed(200, 200)) ],
 			[ "Background(0x8080ff, <font color='#c0c0c0'>Fixed(200, 200)</font>, null, 10)", Background(0x8080ff, Fixed(200, 200), null, 10) ],
 			[ "GradientBackground( \"linear\", [ 0xc0c0ff, 0x8080ff], 0.0, 0.0, <font color='#c0c0c0'>Fixed( 200, 200 )</font>, null, 10, 45 )", GradientBackground( "linear", [ 0xc0c0ff, 0x8080ff], 0.0, 0.0, Fixed( 200, 200 ), null, 10, 45 ) ],
@@ -48,6 +44,7 @@ class ComponentTour {
 			"ScrollBar",
 			"Id",
 			"CustomBlock",
+			"Mutable",
 			"Arctic.makeRadioButtonGroup"
 */
 		];
@@ -59,6 +56,7 @@ class ComponentTour {
 		var menu = Arctic.makeTextChoice(componentTexts, chooseComponent, selected);
 		
 		var code = components[selected];
+		preview = new MutableBlock(code[1]);
 		var screen = 
 			Border( 5, 5,
 				Frame( Background(0xf0f0ff, Border( 10, 10,
@@ -73,7 +71,7 @@ class ComponentTour {
 						LineStack( [
 							Arctic.makeText("Preview:"),
 							Fixed(5, 5),
-							Frame( Background( 0xffffff, Border( 5, 5, code[1] ), null, 10), 2, 0x000000, 5, null, 0, 0)
+							Frame( Background( 0xffffff, Border( 5, 5, Mutable(preview) ), null, 10), 2, 0x000000, 5, null, 0, 0)
 						]),
 						Filler
 					] )
@@ -86,12 +84,13 @@ class ComponentTour {
 		// And finally display on the given movieclip
 		var root = arcticView.display(true);
 	}
-	public function chooseComponent(sel : Int, text : String) {
-		// Clear out the screen
-		arcticView.destroy();
-		selected = sel;
-		update();
+	public function chooseComponent(selected : Int, text : String) {
+		// Change the preview block
+		preview.block = components[selected][1];
+		// This forces a relayout of the other components
+		arcticView.refresh(false);
 	}
 	public var arcticView : ArcticView;
-	private var selected : Int;
+	private var preview : MutableBlock;
+	private var components : Array<Dynamic>; 
 }

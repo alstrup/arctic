@@ -731,26 +731,26 @@ class ArcticView {
 			}
 			return { clip: clip, width: Math.max(sel.width, unsel.width), height: Math.max(sel.height, unsel.height), growWidth: sel.growWidth, growHeight: sel.growHeight};
 
-		case Mutable(arcticState):
+		case Mutable(mutableBlock):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode != Metrics) {
-				arcticState.availableWidth = availableWidth;
-				arcticState.availableHeight = availableHeight;
+				mutableBlock.availableWidth = availableWidth;
+				mutableBlock.availableHeight = availableHeight;
 			}
 			if (mode == Create) {
 				var me = this;
-				arcticState.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
+				mutableBlock.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
 					if (oldClip != null) {
 						ArcticMC.remove(oldClip);
 						me.movieClips.remove(oldClip);
 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
-					return me.build(arcticState.block, childClip, w, h, mode, 0);
+					return me.build(mutableBlock.block, childClip, w, h, mode, 0);
 				};
 			}
 			var childClip : MovieClip = getOrMakeClip(clip, mode, 0);
-			var result = build(arcticState.block, childClip, availableWidth, availableHeight, mode, 0);
+			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
 		case Filler:
@@ -1438,17 +1438,26 @@ class ArcticView {
 			#else flash9
 				var clip = new MovieClip();
 				p.addChild(clip);
-				#if debug
-					if (p.numChildren < childNo) {
-						trace("Invariant broken: Expected clip to have at least " + childNo + " children");
-					}
-				#end
+				if (p != parent) {
+					Reflect.setField(p, "c" + childNo, clip);
+				} else {
+					// For the parent, we use movieclip child numbers, 
+					// because we can not add properties to things
+					// like flash.Lib.current in Flash 9
+				}
 			#end
 			movieClips.push(clip);
 			clip.tabEnabled = false;
 			return clip;
 		} else if (buildMode == Reuse) {
 			#if flash9
+				if (p != parent) {
+					if (Reflect.hasField(p, "c" + childNo)) {
+						return Reflect.field(p, "c" + childNo);
+					}
+					// Fallback - should never happen
+					return getOrMakeClip(p, Create, childNo);
+				}
 				if (p.numChildren < childNo) {
 					// Fallback - should never happen
 					return getOrMakeClip(p, Create, childNo);

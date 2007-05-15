@@ -1,7 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.8.3">
-		- Brown-paper bag bug fixed
+    <version name="0.8.4">
+		- Performance improvements: Do not make empty movieclips for some of the blocks that don't need it
 	</version>
 </project>
