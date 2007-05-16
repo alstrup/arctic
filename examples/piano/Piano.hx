@@ -10,7 +10,6 @@ class Piano {
 	}
 	
 	public function new() {
-	
 		var keys =
 			LineStack( [
 				Fixed(0, 5),
@@ -34,6 +33,8 @@ class Piano {
 				])
 			]);
 		
+		noteBlock = new ArcticState(null, getNoteBlock);
+			
 		noteDisplay = new ArcticState("", function(s : String) {
 			return Arctic.makeText(s);
 		});
@@ -42,12 +43,14 @@ class Piano {
 			LineStack( [
 				Fixed(0, 10),
 				ColumnStack( [
-					Fixed(20, 0),
-					Picture("staff.swf", 0.25 * 420.0, 0.25 * 420.0, 1.0),
-					Fixed(20, 0),
-					noteDisplay.block
+					Fixed(10, 0),
+					OnTop(
+						Picture("gstaff.swf", 0.5 * 408.0, 0.5 * 182.0, 1.0),
+						noteBlock.block
+					),
 				] ),
-				Fixed(0, 10),
+				noteDisplay.block,
+				Fixed(0, 30),
 				Background( 0x1C1B1C, 
 					Border(20, 2,
 						OnTop(
@@ -64,8 +67,32 @@ class Piano {
 		noteDisplay.state = Std.string(haxe.Timer.stamp() - start);
 	}
 	
-	private function press(k) {
-		noteDisplay.state = k;
+	private function press(note) {
+		noteBlock.state = note;
+		noteDisplay.state = note;
+	}
+	
+	private function getNoteBlock(note : String) : ArcticBlock {
+		if (note == null) return Fixed(0,0);
+		var sharp = (note.length == 2);
+		var line = 6 + switch (note.charAt(0)) {
+			case "c": 6;
+			case "d": 5;
+			case "e": 4;
+			case "f": 3;
+			case "g": 2;
+			case "a": 1;
+			case "h": 0;
+		};
+		if (line < 7) {
+			return Offset(60, (line + 2) * 0.5 * 9 + 0.5 * 2,
+				Picture("note1.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
+			);
+		} else {
+			return Offset(60, (line - 4) * 0.5 * 9 + 0.5 * 2,
+				Picture("note2.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
+			);
+		}
 	}
 	
 	private function blackkey(note) {
@@ -76,7 +103,9 @@ class Piano {
 		return Button(Background(0x808080, Fixed(width, 45), 0), Background(0x000000, Fixed(width, 45), 50),
 				callback(press, note));
 	}
+
 	private var view : ArcticView;
+	private var noteBlock : ArcticState<String>;
 	private var noteDisplay : ArcticState<String>;
 }
 
