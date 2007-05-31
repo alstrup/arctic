@@ -6,9 +6,10 @@ import arctic.ArcticBlock;
  * A stateful block. Use this to make blocks that can be updated from the outside.
  * Initialize with a given state and a function which returns a block given a certain state.
  * When you want to update the state, just assign to the state variable, and the
- * display will automatically be updated. Notice that no re-layout of existing items
- * is performed, which might be necessary if this stateful block changes size. 
- * You can use arcticView.refresh(false) to do a relayout of the entire view.
+ * display will automatically be updated according to the function given. Notice 
+ * that no re-layout of existing items is performed, which might be necessary if 
+ * this stateful block changes size.  You can use arcticView.refresh(false) to do 
+ * a relayout of the entire view.
  * Example of use:
 
  		var counter = new ArcticState(0, function(number : Int) : ArcticBlock {
@@ -28,6 +29,7 @@ class ArcticState<T> {
 		setFunction(getBlock0);
 	}
 	
+	/// The function that defines the block for a given state can be set or changed using this method
 	public function setFunction(getBlock0 : T -> ArcticBlock) {
 		if (getBlock0 == null) {
 			getBlock = null;
@@ -42,7 +44,7 @@ class ArcticState<T> {
 
 	/// The state of this state block
 	public var state(get, set) : T;
-	/// What is the current ArcticBlock for this state
+	/// The current ArcticBlock for this state
 	public var block(default, null) : ArcticBlock;
 
 	/**
