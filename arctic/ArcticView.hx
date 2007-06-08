@@ -5,14 +5,12 @@ import arctic.ArcticMC;
 
 #if flash9
 import flash.display.MovieClip;
-import flash.geom.Rectangle;
 import flash.text.TextField;
 import flash.text.TextFieldType;
 import flash.events.FocusEvent;
 #else flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
-import flash.geom.Rectangle;
 import flash.TextField;
 import flash.TextFormat;
 import flash.Mouse;

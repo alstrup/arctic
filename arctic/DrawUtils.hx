@@ -1,14 +1,11 @@
 package arctic;
 
+import arctic.ArcticMC;
 #if flash9
 import flash.display.MovieClip;
 #else true
 import flash.MovieClip;
 #end
-
-import flash.geom.Rectangle;
-import flash.geom.Point;
-
 
 /**
  * Namespace for MovieClip utils
@@ -18,14 +15,11 @@ class DrawUtils {
 	/// Contributed by Zjnue Brzavi <zjnue.brzavi@googlemail.com>
 	static public function drawRect(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, ?cornerRadius : Float) {
 		var angle, sideSign, cnrSign, strtX, strtY, nextX, nextY, cnrX, cnrY, endX, endY;
+		var g = ArcticMC.getGraphics(mc);
 		if (cornerRadius != null && cornerRadius > 0) {
 			strtX = x + cornerRadius;
 			strtY = y;
-			#if flash9
-				mc.graphics.moveTo(strtX,strtY);
-			#else flash
-				mc.moveTo(strtX,strtY);
-			#end
+			g.moveTo(strtX,strtY);
 			for (i in 0...4) {
 				angle = (Math.PI/4) - (i*Math.PI/2);
 				sideSign = if (Math.cos(angle) >= 0) 1 else -1;
@@ -45,30 +39,17 @@ class DrawUtils {
 					endY = cnrY;
 					endX = cnrX + cnrSign * cornerRadius;
 				}
-				#if flash9
-					mc.graphics.lineTo(nextX,nextY);
-					mc.graphics.curveTo(cnrX,cnrY,endX,endY);
-				#else flash
-					mc.lineTo(nextX,nextY);
-					mc.curveTo(cnrX,cnrY,endX,endY);
-				#end
+				g.lineTo(nextX,nextY);
+				g.curveTo(cnrX,cnrY,endX,endY);
 				strtX = endX;
 				strtY = endY;
 			}
 		} else {
-			#if flash9
-				mc.graphics.moveTo(x, y);
-				mc.graphics.lineTo(x+w, y);
-				mc.graphics.lineTo(x+w, y+h);
-				mc.graphics.lineTo(x, y+h);
-				mc.graphics.lineTo(x, y);
-			#else flash
-				mc.moveTo(x, y);
-				mc.lineTo(x+w, y);
-				mc.lineTo(x+w, y+h);
-				mc.lineTo(x, y+h);
-				mc.lineTo(x, y);
-			#end
+			g.moveTo(x, y);
+			g.lineTo(x+w, y);
+			g.lineTo(x+w, y+h);
+			g.lineTo(x, y+h);
+			g.lineTo(x, y);
 		}
 	}
 
@@ -87,9 +68,9 @@ static public function drawArrowHead(mc: MovieClip, startX: Float, startY: Float
     // find the normalized angle of difference in the arrow w and h
     var angle_s = Math.abs((Math.PI/2) - Math.atan2(r2 - arrowH, arrowW / 2));
     // apply the x / y components to the new angle difference
-    var pt2 = new Point<Float>(startX + (r2-arrowH)*Math.cos(angle_real-angle_s), startY + (r2-arrowH)*Math.sin(angle_real-angle_s));
-    var pt3 = new Point<Float>(startX + (r2-arrowH)*Math.cos(angle_real+angle_s), startY + (r2-arrowH)*Math.sin(angle_real+angle_s));
-    var pt1 = new Point<Float>(endX, endY);
+    var pt2 = new ArcticPoint(startX + (r2-arrowH)*Math.cos(angle_real-angle_s), startY + (r2-arrowH)*Math.sin(angle_real-angle_s));
+    var pt3 = new ArcticPoint(startX + (r2-arrowH)*Math.cos(angle_real+angle_s), startY + (r2-arrowH)*Math.sin(angle_real+angle_s));
+    var pt1 = new ArcticPoint(endX, endY);
 
     // basically, the arrow is a filled in triangle
     mc.moveTo(pt1.x, pt1.y);
@@ -111,47 +92,27 @@ static public function drawArrow(mc: MovieClip, startX, startY, endX, endY, arro
 // Draws a circle with optional filling
 static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float)
 {
-	#if flash9
-		mc.graphics.lineStyle(1, color);
-		if (null != fillColor) {
-			mc.graphics.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
-		}
-		mc.graphics.drawCircle(x, y, radius);
-		if (null != fillColor) {
-			mc.graphics.endFill();
-		}
-	#else flash
-		mc.lineStyle(1, color);
-		if (null != fillColor) {
-			mc.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
-		}
-		DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
-		if (null != fillColor) {
-			mc.endFill();
-		}
-	#end
+	var g = ArcticMC.getGraphics(mc);
+	g.lineStyle(1, color);
+	if (null != fillColor) {
+		g.beginFill(fillColor, ArcticMC.convertAlpha(fillAlpha));
+	}
+	DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
+	if (null != fillColor) {
+		g.endFill();
+	}
 }
 
 static public function drawRectangle(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, cornerRadius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float) {
-	#if flash9
-		mc.graphics.lineStyle(1, color);
-		if (null != fillColor) {
-			mc.graphics.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
-		}
-		drawRect(mc, x, y, w, h, cornerRadius);
-		if (null != fillColor) {
-			mc.graphics.endFill();
-		}
-	#else flash
-		mc.lineStyle(1, color);
-		if (null != fillColor) {
-			mc.beginFill(fillColor, if (fillAlpha == null) 100.0 else fillAlpha);
-		}
-		drawRect(mc, x, y, w, h, cornerRadius);
-		if (null != fillColor) {
-			mc.endFill();
-		}
-	#end
+	var g = ArcticMC.getGraphics(mc);
+	g.lineStyle(1, color);
+	if (null != fillColor) {
+		g.beginFill(fillColor, ArcticMC.convertAlpha(fillAlpha));
+	}
+	drawRect(mc, x, y, w, h, cornerRadius);
+	if (null != fillColor) {
+		g.endFill();
+	}
 }
 
 }
