@@ -1,13 +1,15 @@
-- Fix interaction between TextInput & Dragable 
-  - seen in ComponentTour8.swf.
+Bugs
+----
+
+- Hover effect does not automatically trigger on refresh (see dynamic example)
 
 Scrollbar bugs:
 - Remove scrollbar event handlers when scrollbar is removed
 - Change scrollbar drag in Flash 9 to work outside of the window as well
 - Dragable should not capture movements from scrollbars.
 
-Bugs:
-- Hover effect does not automatically trigger on refresh (see dynamic example)
+New features to consider
+------------------------
 
 Extend blocks with new APIs:
 - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
@@ -16,9 +18,8 @@ Extend blocks with new APIs:
 - Add API for changing state of toggle button
 
 - Make tooltip have a delay, and make sure they do not go outside the stage
-- Add filling behaviour to grid
 
-New features to consider:
+- Add filling behaviour to grid
 
 - Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using ArcticState
 
