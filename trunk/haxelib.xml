@@ -1,9 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.8.4">
-		- Performance improvements: Do not make empty movieclips for some of the blocks that don't need it
-		- Fix problem with Dragable leaving dragability behind after it was removed
-		- Start a piano example which works on PocketPCs with Flash 7
+    <version name="0.8.5">
+		- Fix Flash 7 compatibility
 	</version>
 </project>
