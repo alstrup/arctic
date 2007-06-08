@@ -1,5 +1,5 @@
 Arctic is a simple haXe GUI framework which allows you to create user
-interfaces for flash applications. It is unique by supporting both Flash 8
+interfaces for flash applications. It is unique by supporting both Flash 7, 8
 and Flash 9 targets using the same client code. It is licensed under the BSD
 license, without the advertisement clause.
 
@@ -11,12 +11,8 @@ Filler element is available which will expand to the width or height available.
 This can be used to implement things like centering and right alignment of user
 interface blocks.
 
-Arctic is currently best suited for fairly static user interfaces, since
-there is no partial refresh support yet, meaning that changes in the user
-interface will require a full refresh.
-
-Arctic is so simple that you should have little trouble understanding how it
-is implemented, and thus it should be easy to extend it to cover your needs.
+Arctic is relatively simple, so you should have little trouble understanding how it
+is implemented, and thus it should be possible to extend it to cover your needs.
 
 See the example to learn how to build your own arctic views.
 
@@ -24,7 +20,7 @@ To install, run
 
   haxelib install arctic
 
-Compile the simple demo in your haxe-1.09\lib\arctic\*\examples
+Compile the simple demo in your haxe-X\lib\arctic\*\examples
 directory, and launch arctic.swf (Flash 8) or arctic9.swf (Flash 9) to try it.
 
 
@@ -50,8 +46,7 @@ The second approach is to use the CustomBlock. This allows you to wrap any exist
 MovieClips you might have, and mix them into Arctic.
 
 The final approach is to make new basic blocks. This is done by extending the ArcticBlock
-enum, and modify build and calc_metrics accordingly in Arctic.hx. This might be
-relevant if you need new layout behaviours.
+enum, and modify build accordingly in Arctic.hx.
 
 
 Regards,

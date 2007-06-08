@@ -3,5 +3,7 @@
     <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
     <version name="0.8.4">
 		- Performance improvements: Do not make empty movieclips for some of the blocks that don't need it
+		- Fix problem with Dragable leaving dragability behind after it was removed
+		- Start a piano example which works on PocketPCs with Flash 7
 	</version>
 </project>
