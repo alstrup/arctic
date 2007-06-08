@@ -168,6 +168,7 @@ class ArcticView {
 			firstChild = parent.numChildren;
 			#else flash
 			firstChild = ArcticMC.getNextHighestDepth(parent);
+			mouseWheelListeners = new Array<{ clip: ArcticMovieClip, listener: Dynamic } >();
 			#end
 		}
 		var size;
@@ -224,6 +225,22 @@ class ArcticView {
 		base = null;
 	}
 	
+	private function removeClip(c : ArcticMovieClip) {
+		movieClips.remove(c);
+		activeClips.remove(c);
+		#if flash9
+		#else flash
+		// Clean up mouse wheel listeners
+		for (s in mouseWheelListeners) {
+			if (s.clip == c) {
+				flash.Mouse.removeListener(s.listener);
+				mouseWheelListeners.remove(s);
+				return;
+			}
+		}
+		#end
+	}
+	
 	// We collect all generated movieclips here, so we can be sure to remove all when done
 	private var movieClips : Array<ArcticMovieClip>;
 	
@@ -235,6 +252,11 @@ class ArcticView {
 	
 	/// And the movieclips for named ids here
 	private var idMovieClip : Hash<ArcticMovieClip>;
+	
+	#if flash9
+	#else flash
+	private var mouseWheelListeners : Array< { clip: ArcticMovieClip, listener : Dynamic } >;
+	#end
 
 	/**
 	 * This constructs or updates all the movieclips used to display the given block on the
@@ -748,7 +770,7 @@ class ArcticView {
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
 					if (oldClip != null) {
 						ArcticMC.remove(oldClip);
-						me.movieClips.remove(oldClip);
+						me.removeClip(oldClip);
 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
 					return me.build(mutableBlock.block, childClip, w, h, mode, 0);
@@ -1269,9 +1291,9 @@ class ArcticView {
 						}
 					}
 				};
-				// TODO: We should remove this one again when the clip dies -
 				flash.Mouse.addListener(mouseWheelListener);
-				
+				// We record this one so we can remove it again later
+				mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
 			#end
 
 			if (null != onInit) {
