@@ -53,7 +53,8 @@ class Arctic {
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
-					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
+					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float,
+					?mouseWheel : Bool) {
 		// Local closured variables to remember drag offset
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
@@ -67,12 +68,12 @@ class Arctic {
 				onDrag(di);
 			}
 		}
-		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit);
+		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, mouseWheel);
 	}
 
 	/// Make a slider with it's own coordinate system. The call-back gives results in slider coordinates
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, block : ArcticBlock,
-							onDrag : Float -> Float -> Void, ?initialX : Float, ? initialY : Float) {
+							onDrag : Float -> Float -> Void, ?initialX : Float, ? initialY : Float, ?mouseWheel : Bool) {
 		// The current position in slider coordinate system
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
@@ -107,7 +108,7 @@ class Arctic {
 				onDrag(x, y);
 			}
 		}
-		return Dragable(true, minimumX != maximumX, minimumY != maximumY, block, ourOnDrag, ourOnInit);
+		return Dragable(true, minimumX != maximumX, minimumY != maximumY, block, ourOnDrag, ourOnInit, mouseWheel);
 	}
 
 	/// Add a check-box in front on the given block
