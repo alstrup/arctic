@@ -214,6 +214,14 @@ class ArcticView {
 		if (base == null) {
 			return;
 		}
+		#if flash9
+		#else flash
+			// Clean up mouse wheel listeners
+			for (s in mouseWheelListeners) {
+				flash.Mouse.removeListener(s.listener);
+			}
+			mouseWheelListeners = [];
+		#end
 		for (m in movieClips) {
 			ArcticMC.remove(m);
 		}
@@ -1060,7 +1068,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
+		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, mouseWheel):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
@@ -1237,18 +1245,20 @@ class ArcticView {
 						}
 					}
 				);
-				// Ideally, it should be on the parent, but limited to the area relevant
-				// (except for dragables that should not stay within where we probably do 
-				// not want mouse wheel events to move anything)
-				clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
-					function (s) {
-						if (upDownMotion) {
-							doDrag(0, -10 * s.delta);
-						} else if (sideMotion) {
-							doDrag(-10 * s.delta, 0);
+				if (mouseWheel != false) {
+					// Ideally, it should be on the parent, but limited to the area relevant
+					// (except for dragables that should not stay within where we probably do 
+					// not want mouse wheel events to move anything)
+					clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+						function (s) {
+							if (upDownMotion) {
+								doDrag(0, -10 * s.delta);
+							} else if (sideMotion) {
+								doDrag(-10 * s.delta, 0);
+							}
 						}
-					}
-				);
+					);
+				}
 			#else flash
 				clip.onMouseDown = function() {
 					if (me.getActiveClip() == dragClip) {
@@ -1275,23 +1285,25 @@ class ArcticView {
 						}
 					}
 				};
-				var mouseWheelListener = { 
-					onMouseDown : function() {},
-					onMouseMove : function() {},
-					onMouseUp : function() {},
-					onMouseWheel : function ( delta : Float, target ) {
-						if (dragClip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
-							if (upDownMotion) {
-								doDrag(0, -10 * delta);
-							} else if (sideMotion) {
-								doDrag(-10 * delta, 0);
+				if (mouseWheel != false) {
+					var mouseWheelListener = { 
+						onMouseDown : function() {},
+						onMouseMove : function() {},
+						onMouseUp : function() {},
+						onMouseWheel : function ( delta : Float, target ) {
+							if (dragClip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
+								if (upDownMotion) {
+									doDrag(0, -10 * delta);
+								} else if (sideMotion) {
+									doDrag(-10 * delta, 0);
+								}
 							}
 						}
-					}
-				};
-				flash.Mouse.addListener(mouseWheelListener);
-				// We record this one so we can remove it again later
-				mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
+					};
+					flash.Mouse.addListener(mouseWheelListener);
+					// We record this one so we can remove it again later
+					mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
+				}
 			#end
 
 			if (null != onInit) {

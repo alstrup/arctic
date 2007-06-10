@@ -125,7 +125,7 @@ enum ArcticBlock {
 	 * Arctic.makeDragable if you want to preserve the dragged distance across canvas resizes.
 	 */
 	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
-			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void);
+			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void, ?mouseWheel : Bool);
 
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
