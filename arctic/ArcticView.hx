@@ -549,6 +549,11 @@ class ArcticView {
 						txtInput.backgroundColor = 0xff0000;
 					}
 				}
+				// Setting additional txtInput properties from the style object
+				var fields = Reflect.fields(style);
+				for (i in 0...fields.length){
+					Reflect.setField(txtInput, fields[i], Reflect.field(style,fields[i]));
+				}
 				txtInput.htmlText = html;
 				// Retreive the format of the initial text
 				var txtFormat = txtInput.getTextFormat();
@@ -575,12 +580,6 @@ class ArcticView {
 					txtInput.addListener(listener);
 					txtInput.type = "input";
 				#end
-
-				// Setting additional txtInput properties from the style object
-				var fields = Reflect.fields(style);
-				for (i in 0...fields.length){
-					Reflect.setField(txtInput, fields[i], Reflect.field(style,fields[i]));
-				}
 			}
 			if (mode != Metrics) {
 				// Setting focus on txtInput 
