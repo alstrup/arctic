@@ -167,11 +167,16 @@ enum ArcticBlock {
 	 *       element. The final parameter is any existing MovieClip. This is useful in
 	 *       Reuse mode, where the code should update the looks of this MovieClip.
 	 * 
+	 *       The buildFunc should return parentMc as clip in Create mode, existingMC in
+	 *       Reuse mode, and null in Metrics mode. (Therefore, this could be omitted
+	 *       from the API, but for now, I'll let it be like be like this to avoid
+	 *       introducing new types.)
+	 * 
 	 *       The function should return the metrics for the block. The different build modes
 	 *       should be consistent in the metrics - otherwise, layout bugs can occur.
 	 * 
 	 * Notice that you have to build the custom blocks such that their work with
-	 * both Flash 8 and 9. See ArcticMC for a helper functions that makes this simpler.
+	 * both Flash 8 and 9. See ArcticMC for helper functions that makes this simpler.
 	 */
 	CustomBlock( data : Dynamic, buildFunc : Dynamic -> BuildMode -> ArcticMovieClip -> Float -> Float -> ArcticMovieClip -> Metrics );
 
