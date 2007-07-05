@@ -1,3 +1,9 @@
+API clean-up:
+
+- Background rounding should be mandatory
+- Frame has wrong order
+
+
 Bugs
 ----
 
