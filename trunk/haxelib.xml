@@ -1,8 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
-    <description>Lightweight GUI framework for haXe targetting Flash 8 and Flash 9</description>
-    <version name="0.8.6">
-		- Fix mouse wheel trouble after destroy
-		- Support making dragable and sliders without mousewheel support
+    <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
+    <version name="0.8.8">
+		- Compatible with haXe 1.14
 	</version>
 </project>
