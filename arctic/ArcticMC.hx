@@ -114,7 +114,7 @@ class ArcticMC {
 	 * Set the position of the clip. x and/or y can be null, in which case
 	 * that position is not changed.
 	 */
-	static public function setXY(m : ArcticMovieClip, x : Float, y : Float) {
+	static public function setXY(m : ArcticMovieClip, x : Null<Float>, y : Null<Float>) {
 		if (x != null) {
 			#if flash9
 				m.x = x;
@@ -144,7 +144,7 @@ class ArcticMC {
 	 * Set the scaling of the clip. scaleX and/or scaleY can be null, in which case
 	 * that scaling is not changed. Original size is 1.
 	 */
-	static public function setScaleXY(m : ArcticMovieClip, x : Float, y : Float) {
+	static public function setScaleXY(m : ArcticMovieClip, x : Null<Float>, y : Null<Float>) {
 		if (x != null) {
 			#if flash9
 				m.scaleX = x;
@@ -229,7 +229,7 @@ class ArcticMC {
 	}
 	
 	/// Converts an alpha value from 0 to 100 range to the correct range depending on the flash target
-	static public function convertAlpha(a : Float) : Float {
+	static public function convertAlpha(a : Null<Float>) : Float {
 		#if flash9
 			if (a == null) 
 				return 1.0;
@@ -454,7 +454,7 @@ class ArcticMC {
 	}
 
 	/// Set the text rendering quality. If sharpness is null, normal rendering is used. gridFit parameter: 0 is none, 1 is pixel, 2 is subpixel
-	static public function setTextRenderingQuality(tf : ArcticTextField, sharpness : Float, ?gridFit : Int) {
+	static public function setTextRenderingQuality(tf : ArcticTextField, sharpness : Null<Float>, ?gridFit : Int) {
 		#if flash8
 		if (sharpness != null) {
 			tf.sharpness = sharpness;

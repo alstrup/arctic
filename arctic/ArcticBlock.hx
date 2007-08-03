@@ -18,7 +18,7 @@ enum ArcticBlock {
 	 * Alpha is an optional transparency from 0.0 to 100.0.
 	 * roundRadius > 0 makes the background rounded at the corners.
 	 */
-	Background(color : Int, block : ArcticBlock, ?alpha : Float, ?roundRadius : Float);
+	Background(color : Null<Int>, block : ArcticBlock, ?alpha : Null<Float>, ?roundRadius : Null<Float>);
 
 	/**
 	 * Draw a gradient background behind the given block.
@@ -29,7 +29,7 @@ enum ArcticBlock {
 	 * roundRadius > 0 makes the gradient rounded at the corners.
 	 * rotation - the amount to rotate, in radians (the default value is 0).
 	 */ 
-	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Float, ?rotation: Float);
+	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Null<Float>, ?rotation: Null<Float>);
 
 	/// Add some space around the block
 	Border(x : Float, y : Float, block : ArcticBlock);
@@ -41,7 +41,7 @@ enum ArcticBlock {
 	 * If wordWrap is false, the text will always have the same size, and only break lines
 	 * if <br/> tags exist in the text.
 	 */
-	Text(html : String, ?embeddedFont : Bool, ?wordWrap : Bool);
+	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>);
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
@@ -49,13 +49,13 @@ enum ArcticBlock {
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
 	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiLine: true } as style is portable.)
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Int, ?numeric : Bool, ?bgColor : Int, ?focus : Bool, ?embeddedFont : Bool);
+	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>);
 
 	/**
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.
 	* Notice that the width & height should be the size of this block, not the original size of the picture.
 	*/
-	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Bool);
+	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>);
 
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
@@ -92,7 +92,7 @@ enum ArcticBlock {
 	/**
 	 * An empty block of the given size
 	 */
-	Fixed(width : Float, height : Float);
+	Fixed(width : Null<Float>, height : Null<Float>);
 
 	/**
 	 * Columns are blocks put next to each other horizontally. The height is the maximum
@@ -107,7 +107,7 @@ enum ArcticBlock {
 	 * pass the index number of the block in the array as second parameter. Notice there
 	 * is no guarantee that all of the entry is visible.
 	 */
-	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Int);
+	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Null<Int>);
 	
 	/**
 	 * A 2-d grid of block. For now, this does not support resizing or scrollbars.
@@ -125,7 +125,7 @@ enum ArcticBlock {
 	 * Arctic.makeDragable if you want to preserve the dragged distance across canvas resizes.
 	 */
 	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
-			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void, ?mouseWheel : Bool);
+			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void, ?mouseWheel : Null<Bool>);
 
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
@@ -133,7 +133,7 @@ enum ArcticBlock {
 	 * keepNormalCursor to true. This is useful for toolips, see Arctic.makeTooltip.
 	 * Per default, the normal cursor is hidden when the custom cursor is visible.
 	 */
-	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Bool);
+	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Null<Bool>);
 
 	/**
 	 * Translate a block in some direction - notice layout does not take this offset
@@ -183,7 +183,7 @@ enum ArcticBlock {
 	/**
 	 * Draws a frame around the given block. Alpha is optional between 0 and 100.
 	 */
-	Frame(block: ArcticBlock, ?thickness: Float, ?color: Int, ?roundRadius: Float, ?alpha: Float, ?xspacing: Float, ?yspacing: Float);
+	Frame(block: ArcticBlock, ?thickness: Null<Float>, ?color: Null<Int>, ?roundRadius: Null<Float>, ?alpha: Null<Float>, ?xspacing: Null<Float>, ?yspacing: Null<Float>);
 
 	/**
 	 * Drops a shadow for the given block. Notice that the shadow is not considered as part of

@@ -78,8 +78,8 @@ class Arctic {
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
 		// The current position in pixels
-		var currentXPixels : Float = null;
-		var currentYPixels : Float = null;
+		var currentXPixels : Null<Float> = null;
+		var currentYPixels : Null<Float> = null;
 		var ourOnInit = function (di : DragInfo, onDragFun) {
 			currentXPixels = 0;
 			if (minimumX != maximumX) {
@@ -212,7 +212,7 @@ class Arctic {
 				setState(true);
 			}
 		};
-		var onSelectHandler = function (index : Int) : Void {
+		var onSelectHandler = function (index : Null<Int>) : Void {
 			if (index == null) {
 				// remove selection
 				Lambda.iter(stateChooser, function(f) { f(false); } );
