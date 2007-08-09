@@ -28,6 +28,7 @@ class ComponentTour {
 			[ "Arctic.makeDateView(<font color='#c0c0c0'>Date.now()</font>)", Arctic.makeDateView(Date.now()) ],
 			[ "Arctic.makeTooltip(<font color='#c0c0c0'>Text(\"Hide\")</font>, \"...and seek\")", Arctic.makeTooltip(Text("Hide"), "...and seek") ],
 			[ "Arctic.makeDragable(true, true, true, <font color='#c0c0c0'>Text(\"Drag me\")</font>)", Arctic.makeDragable(true, true, true, Text("Drag me")) ],
+			[ "Arctic.makeSlider(0, 100, 0, 100, <font color='#c0c0c0'>Text(\"Slide me\")</font>)", Arctic.makeSlider(0, 100, 0, 100, Text("Slide me"), null) ],
 			[ "Shadow(<font color='#c0c0c0'>Text(\"Shadow\")</font>, 2, 45, 0x000000, 10)", Shadow(Text("Shadow"), 2, 45, 0x000000, 10) ],
 			[ "Frame(<font color='#c0c0c0'>Text(\"Frame\")</font>, 5, 0x8080ff, 20, null, 10, 10)", Frame(Text("Frame"), 5, 0x8080ff, 20, null, 10, 10) ],
 			[ "Cursor(<font color='#c0c0c0'>Text(\"See\")</font>, <font color='#c0c0c0'>Text(\"A custom cursor!\")</font>, false)", Cursor(Text("See"), Text("A custom cursor!"), false) ],

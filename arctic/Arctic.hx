@@ -94,17 +94,17 @@ class Arctic {
 		var ourOnDrag = function (di : DragInfo) : Void {
 			currentXPixels = di.x;
 			currentYPixels = di.y;
+			var x = minimumX;
+			if (minimumX != maximumX) {
+				x = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
+				currentX = x;
+			}
+			var y = minimumY;
+			if (minimumY != maximumY) {
+				y = di.y / di.totalHeight * (maximumY - minimumY) + minimumY;
+				currentY = y;
+			}
 			if (onDrag != null) {
-				var x = minimumX;
-				if (minimumX != maximumX) {
-					x = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
-					currentX = x;
-				}
-				var y = minimumY;
-				if (minimumY != maximumY) {
-					y = di.y / di.totalHeight * (maximumY - minimumY) + minimumY;
-					currentY = y;
-				}
 				onDrag(x, y);
 			}
 		}
