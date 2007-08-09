@@ -186,10 +186,10 @@ enum ArcticBlock {
 	Frame(block: ArcticBlock, ?thickness: Null<Float>, ?color: Null<Int>, ?roundRadius: Null<Float>, ?alpha: Null<Float>, ?xspacing: Null<Float>, ?yspacing: Null<Float>);
 
 	/**
-	 * Drops a shadow for the given block. Notice that the shadow is not considered as part of
-	 * the block in terms of size.
+	 * Apply a filter on the block. Notice that the filter effect is not considered as part of the block
+	 * in terms of size.
 	 */
-	Shadow(block: ArcticBlock, distance: Int, angle: Int, color: Int, alpha: Float);
+	Filter(filter : Filter, block : ArcticBlock);
 }
 
 /// The structure used by CustomBlocks to tell arctic of dimensions and requested resizing behaviour
@@ -213,6 +213,28 @@ typedef DragInfo = {
 	// How much room is available for dragging in pixels?
 	totalWidth : Float,
 	totalHeight : Float
+}
+
+enum Filter {
+	#if flash9
+	Bevel(?distance : Float, ?angle : Float, ?highlightColor : UInt, ?highlightAlpha : Float, ?shadowColor : UInt, ?shadowAlpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
+	Blur(?blurX : Float, ?blurY : Float, ?quality : Int);
+	ColorMatrix(?matrix : Array<Float>);
+	Convolution(?matrixX : Float, ?matrixY : Float, ?matrix : Array<Dynamic>, ?divisor : Float, ?bias : Float, ?preserveAlpha : Bool, ?clamp : Bool, ?color : UInt, ?alpha : Float);
+	DropShadow(?distance : Float, ?angle : Float, ?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+	Glow(?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool);
+	GradientBevel(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
+	GradientGlow(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
+	#else true
+	Bevel(?distance : Float, ?angle : Float, ?highlightColor : Float, ?highlightAlpha : Float, ?shadowColor : Float, ?shadowAlpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Float, ?type : String, ?knockout : Bool);
+	Blur(?blurX : Float, ?blurY : Float, ?quality : Int);
+	ColorMatrix(?matrix : Array<Float>);
+	Convolution(?matrixX : Float, ?matrixY : Float, ?matrix : Array<Dynamic>, ?divisor : Float, ?bias : Float, ?preserveAlpha : Bool, ?clamp : Bool, ?color : Int, ?alpha : Float);
+	DropShadow(?distance : Float, ?angle : Float, ?color : Float, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Float, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+	Glow(?color : Int, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool);
+	GradientBevel(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
+	GradientGlow(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
+	#end
 }
 
 /**

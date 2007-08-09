@@ -348,25 +348,45 @@ class ArcticView {
 				DrawUtils.drawRect(clip, delta, delta, child.width - thickness, child.height - thickness, roundRadius);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-		
-		case Shadow(block, distance, angle, color, alpha):
+
+		case Filter(filter, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			#if flash6
 			#else flash7
 			#else flash
 			if (mode == Create) {
-				// TODO: We do not support changing of Shadow parameters in an update
-				var dropShadow = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
-				// we must use a temporary array (see documentation)
+				var myFilter : Dynamic;
+				switch(filter) {
+				case Bevel(distance, angle, highlightColor, highlightAlpha, shadowColor, shadowAlpha, blurX, blurY, strength, quality, type, knockout):
+					myFilter = new flash.filters.BevelFilter(distance, angle, highlightColor, highlightAlpha, shadowColor, shadowAlpha, blurX, blurY, strength, quality, type, knockout);
+				case Blur(blurX, blurY, quality):
+					myFilter = new flash.filters.BlurFilter(blurX, blurY, quality);
+				case ColorMatrix(matrix):
+					myFilter = new flash.filters.ColorMatrixFilter(matrix);
+				case Convolution(matrixX, matrixY, matrix, divisor, bias, preserveAlpha, clamp, color, alpha):
+					myFilter = new flash.filters.ConvolutionFilter(matrixX, matrixY, matrix, divisor, bias, preserveAlpha, clamp, color, alpha);
+				case DropShadow(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
+					// Hm, this doesn't work if blurX and friends are "null", because they are actually "undefined"
+//					myFilter = new flash.filters.DropShadowFilter(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject);
+					myFilter = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
+				case Glow(color, alpha, blurX, blurY, strength, quality, inner, knockout):
+					myFilter = new flash.filters.GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout);
+				case GradientBevel(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+					myFilter = new flash.filters.GradientBevelFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout);
+				case GradientGlow(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+					myFilter = new flash.filters.GradientGlowFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout);
+				};
+				// TODO: We do not support changing of Filter parameters in an update
+				// We must use a temporary array (see documentation)
 				var _filters = clip.filters;
-				_filters.push(dropShadow);
+				_filters.push(myFilter);
 				clip.filters = _filters;
 			}
 			#end
-			// Notice: We do not let the shadow affect the size
+			// Notice: We do not let the filter affect the size
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			
+		
 		case Background(color, block, alpha, roundRadius):
 			if (mode == Metrics) {
 				return build(block, null, availableWidth, availableHeight, Metrics, 0);
@@ -927,7 +947,7 @@ class ArcticView {
 				// See if we can free space up by shrinking children enough
 				var gh = 0.0;
 				var shrinkable = 0;
-				var cutoffHeight = 20;
+				var cutoffHeight = 40;
 				for (cm in childMetrics) {
 					if (cm.growHeight && cm.height > cutoffHeight) {
 						gh += (cm.height - cutoffHeight);
@@ -980,12 +1000,12 @@ class ArcticView {
 				ensureY = y;
 			}
 			
-			if (y - availableHeight >= 1 && availableHeight >= 10) {
+			if (y - availableHeight >= 1 && availableHeight >= 34) {
 				// Scrollbar
-				w += 12;
 				if (mode != Metrics) {
 					Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
 				}
+				w += 17;
 				y = availableHeight;
 			} else {
 				if (mode == Reuse) {

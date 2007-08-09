@@ -49,7 +49,6 @@ class Arctic {
 	 * Make a block dragable by the mouse in the given directions.
 	 * If stayWithinBlock is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
-	 * This block can be used to make many things, including dialogs.
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
@@ -71,7 +70,11 @@ class Arctic {
 		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, mouseWheel);
 	}
 
-	/// Make a slider with it's own coordinate system. The call-back gives results in slider coordinates
+	/**
+	 * Make a slider with it's own coordinate system. The call-back gives results in slider coordinates
+	 * Compared to a dragable, this component preserves the relative position of the handle after resizes.
+	 * This is suitable for normal sliders, but can also be used for making dragable dialogs.
+	 */
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, block : ArcticBlock,
 							onDrag : Float -> Float -> Void, ?initialX : Float, ? initialY : Float, ?mouseWheel : Bool) {
 		// The current position in slider coordinate system

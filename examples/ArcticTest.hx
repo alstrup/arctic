@@ -36,7 +36,10 @@ class ArcticTest {
 								Filler, 
 								ColumnStack( [
 									Filler,
-									Shadow( Arctic.makeText("Hello world!", 40, null, "arial"), 7, 45, 0x777777, 0.5 ),
+									Filter(
+										DropShadow(7, 45, 0x777777, 0.5),
+										Arctic.makeText("Hello world!", 40, null, "arial")
+									),
 									Filler ]
 								),
 								Filler,
