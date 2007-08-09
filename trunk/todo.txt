@@ -1,18 +1,19 @@
 API clean-up:
-
 - Background rounding should be mandatory
 - Frame has wrong order
-
 
 Bugs
 ----
 
-- Hover effect does not automatically trigger on refresh (see dynamic example)
-
 Scrollbar bugs:
-- Remove scrollbar event handlers when scrollbar is removed
-- Change scrollbar drag in Flash 9 to work outside of the window as well
+- Add arrows on buttons
+- Buttons should move slider handle
+- Buttons should auto-repeat
+- Mouse wheel support for scrollbar should work across entire clip, not just scrollbar itself
 - Dragable should not capture movements from scrollbars.
+
+Other bugs:
+- Hover effect does not automatically trigger on refresh (see dynamic example)
 
 New features to consider
 ------------------------
@@ -28,8 +29,6 @@ Extend blocks with new APIs:
 - Add filling behaviour to grid
 
 - Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using ArcticState
-
-- Scrollbar = LineStack(Button, Slider, Button);
 
 - Combo-box
 
