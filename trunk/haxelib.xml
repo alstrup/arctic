@@ -1,7 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.8.8">
-		- Compatible with haXe 1.14
+    <version name="0.8.9">
+		- Fix slider to keep relative position after resize when there is no onDrag function defined
 	</version>
 </project>
