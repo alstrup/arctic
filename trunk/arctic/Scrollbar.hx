@@ -4,9 +4,12 @@ import arctic.ArcticMC;
 import arctic.ArcticBlock;
 
 class Scrollbar {
-    // This method draws a scrollbar given a movie clip. 
-    // This movieclips should have a parent, which will also be the parent of the scroll bar 
-    // rendered.
+	/**
+	 * Draw a vertical scrollbar in parent MovieClip such that clip is the content that the scrollbar
+	 * controls. availableWidth & availableHeight is the amount of space the content area
+	 * is, and realHeight is how high the total clip is. ensureYVisible is the top position we
+	 * should show.
+	 */
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
                                                          availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
 
