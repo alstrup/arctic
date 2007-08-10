@@ -6,7 +6,6 @@ Bugs
 ----
 
 Scrollbar bugs:
-- Add arrows on buttons
 - Buttons should move slider handle
 - Buttons should auto-repeat
 - Mouse wheel support for scrollbar should work across entire clip, not just around handle itself

@@ -20,10 +20,10 @@ class Scrollbar {
 			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
 		}
-		// trace("Scrollbar at " + availableWidth + " with height " + availableHeight + " out of " + realHeight + " viewing " + ensureYVisible);
 
 		var currentY = ensureYVisible;
 
+		// This updates the scroll-rect to show what we need
 		var update = function() {
 			currentY = Math.min(currentY, realHeight - availableHeight);
 			currentY = Math.max(0, currentY);
@@ -36,36 +36,22 @@ class Scrollbar {
 		};
 		
 		var onUp = function() {
-			currentY -= 10;
+			currentY -= 15;
 			update();
 			// TODO: Move slider handle
 		}
 		
 		var onDown = function() {
-			currentY += 10;
+			currentY += 15;
 			update();
 			// TODO: Move slider handle
 		}
-
 		
 		var buttonHeight = scrollbarWidth - 4;
-		var sliderHeight = availableHeight - 2 * scrollbarWidth + 3;
+		var sliderHeight = availableHeight - 2 * scrollbarWidth + 4;
 		var handleSize = Math.max(buttonHeight, sliderHeight * (availableHeight / realHeight));
 		
-		var makeButton = function(block, fn) : ArcticBlock {
-			return Button(
-						Filter(
-							Bevel(1, 45, 0xcad8f9, 100, 0x7da0d4, 100, 2, 2, 1, 1, "inner", false),
-							GradientBackground("linear", [0xe1eafe, 0xb9cbf3], 0, 0, block, null, 3, Math.PI / 2)
-						),
-						Filter(
-							Bevel(1, 45, 0x97aee0, 100, 0x7da0d4, 100, 2, 2, 1, 1, "inner", false),
-							GradientBackground("linear", [0xe5f6ff, 0xb9dafb], 0, 0, block, null, 3, Math.PI / 2)
-						),
-						fn
-					);
-		}
-		
+		// Design the slider part
 		var slider;
 		if (availableHeight > 3 * buttonHeight + 10) {
 			var handleBlock =
@@ -96,7 +82,7 @@ class Scrollbar {
 							]), 
 							Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, 
 								ColumnStack([ Background(0x000000, Fixed(availableWidth + 2, handleSize),0), handleBlock ] ), 
-								onScroll, null, ensureYVisible)
+								onScroll, null, ensureYVisible, true)
 						)
 					);
 		} else {
@@ -105,19 +91,22 @@ class Scrollbar {
 		}
 		;
 
+		// The final scrollbar is composed
 		var scrollbar = 
 			OnTop(
+				// The buttons
 				Offset(availableWidth, 0, 
 					Frame(
 						Frame(
 							LineStack( [
-								makeButton(Fixed(buttonHeight, buttonHeight), onUp),
+								makeButton(buttonHeight, true, onUp),
 								Fixed(0, sliderHeight),
-								makeButton(Fixed(buttonHeight, buttonHeight), onDown)
+								makeButton(buttonHeight, false, onDown)
 							] ), 1, 0xffffff
 						), 1, 0xeeede5
 					)
 				),
+				// The slider area
 				Offset(0, buttonHeight + 2, slider)
 			)
 			;
@@ -131,6 +120,7 @@ class Scrollbar {
 		return;
 	}
 
+	/// Get rid of the scrollbar
 	static public function removeScrollbar(parent : ArcticMovieClip, clip : ArcticMovieClip) {
 		if (Reflect.hasField(parent, "scrollbar")) {
 			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
@@ -138,5 +128,45 @@ class Scrollbar {
 			Reflect.deleteField(parent, "scrollbar");
 			ArcticMC.setScrollRect(clip, null);
 		}
+	}
+
+	/// Make a scrollbar button of the given size
+	static private function makeButton(size : Float, up : Bool, fn) : ArcticBlock {
+		var arrow1 = makeArrow(size, up, 0x4D6185);
+		var arrow2 = makeArrow(size, up, 0x2C364A);
+		return Button(
+					Filter(
+						Bevel(1, 45, 0xcad8f9, 100, 0x7da0d4, 100, 2, 2, 1, 1, "inner", false),
+						GradientBackground("linear", [0xe1eafe, 0xb9cbf3], 0, 0, arrow1, null, 3, Math.PI / 2)
+					),
+					Filter(
+						Bevel(1, 45, 0x97aee0, 100, 0x7da0d4, 100, 2, 2, 1, 1, "inner", false),
+						GradientBackground("linear", [0xe5f6ff, 0xb9dafb], 0, 0, arrow2, null, 3, Math.PI / 2)
+					),
+					fn
+				);
+	}
+	
+	/// A nice arrow of a given size, pointing up or down, with a colour
+	static private function makeArrow(size : Float, up : Bool, colour : Int) : ArcticBlock {
+		// Callback fn for the CustomBlock to draw Radio button
+		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
+			if (mode != Metrics) {
+				var b = 4;
+				var g = ArcticMC.getGraphics(parentMc);
+				g.lineStyle(2, colour);
+				if (up) {
+					g.moveTo(b, size - b);
+					g.lineTo(size / 2, b);
+					g.lineTo(size - b, size - b);
+				} else {
+					g.moveTo(b, b);
+					g.lineTo(size / 2, size - b);
+					g.lineTo(size - b, b);
+				}
+			}
+			return { clip: parentMc, width: size, height: size, growWidth : false, growHeight : false };
+		}
+		return CustomBlock(up, build);
 	}
 }

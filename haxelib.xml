@@ -8,6 +8,7 @@
 		    Shadow(block, d, a, c, alpha)
 		  to
 		    Filter(DropShadow(d, a, c, alpha), block)
-		  Notice the Filter block only works on Flash 8 & 9
+		  Notice the Filter block only works on Flash 8 & 9. On Flash 7, it's a no-op.
+		- Dragable and Sliders are not controllable by mouse wheel by default
 	</version>
 </project>
