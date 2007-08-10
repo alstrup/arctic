@@ -1145,35 +1145,28 @@ class ArcticView {
 				info.childWidth = width;
 				info.childHeight = height;
 			}
-			
-			if (stayWithin) {
-				ArcticMC.setSize(clip, availableWidth, availableHeight);
-			}
-			
 			var me = this;
 			var dragClip = child.clip;
-			var setOffset = function (dx : Float, dy : Float) {
+			var setPosition = function (x : Float, y : Float) {
 				var info = me.getBlockInfo(dragClip);
 				if (stayWithin) {
-					dx = Math.min(info.available.width - info.childWidth, dx);
-					dy = Math.min(info.available.height - info.childHeight, dy);
+					x = Math.min(info.available.width - info.childWidth, x);
+					y = Math.min(info.available.height - info.childHeight, y);
 				}
-				ArcticMC.moveClip(dragClip, dx, dy);
-				info.totalDx = dx;
-				info.totalDy = dy;
+				ArcticMC.setXY(dragClip, x, y);
+				info.totalDx = x;
+				info.totalDy = y;
 			}; 
 			
 			if (mode != Create) {
 				if (mode == Reuse && null != onInit) {
-					// Reverse movement so it's back in a second
-					ArcticMC.moveClip(dragClip, -info.totalDx, -info.totalDy);
 					var dragInfo = { 
 						x : info.totalDx, 
 						y : info.totalDy, 
 						totalWidth : info.available.width - info.childWidth, 
 						totalHeight : info.available.height - info.childHeight 
 					};
-					onInit(dragInfo, setOffset);
+					onInit(dragInfo, setPosition);
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
@@ -1339,7 +1332,7 @@ class ArcticView {
 					totalWidth : info.available.width - info.childWidth, 
 					totalHeight : info.available.height - info.childHeight 
 				};
-				onInit(dragInfo, setOffset);
+				onInit(dragInfo, setPosition);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		

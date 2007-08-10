@@ -50,6 +50,7 @@ class Arctic {
 	 * If stayWithinBlock is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
+	 * You can change the position of the dragable by calling the returned setPositionFn.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
 					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float,
@@ -57,7 +58,10 @@ class Arctic {
 		// Local closured variables to remember drag offset
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
+		// When onInit is called on construction time, we capture the DragInfo and move function in this local variable...
+		var dragInfo : { di : DragInfo, setPositionFn : Float -> Float -> Void };
 		var ourOnInit = function (di : DragInfo, onDragFun) {
+			dragInfo = { di: di, setPositionFn: onDragFun };
 			onDragFun(dragX, dragY);
 		};
 		var ourOnDrag = function (di : DragInfo) : Void {
@@ -67,7 +71,16 @@ class Arctic {
 				onDrag(di);
 			}
 		}
-		return Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, mouseWheel);
+		/// ... which is captured in the closure of this function...
+		var setPositionFn = function (x, y) { 
+			dragX = x; 
+			dragY = y; 
+			dragInfo.setPositionFn(x, y); 
+		}
+		return { 
+			block: Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, mouseWheel),
+			setPositionFn: setPositionFn
+		};
 	}
 
 	/**
@@ -75,28 +88,47 @@ class Arctic {
 	 * Compared to a dragable, this component preserves the relative position of the handle after resizes.
 	 * This is suitable for normal sliders, but can also be used for making dragable dialogs.
 	 */
-	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, block : ArcticBlock,
-							onDrag : Float -> Float -> Void, ?initialX : Float, ? initialY : Float, ?mouseWheel : Bool) {
+	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, handleBlock : ArcticBlock,
+							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?mouseWheel : Bool) {
 		// The current position in slider coordinate system
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
-		// The current position in pixels
-		var currentXPixels : Null<Float> = null;
-		var currentYPixels : Null<Float> = null;
+		
+		/// When onInit is called on construction time, we capture the DragInfo and move function in this local variable...
+		var moverInfo;
+
 		var ourOnInit = function (di : DragInfo, onDragFun) {
-			currentXPixels = 0;
+			moverInfo = { di: di, setPositionFn : onDragFun };
+			var currentXPixels = 0.0;
 			if (minimumX != maximumX) {
 				currentXPixels = (currentX - minimumX) / (maximumX - minimumX) * di.totalWidth;
 			}
-			currentYPixels = 0;
+			var currentYPixels = 0.0;
 			if (minimumY != maximumY) {
 				currentYPixels = (currentY - minimumY) / (maximumY - minimumY) * di.totalHeight;
 			}
 			onDragFun(currentXPixels, currentYPixels);
 		};
+
+		/// ... which is captured in the closure of this function...
+		var setPositionFn = function (x : Float, y : Float) {
+			// Update position in slider coordinate system
+			currentX = x;
+			currentY = y;
+			currentX = Math.min(maximumX, Math.max(minimumX, currentX));
+			currentY = Math.min(maximumY, Math.max(minimumY, currentY));
+			var currentXPixels = 0.0;
+			if (minimumX != maximumX) {
+				currentXPixels = (currentX - minimumX) / (maximumX - minimumX) * moverInfo.di.totalWidth;
+			}
+			var currentYPixels = 0.0;
+			if (minimumY != maximumY) {
+				currentYPixels = (currentY - minimumY) / (maximumY - minimumY) * moverInfo.di.totalHeight;
+			}
+			moverInfo.setPositionFn(currentXPixels, currentYPixels);
+		}
+		
 		var ourOnDrag = function (di : DragInfo) : Void {
-			currentXPixels = di.x;
-			currentYPixels = di.y;
 			var x = minimumX;
 			if (minimumX != maximumX) {
 				x = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
@@ -111,7 +143,8 @@ class Arctic {
 				onDrag(x, y);
 			}
 		}
-		return Dragable(true, minimumX != maximumX, minimumY != maximumY, block, ourOnDrag, ourOnInit, mouseWheel);
+		
+		return { block: Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit, mouseWheel), setPositionFn : setPositionFn };
 	}
 
 	/// Add a check-box in front on the given block

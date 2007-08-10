@@ -6,9 +6,10 @@ Bugs
 ----
 
 Scrollbar bugs:
-- Buttons should move slider handle
 - Buttons should auto-repeat
 - Mouse wheel support for scrollbar should work across entire clip, not just around handle itself
+- Click on non-handle area should scroll in that direction
+- Resizing should preserve scrollbar position
 
 Other bugs:
 - Hover effect does not automatically trigger on refresh (see dynamic example)
@@ -19,7 +20,6 @@ New features to consider
 Extend blocks with new APIs:
 - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
 - Add API for text elements to set focus to them, and ask whether they have focus, and to change contents dynamically
-- Add API for changing slider position after construction
 - Add API for changing state of toggle button
 
 - Make tooltip have a delay, and make sure they do not go outside the stage
