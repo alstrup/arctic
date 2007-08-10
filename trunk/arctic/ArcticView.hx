@@ -1264,7 +1264,7 @@ class ArcticView {
 						}
 					}
 				);
-				if (mouseWheel != false) {
+				if (mouseWheel == true) {
 					// Ideally, it should be on the parent, but limited to the area relevant
 					// (except for dragables that should not stay within where we probably do 
 					// not want mouse wheel events to move anything)
