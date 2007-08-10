@@ -3,12 +3,19 @@
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.8.9">
 		- Fix slider to keep relative position after resize when there is no onDrag function defined
+
 		- Reimplement scrollbar as an ArcticView, rather than custom code, beautifying in the process
+
 		- Add general Filter block, replacing the specific Shadow block. To upgrade, change
 		    Shadow(block, d, a, c, alpha)
 		  to
 		    Filter(DropShadow(d, a, c, alpha), block)
 		  Notice the Filter block only works on Flash 8 & 9. On Flash 7, it's a no-op.
+
+		 - Add API for repositioning dragable and sliders. To upgrade, change
+		    Arctic.makeDragable(...)   to   Arctic.makeDragable().block
+		    Arctic.makeSlider(...)     to   Arctic.makeSlider().block
+
 		- Dragable and Sliders are not controllable by mouse wheel by default
 	</version>
 </project>

@@ -12,16 +12,17 @@ class Scrollbar {
 	 */
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
                                                          availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
-
 		var scrollbarWidth = 17;
-															 
-		 if (Reflect.hasField(parent, "scrollbar")) {
+
+		var currentY = ensureYVisible;
+		if (Reflect.hasField(parent, "scrollbar")) {
 			// Reuse is for wimps: We just nuke the old one and recreate
+			
+			// TODO: We should capture the current value of the old scrollbar, and use that as currentY scaled to new coordinate system
+			
 			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
 		}
-
-		var currentY = ensureYVisible;
 
 		// This updates the scroll-rect to show what we need
 		var update = function() {
@@ -30,29 +31,30 @@ class Scrollbar {
 			ArcticMC.setScrollRect( clip, new ArcticRectangle( 0, currentY, availableWidth, availableHeight ) );
 		}
 		
+		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
 		var onScroll = function(x, y) {
 			currentY = y;
 			update();
 		};
 		
-		var onUp = function() {
-			currentY -= 15;
-			update();
-			// TODO: Move slider handle
-		}
-		
-		var onDown = function() {
-			currentY += 15;
-			update();
-			// TODO: Move slider handle
-		}
-		
 		var buttonHeight = scrollbarWidth - 4;
 		var sliderHeight = availableHeight - 2 * scrollbarWidth + 4;
 		var handleSize = Math.max(buttonHeight, sliderHeight * (availableHeight / realHeight));
 		
+		var onUp = function() {
+			currentY = Math.max(0, currentY - 15);
+			update();
+			slider.setPositionFn(0, currentY);
+		}
+		
+		var onDown = function() {
+			currentY = Math.min(realHeight, currentY + 15);
+			update();
+			slider.setPositionFn(0, currentY);
+		}
+		
 		// Design the slider part
-		var slider;
+		var sliderBlock;
 		if (availableHeight > 3 * buttonHeight + 10) {
 			var handleBlock =
 				Filter(
@@ -72,7 +74,12 @@ class Scrollbar {
 						),
 						null, 3, Math.PI / 2)
 				);
-			slider = ConstrainHeight(sliderHeight, sliderHeight,
+			
+			slider = Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, 
+							ColumnStack([ Background(0x000000, Fixed(availableWidth + 2, handleSize),0), handleBlock ] ), 
+							onScroll, null, currentY, true);
+		
+			sliderBlock = ConstrainHeight(sliderHeight, sliderHeight,
 						OnTop(
 							ColumnStack([ 
 								Background(0x000000, Fixed(availableWidth + 2, sliderHeight), 0),
@@ -80,16 +87,13 @@ class Scrollbar {
 									Fixed(buttonHeight, sliderHeight),
 									null, null, 0)
 							]), 
-							Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, 
-								ColumnStack([ Background(0x000000, Fixed(availableWidth + 2, handleSize),0), handleBlock ] ), 
-								onScroll, null, ensureYVisible, true)
+							slider.block
 						)
 					);
 		} else {
 			// No slider
-			slider = Fixed(0, sliderHeight);
+			sliderBlock = Fixed(0, sliderHeight);
 		}
-		;
 
 		// The final scrollbar is composed
 		var scrollbar = 
@@ -107,7 +111,7 @@ class Scrollbar {
 					)
 				),
 				// The slider area
-				Offset(0, buttonHeight + 2, slider)
+				Offset(0, buttonHeight + 2, sliderBlock)
 			)
 			;
 

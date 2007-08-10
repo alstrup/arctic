@@ -187,10 +187,10 @@ class ArcticTest {
 		var sliderfun = function(x : Float, y : Float) { doTrace(x + "," + y); };
 		var dragfun = function(di : DragInfo) { doTrace("x: " + di.x + "/" + di.totalWidth + " y: " + di.y + "/" + di.totalHeight); };
 		var drag = LineStack( [
-					Background(0x808080, Arctic.makeSlider(0, 100, 0, 0, makeText("I can be dragged from side to side within my area"), sliderfun) ),
-					Background(0xa0a080, Arctic.makeSlider(-100, 100, 10, 20, makeText("I can be dragged within my area"), sliderfun, 0, 15 ) ),
-					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), dragfun, 0, 200 ) ),
-					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere"), dragfun )
+					Background(0x808080, Arctic.makeSlider(0, 100, 0, 0, makeText("I can be dragged from side to side within my area"), sliderfun).block ),
+					Background(0xa0a080, Arctic.makeSlider(-100, 100, 10, 20, makeText("I can be dragged within my area"), sliderfun, 0, 15 ).block ),
+					Background(0xc0c0c0, Arctic.makeDragable(true, false, true, makeText("I can be dragged up and down within my area"), dragfun, 0, 200 ).block ),
+					Arctic.makeDragable(false, true, true, makeText("I can be dragged anywhere"), dragfun ).block
 				] );
 		arcticView = new ArcticView(drag, parent);
 		var root = arcticView.display(true);
