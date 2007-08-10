@@ -6,10 +6,12 @@ Bugs
 ----
 
 Scrollbar bugs:
-- Buttons should auto-repeat
+- Click on non-handle area should scroll in that direction - change the background to a button
+  and use the new extended API to get the coordinate of the click
+- Buttons should auto-repeat - use new Button extended API to start timer and do this
 - Mouse wheel support for scrollbar should work across entire clip, not just around handle itself
-- Click on non-handle area should scroll in that direction
 - Resizing should preserve scrollbar position
+- Button arrows should be 90 degrees - they are a little too narrow now
 
 Other bugs:
 - Hover effect does not automatically trigger on refresh (see dynamic example)
