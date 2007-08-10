@@ -12,7 +12,8 @@ class Scrollbar {
 	 */
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
                                                          availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
-		var scrollbarWidth = 17;
+		var scrollbarWidth = 17; // How wide the scrollbar is
+		var buttonMovement = 15; // How many pixels we move when a scrollbar button is clicked
 
 		var currentY = ensureYVisible;
 		if (Reflect.hasField(parent, "scrollbar")) {
@@ -30,28 +31,32 @@ class Scrollbar {
 			currentY = Math.max(0, currentY);
 			ArcticMC.setScrollRect( clip, new ArcticRectangle( 0, currentY, availableWidth, availableHeight ) );
 		}
-		
-		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
+
+		// Called by the slider when handle is dragged
 		var onScroll = function(x, y) {
 			currentY = y;
 			update();
 		};
+
+		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
+		// Called when up is clicked
+		var onUp = function() {
+			currentY = Math.max(0, currentY - buttonMovement);
+			slider.setPositionFn(0, currentY);
+			update();
+		}
 		
+		// Called when down is clicked
+		var onDown = function() {
+			currentY = Math.min(realHeight, currentY + buttonMovement);
+			slider.setPositionFn(0, currentY);
+			update();
+		}
+		
+		// Metrics
 		var buttonHeight = scrollbarWidth - 4;
 		var sliderHeight = availableHeight - 2 * scrollbarWidth + 4;
 		var handleSize = Math.max(buttonHeight, sliderHeight * (availableHeight / realHeight));
-		
-		var onUp = function() {
-			currentY = Math.max(0, currentY - 15);
-			update();
-			slider.setPositionFn(0, currentY);
-		}
-		
-		var onDown = function() {
-			currentY = Math.min(realHeight, currentY + 15);
-			update();
-			slider.setPositionFn(0, currentY);
-		}
 		
 		// Design the slider part
 		var sliderBlock;
@@ -133,9 +138,9 @@ class Scrollbar {
 			ArcticMC.setScrollRect(clip, null);
 		}
 	}
-
-	/// Make a scrollbar button of the given size
-	static private function makeButton(size : Float, up : Bool, fn) : ArcticBlock {
+	
+	/// Make a scrollbar button of the given size - if up is false, the pointing points down 
+	static private function makeButton(size : Float, up : Bool, fn : Void -> Void) : ArcticBlock {
 		var arrow1 = makeArrow(size, up, 0x4D6185);
 		var arrow2 = makeArrow(size, up, 0x2C364A);
 		return Button(

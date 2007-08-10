@@ -50,7 +50,8 @@ class Arctic {
 	 * If stayWithinBlock is true, the movement is constrained to the available area
 	 * of the block (and this block becomes size greedy in the directions we allow motion in).
 	 * onDrag is called whenever we drag, telling the total X and Y offsets.
-	 * You can change the position of the dragable by calling the returned setPositionFn.
+	 * You can change the position of the dragable by calling the returned setPositionFn. 
+	 * This will *not* trigger a call to any supplied onDrag function.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
 					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float,
@@ -87,6 +88,8 @@ class Arctic {
 	 * Make a slider with it's own coordinate system. The call-back gives results in slider coordinates
 	 * Compared to a dragable, this component preserves the relative position of the handle after resizes.
 	 * This is suitable for normal sliders, but can also be used for making dragable dialogs.
+	 * You can change the position of the handle by calling the returned setPositionFn. This will *not*
+	 * trigger a call to any supplied onDrag function.
 	 */
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, handleBlock : ArcticBlock,
 							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?mouseWheel : Bool) {
