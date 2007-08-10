@@ -20,5 +20,8 @@
 		
 		- Extend Button block with API to get coordinates of click inside Button block, and both
 		  mouse button press and release events.
+		
+		- Add a repeating button wrapper to construct buttons that can auto-repeat while mouse button
+		  is pressed
 	</version>
 </project>
