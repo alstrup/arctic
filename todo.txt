@@ -9,8 +9,7 @@ Scrollbar bugs:
 - Add arrows on buttons
 - Buttons should move slider handle
 - Buttons should auto-repeat
-- Mouse wheel support for scrollbar should work across entire clip, not just scrollbar itself
-- Dragable should not capture movements from scrollbars.
+- Mouse wheel support for scrollbar should work across entire clip, not just around handle itself
 
 Other bugs:
 - Hover effect does not automatically trigger on refresh (see dynamic example)
@@ -28,7 +27,8 @@ Extend blocks with new APIs:
 
 - Add filling behaviour to grid
 
-- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using ArcticState
+- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using ArcticState,
+  and probably a Color filter of some kind
 
 - Combo-box
 
