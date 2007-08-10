@@ -17,5 +17,8 @@
 		    Arctic.makeSlider(...)     to   Arctic.makeSlider().block
 
 		- Dragable and Sliders are not controllable by mouse wheel by default
+		
+		- Extend Button block with API to get coordinates of click inside Button block, and both
+		  mouse button press and release events.
 	</version>
 </project>

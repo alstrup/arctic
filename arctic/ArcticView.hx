@@ -663,7 +663,7 @@ class ArcticView {
 			ArcticMC.setSize(clip, w, h);
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
-		case Button(block, hover, action):
+		case Button(block, hover, action, actionExt):
 			if (mode == Metrics) {
 				var child = build(block, null, availableWidth, availableHeight, Metrics, 0);
 				var hover = build(hover, null, availableWidth, availableHeight, Metrics, 1);
@@ -689,12 +689,26 @@ class ArcticView {
 				hover.clip.buttonMode = true;
 				hover.clip.mouseChildren = false;
 				if (mode == Create) {
-					if (action != null) {
+					if (action != null || actionExt != null) {
 						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
 								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
-									action(); 
+									if (action != null) {
+										action(); 
+									}
+									if (actionExt != null) {
+										actionExt(clip.mouseX, clip.mouseY, false);
+									}
+								}
+							} ); 
+					}
+					if (actionExt != null) {
+						clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, function(s) { 
+								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+									actionExt(clip.mouseX, clip.mouseY, true);
 								}
 							} ); 
 					}
@@ -715,10 +729,25 @@ class ArcticView {
 				}
 			#else flash
 				if (mode == Create) {
-					clip.onMouseUp = function () {
-						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-						if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
-							action();
+					if (action != null || actionExt != null) {
+						clip.onMouseUp = function () {
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
+								if (action != null) {
+									action();
+								}
+								if (actionExt != null) {
+									actionExt(clip._xmouse, clip._ymouse, false);
+								}
+							}
+						}
+					}
+					if (actionExt != null) {
+						clip.onMouseDown = function () {
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip)) {
+								actionExt(clip._xmouse, clip._ymouse, true);
+							}
 						}
 					}
 					clip.onMouseMove = function() {
