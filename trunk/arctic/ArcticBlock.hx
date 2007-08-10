@@ -61,10 +61,12 @@ enum ArcticBlock {
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
 	 * When the button is clicked, onClick is called. If onClickExtended is supplied, it is called with the x and y
 	 * coordinates, plus a bool signifying whether the mouse button is pressed (true) or released (false). onClickExtended
-	 * is called onnly if the click or released is inside the button. This means that you might not get both calls.
+	 * is called even if the click or released is outside the button with the x and y coordinates of the mouse, a bool
+	 * which is false on mouse button down and true on mouse button up, and the final bool telling whether the click is
+	 * inside the button or not.
 	 * On button release, onClick is called before onClickExtended.
 	 */
-	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void, ?onClickExtended : Float -> Float -> Bool -> Void);
+	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void, ?onClickExtended : Float -> Float -> Bool -> Bool-> Void);
 
 	/**
 	 * Toggle button (selected/unselected).
