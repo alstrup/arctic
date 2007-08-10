@@ -88,9 +88,14 @@ class Scrollbar {
 				);
 			slider = ConstrainHeight(sliderHeight, sliderHeight,
 						OnTop(
-							GradientBackground("linear", [0xfefefb, 0xf3f1ec], 0, 0, Fixed(buttonHeight, sliderHeight), null, null, 0),
+							ColumnStack([ 
+								Background(0x000000, Fixed(availableWidth + 2, sliderHeight), 0),
+								GradientBackground("linear", [0xfefefb, 0xf3f1ec], 0, 0, 
+									Fixed(buttonHeight, sliderHeight),
+									null, null, 0)
+							]), 
 							Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, 
-								handleBlock, 
+								ColumnStack([ Background(0x000000, Fixed(availableWidth + 2, handleSize),0), handleBlock ] ), 
 								onScroll, null, ensureYVisible)
 						)
 					);
@@ -101,17 +106,19 @@ class Scrollbar {
 		;
 
 		var scrollbar = 
-			Offset(availableWidth, 0, 
-				Frame(
+			OnTop(
+				Offset(availableWidth, 0, 
 					Frame(
-						LineStack( [
-							makeButton(Fixed(buttonHeight, buttonHeight), onUp),
-							slider,
-							Fixed(0, 1),
-							makeButton(Fixed(buttonHeight, buttonHeight), onDown)
-						] ), 1, 0xffffff
-					), 1, 0xeeede5
-				)
+						Frame(
+							LineStack( [
+								makeButton(Fixed(buttonHeight, buttonHeight), onUp),
+								Fixed(0, sliderHeight),
+								makeButton(Fixed(buttonHeight, buttonHeight), onDown)
+							] ), 1, 0xffffff
+						), 1, 0xeeede5
+					)
+				),
+				Offset(0, buttonHeight + 2, slider)
 			)
 			;
 
