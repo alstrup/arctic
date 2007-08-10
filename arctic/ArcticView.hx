@@ -354,28 +354,35 @@ class ArcticView {
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			#if flash6
 			#else flash7
-			#else flash
+			#else flash // 8 & 9
 			if (mode == Create) {
+				/// We have to fix parameters that are "undefined"
+				/// Since null == undefined, the following functions will change undefined to null
+				/// Due to strong typing, we have a fix-up function for each parameter type. c is color, which can be Float or UInt depending on target
+				var f = function (a) { return if (a == null) null else a; };
+				var c = function (a) { return if (a == null) null else a; };
+				var i = function (a) { return if (a == null) null else a; };
+				var b = function (a) { return if (a == null) null else a; };
+				var s = function (a) { return if (a == null) null else a; };
+
 				var myFilter : Dynamic;
 				switch(filter) {
 				case Bevel(distance, angle, highlightColor, highlightAlpha, shadowColor, shadowAlpha, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.BevelFilter(distance, angle, highlightColor, highlightAlpha, shadowColor, shadowAlpha, blurX, blurY, strength, quality, type, knockout);
+					myFilter = new flash.filters.BevelFilter(f(distance ), f(angle), c(highlightColor), f(highlightAlpha), c(shadowColor), f(shadowAlpha), f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
 				case Blur(blurX, blurY, quality):
-					myFilter = new flash.filters.BlurFilter(blurX, blurY, quality);
+					myFilter = new flash.filters.BlurFilter(f(blurX), f(blurY), i(quality));
 				case ColorMatrix(matrix):
 					myFilter = new flash.filters.ColorMatrixFilter(matrix);
 				case Convolution(matrixX, matrixY, matrix, divisor, bias, preserveAlpha, clamp, color, alpha):
-					myFilter = new flash.filters.ConvolutionFilter(matrixX, matrixY, matrix, divisor, bias, preserveAlpha, clamp, color, alpha);
+					myFilter = new flash.filters.ConvolutionFilter(f(matrixX), f(matrixY), matrix, f(divisor), f(bias), b(preserveAlpha), b(clamp), c(color), f(alpha));
 				case DropShadow(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
-					// Hm, this doesn't work if blurX and friends are "null", because they are actually "undefined"
-//					myFilter = new flash.filters.DropShadowFilter(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject);
-					myFilter = new flash.filters.DropShadowFilter(distance, angle, color, alpha);
+					myFilter = new flash.filters.DropShadowFilter(f(distance), f(angle), c(color), f(alpha), f(blurX), f(blurY), f(strength), i(quality), b(inner), b(knockout), b(hideObject));
 				case Glow(color, alpha, blurX, blurY, strength, quality, inner, knockout):
-					myFilter = new flash.filters.GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout);
+					myFilter = new flash.filters.GlowFilter(c(color), f(alpha), f(blurX), f(blurY), f(strength), i(quality), b(inner), b(knockout));
 				case GradientBevel(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.GradientBevelFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout);
+					myFilter = new flash.filters.GradientBevelFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
 				case GradientGlow(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.GradientGlowFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout);
+					myFilter = new flash.filters.GradientGlowFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
 				};
 				// TODO: We do not support changing of Filter parameters in an update
 				// We must use a temporary array (see documentation)
