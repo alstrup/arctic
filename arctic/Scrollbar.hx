@@ -61,19 +61,20 @@ class Scrollbar {
 		// Design the slider part
 		var sliderBlock;
 		if (availableHeight > 3 * buttonHeight + 10) {
+			var b = buttonHeight * 0.3;
 			var handleBlock =
 				Filter(
 					Bevel(1, 45, 0xe6eefc, 100, 0xb0c4f2, 100, 2, 2, 1, 1, "inner", false),
 					GradientBackground("linear", [0xc8d6fb, 0xb9cbf3], 0, 0, 
-						Offset(3, 0,
+						Offset(b, 0,
 							LineStack([
 								Fixed(buttonHeight, handleSize / 2 - 3), 
-								Background(0xeef4fe, Fixed(buttonHeight - 6, 1)),
-								Background(0x8cb0f8, Fixed(buttonHeight - 6, 1)),
-								Background(0xeef4fe, Fixed(buttonHeight - 6, 1)),
-								Background(0x8cb0f8, Fixed(buttonHeight - 6, 1)),
-								Background(0xeef4fe, Fixed(buttonHeight - 6, 1)),
-								Background(0x8cb0f8, Fixed(buttonHeight - 6, 1)),
+								Background(0xeef4fe, Fixed(buttonHeight - 2 * b, 1)),
+								Background(0x8cb0f8, Fixed(buttonHeight - 2 * b, 1)),
+								Background(0xeef4fe, Fixed(buttonHeight - 2 * b, 1)),
+								Background(0x8cb0f8, Fixed(buttonHeight - 2 * b, 1)),
+								Background(0xeef4fe, Fixed(buttonHeight - 2 * b, 1)),
+								Background(0x8cb0f8, Fixed(buttonHeight - 2 * b, 1)),
 								Fixed(buttonHeight, handleSize / 2 - 3)
 							])
 						),
@@ -161,7 +162,7 @@ class Scrollbar {
 		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			if (mode != Metrics) {
-				var b = 4;
+				var b = size * 0.35;
 				var g = ArcticMC.getGraphics(parentMc);
 				g.lineStyle(2, colour);
 				if (up) {
