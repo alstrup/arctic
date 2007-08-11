@@ -24,6 +24,26 @@ class Arctic {
 		return Button(t, Background(0xf0f0f0, t, 70.0, if (fontsize != null) fontsize / 4 else 5.0), onClick);
 	}
 	
+	/// This constructs a button which repeatedly triggers the action as long as the mouse is pressed
+	static public function makeRepeatingButton(base : ArcticBlock, hover : ArcticBlock, action : Void -> Void, interval : Int) : ArcticBlock {
+		var timer : haxe.Timer = null;
+		var ourHandler = function (x : Float, y : Float, down : Bool, inside : Bool) {
+			if (!down) {
+				if (timer != null) {
+					timer.stop();
+					timer = null;
+				}
+				return;
+			}
+			if (!inside || timer != null) {
+				return;
+			}
+			timer = new haxe.Timer(interval);
+			timer.run = action;
+		}
+		return Button(base, hover, action, ourHandler);
+	}
+	
 	/// Associate a tooltip with a block
 	static public function makeTooltip(block : ArcticBlock, text : String) : ArcticBlock {
 		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, makeText(text)), 100, 3)), true);
@@ -98,56 +118,93 @@ class Arctic {
 		var currentY = if (initialY == null) minimumY else initialY;
 		
 		/// When onInit is called on construction time, we capture the DragInfo and move function in this local variable...
-		var moverInfo;
+		var moverInfo : { di: DragInfo, setPositionFn : Float -> Float -> Void };
 
+		/// Converts current slider coordinates to pixel coordinates
+		var convertToPixels = function () : { x : Float, y : Float } {
+			var result = {
+				x : 0.0,
+				y : 0.0
+			};
+			if (minimumX != maximumX) {
+				result.x = (currentX - minimumX) / (maximumX - minimumX) * moverInfo.di.totalWidth;
+			}
+			if (minimumY != maximumY) {
+				result.y = (currentY - minimumY) / (maximumY - minimumY) * moverInfo.di.totalHeight;
+			}
+			return result;
+		}
+		
+		/// Called when the slider is physically constructed with metrics info and a function to move the slider
 		var ourOnInit = function (di : DragInfo, onDragFun) {
 			moverInfo = { di: di, setPositionFn : onDragFun };
-			var currentXPixels = 0.0;
-			if (minimumX != maximumX) {
-				currentXPixels = (currentX - minimumX) / (maximumX - minimumX) * di.totalWidth;
-			}
-			var currentYPixels = 0.0;
-			if (minimumY != maximumY) {
-				currentYPixels = (currentY - minimumY) / (maximumY - minimumY) * di.totalHeight;
-			}
-			onDragFun(currentXPixels, currentYPixels);
+			var pixels = convertToPixels();
+			onDragFun(pixels.x, pixels.y);
 		};
 
-		/// ... which is captured in the closure of this function...
+		/// This function can move the slider
 		var setPositionFn = function (x : Float, y : Float) {
 			// Update position in slider coordinate system
-			currentX = x;
-			currentY = y;
-			currentX = Math.min(maximumX, Math.max(minimumX, currentX));
-			currentY = Math.min(maximumY, Math.max(minimumY, currentY));
-			var currentXPixels = 0.0;
-			if (minimumX != maximumX) {
-				currentXPixels = (currentX - minimumX) / (maximumX - minimumX) * moverInfo.di.totalWidth;
-			}
-			var currentYPixels = 0.0;
-			if (minimumY != maximumY) {
-				currentYPixels = (currentY - minimumY) / (maximumY - minimumY) * moverInfo.di.totalHeight;
-			}
-			moverInfo.setPositionFn(currentXPixels, currentYPixels);
+			currentX = Math.min(maximumX, Math.max(minimumX, x));
+			currentY = Math.min(maximumY, Math.max(minimumY, y));
+			var pixels = convertToPixels();
+			moverInfo.setPositionFn(pixels.x, pixels.y);
 		}
 		
 		var ourOnDrag = function (di : DragInfo) : Void {
-			var x = minimumX;
 			if (minimumX != maximumX) {
-				x = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
-				currentX = x;
+				currentX = di.x / di.totalWidth * (maximumX - minimumX) + minimumX;
 			}
-			var y = minimumY;
 			if (minimumY != maximumY) {
-				y = di.y / di.totalHeight * (maximumY - minimumY) + minimumY;
-				currentY = y;
+				currentY = di.y / di.totalHeight * (maximumY - minimumY) + minimumY;
 			}
 			if (onDrag != null) {
-				onDrag(x, y);
+				onDrag(currentX, currentY);
 			}
 		}
 		
-		return { block: Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit, mouseWheel), setPositionFn : setPositionFn };
+		var clickHandler = function (x, y, up, hit) {
+			if (!up) {
+				return;
+			}
+			var di = moverInfo.di;
+			if (x < 0.0 || x > di.width + di.totalWidth || y < 0.0 || y > di.height + di.totalHeight) {
+				return;
+			}
+			var pixels = convertToPixels();
+			var w = di.width / di.totalWidth * (maximumX - minimumX);
+			var h = di.height / di.totalHeight * (maximumY - minimumY);
+			var move = false;
+			if (x < pixels.x) {
+				currentX -= w;
+				move = true;
+			} else if ((pixels.x + di.width) < x) {
+				currentX += w;
+				move = true;
+			}
+			if (y < pixels.y) {
+				currentY -= h;
+				move = true;
+			} else if ((pixels.y + di.height) < y) {
+				currentY += h;
+				move = true;
+			}
+			if (move) {
+				setPositionFn(currentX, currentY);
+				if (onDrag != null) {
+					onDrag(currentX, currentY);
+				}
+			}
+		}
+		
+		var block = OnTop(
+			Button( Background(0x000000, Fixed(0,0)), Background(0x000000, Fixed(0,0)), null, clickHandler),
+			Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit, mouseWheel)
+		);
+		return { 
+			block: block, 
+			setPositionFn : setPositionFn 
+		};
 	}
 
 	/// Add a check-box in front on the given block
