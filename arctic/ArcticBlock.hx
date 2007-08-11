@@ -215,6 +215,9 @@ typedef DragInfo = {
 	// How much we have moved so far in pixels?
 	x : Float,
 	y : Float,
+	// How wide/high is the drag handle?
+	width : Float,
+	height : Float,
 	// How much room is available for dragging in pixels?
 	totalWidth : Float,
 	totalHeight : Float

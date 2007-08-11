@@ -1194,7 +1194,9 @@ class ArcticView {
 				if (mode == Reuse && null != onInit) {
 					var dragInfo = { 
 						x : info.totalDx, 
-						y : info.totalDy, 
+						y : info.totalDy,
+						width : info.childWidth,
+						height : info.childHeight,
 						totalWidth : info.available.width - info.childWidth, 
 						totalHeight : info.available.height - info.childHeight 
 					};
@@ -1254,6 +1256,8 @@ class ArcticView {
 						var dragInfo = { 
 							x : info.totalDx, 
 							y : info.totalDy, 
+							width : info.childWidth,
+							height : info.childHeight,
 							totalWidth : info.available.width - info.childWidth, 
 							totalHeight : info.available.height - info.childHeight 
 						};
@@ -1361,6 +1365,8 @@ class ArcticView {
 				var dragInfo = { 
 					x : info.totalDx, 
 					y : info.totalDy, 
+					width : info.childWidth,
+					height : info.childHeight,
 					totalWidth : info.available.width - info.childWidth, 
 					totalHeight : info.available.height - info.childHeight 
 				};

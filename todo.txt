@@ -6,8 +6,8 @@ Bugs
 ----
 
 Scrollbar bugs:
-- Click on non-handle area should scroll in that direction - change the background to a button
-  and use the new extended API to get the coordinate of the click
+- The scrollbar is as wide as the canvas, so you can drag and click outside the visual
+  scrollbar
 - Mouse wheel support for scrollbar should work across entire clip, not just around handle itself
 - Resizing should preserve scrollbar position
 - Button arrows should be 90 degrees - they are a little too narrow now

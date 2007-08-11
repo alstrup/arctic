@@ -144,7 +144,7 @@ class Scrollbar {
 	static private function makeButton(size : Float, up : Bool, fn : Void -> Void) : ArcticBlock {
 		var arrow1 = makeArrow(size, up, 0x4D6185);
 		var arrow2 = makeArrow(size, up, 0x2C364A);
-		return arctic.RepeatingButton.make(
+		return Arctic.makeRepeatingButton(
 					Filter(
 						Bevel(1, 45, 0xcad8f9, 100, 0x7da0d4, 100, 2, 2, 1, 1, "inner", false),
 						GradientBackground("linear", [0xe1eafe, 0xb9cbf3], 0, 0, arrow1, null, 3, Math.PI / 2)
