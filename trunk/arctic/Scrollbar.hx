@@ -106,14 +106,14 @@ class Scrollbar {
 			OnTop(
 				// The buttons
 				Offset(availableWidth, 0, 
-					Frame(
-						Frame(
+					Frame(1, 0xeeede5,
+						Frame(1, 0xffffff, 
 							LineStack( [
 								makeButton(buttonHeight, true, onUp),
 								Fixed(0, sliderHeight),
 								makeButton(buttonHeight, false, onDown)
-							] ), 1, 0xffffff
-						), 1, 0xeeede5
+							] ) 
+						)
 					)
 				),
 				// The slider area

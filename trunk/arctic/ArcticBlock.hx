@@ -188,7 +188,7 @@ enum ArcticBlock {
 	/**
 	 * Draws a frame around the given block. Alpha is optional between 0 and 100.
 	 */
-	Frame(block: ArcticBlock, ?thickness: Null<Float>, ?color: Null<Int>, ?roundRadius: Null<Float>, ?alpha: Null<Float>, ?xspacing: Null<Float>, ?yspacing: Null<Float>);
+	Frame(thickness: Float, color: Int, block: ArcticBlock, ?roundRadius: Null<Float>, ?alpha: Null<Float>, ?xspacing: Null<Float>, ?yspacing: Null<Float>);
 
 	/**
 	 * Apply a filter on the block. Notice that the filter effect is not considered as part of the block

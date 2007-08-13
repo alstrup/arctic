@@ -30,7 +30,7 @@ class ComponentTour {
 			[ "Arctic.makeDragable(true, true, true, <font color='#c0c0c0'>Text(\"Drag me\")</font>)", Arctic.makeDragable(true, true, true, Text("Drag me")) ],
 			[ "Arctic.makeSlider(0, 100, 0, 100, <font color='#c0c0c0'>Text(\"Slide me\")</font>)", Arctic.makeSlider(0, 100, 0, 100, Text("Slide me"), null) ],
 			[ "Filter(DropShadow(2, 45, 0x000000, 10), <font color='#c0c0c0'>Text(\"Shadow\")</font>)", Filter(DropShadow(2, 45, 0x000000, 100), Text("Shadow")) ],
-			[ "Frame(<font color='#c0c0c0'>Text(\"Frame\")</font>, 5, 0x8080ff, 20, null, 10, 10)", Frame(Text("Frame"), 5, 0x8080ff, 20, null, 10, 10) ],
+			[ "Frame(5, 0x8080ff, <font color='#c0c0c0'>Text(\"Frame\")</font>, 20, null, 10, 10)", Frame(5, 0x8080ff, Text("Frame"), 20, null, 10, 10) ],
 			[ "Cursor(<font color='#c0c0c0'>Text(\"See\")</font>, <font color='#c0c0c0'>Text(\"A custom cursor!\")</font>, false)", Cursor(Text("See"), Text("A custom cursor!"), false) ],
 			[ "Offset(50, 50, <font color='#c0c0c0'>Background(0xc0c0ff, Fixed(200, 200) )</font> )", Offset(50, 50, Background(0xc0c0ff, Fixed(200, 200) ) ) ],
 			[ "OnTop(Text(\"Text\"), Text(\"////////\") )", OnTop(Text("Text"), Text("////////") ) ],
@@ -60,7 +60,7 @@ class ComponentTour {
 		preview = new MutableBlock(code[1]);
 		var screen = 
 			Border( 5, 5,
-				Frame( Background(0xf0f0ff, Border( 10, 10,
+				Frame( 2, 0x000000, Background(0xf0f0ff, Border( 10, 10,
 					ColumnStack( [ 
 						LineStack( [
 							Arctic.makeText("Select a component to preview:"),
@@ -72,12 +72,12 @@ class ComponentTour {
 						LineStack( [
 							Arctic.makeText("Preview:"),
 							Fixed(5, 5),
-							Frame( Background( 0xffffff, Border( 5, 5, Mutable(preview) ), null, 10), 2, 0x000000, 5, null, 0, 0)
+							Frame( 2, 0x000000, Background( 0xffffff, Border( 5, 5, Mutable(preview) ), null, 10), 5, null, 0, 0)
 						]),
 						Filler
 					] )
 				), null, 10),
-				2, 0x000000, 10, null, 0, 0)
+				10, null, 0, 0)
 			);
 
 		// Then construct the arctic view object

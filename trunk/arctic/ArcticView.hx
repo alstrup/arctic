@@ -329,11 +329,10 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		
-		case Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing):
+		case Frame(thickness, color, block, roundRadius, alpha, xspacing, yspacing):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);			
 			if (xspacing == null) xspacing = 0;
 			if (yspacing == null) yspacing = 0;
-			if (thickness == null) thickness = 0;
 			var x = xspacing + thickness;
 			var y = yspacing + thickness;
 			if (x != 0 || y != 0) {
