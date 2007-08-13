@@ -99,7 +99,7 @@ class ArcticTest {
 						LineStack( [
 							Border( 10, 10, 
 								ColumnStack( [
-									Frame(Arctic.makeDateView(Date.now()), 1, 0x777777, 2, 100, 2, 2), 
+									Frame(1, 0x777777, Arctic.makeDateView(Date.now()), 2, 100, 2, 2), 
 									Border( 20, 20, 
 										Arctic.makeText("<b>Today's appointments</b>", 24, "#ffffff", "arial")
 									)

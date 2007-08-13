@@ -28,10 +28,15 @@ class Arctic {
 	static public function makeRepeatingButton(base : ArcticBlock, hover : ArcticBlock, action : Void -> Void, interval : Int) : ArcticBlock {
 		var timer : haxe.Timer = null;
 		var ourHandler = function (x : Float, y : Float, down : Bool, inside : Bool) {
+			var delay = 4;
 			if (!down) {
 				if (timer != null) {
 					timer.stop();
 					timer = null;
+					if (delay == 4) {
+						// Make sure we at least call action once
+						action();
+					}
 				}
 				return;
 			}
@@ -39,9 +44,13 @@ class Arctic {
 				return;
 			}
 			timer = new haxe.Timer(interval);
-			timer.run = action;
+			timer.run = function() { 
+				if (delay == 4) action(); 
+				if (delay > 0) delay--; 
+				else action(); 
+			}
 		}
-		return Button(base, hover, action, ourHandler);
+		return Button(base, hover, null, ourHandler);
 	}
 	
 	/// Associate a tooltip with a block

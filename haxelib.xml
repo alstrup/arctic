@@ -23,5 +23,13 @@
 		
 		- Add a repeating button wrapper to construct buttons that can auto-repeat while mouse button
 		  is pressed
+		 
+		- Change Frame block parameter order from 
+		
+		    Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing);
+		  
+		  to
+		  
+		    Frame(thickness, color, block, roundRadius, alpha, xspacing, yspacing);
 	</version>
 </project>
