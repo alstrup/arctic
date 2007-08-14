@@ -233,7 +233,8 @@ enum Filter {
 	Blur(?blurX : Float, ?blurY : Float, ?quality : Int);
 	ColorMatrix(?matrix : Array<Float>);
 	Convolution(?matrixX : Float, ?matrixY : Float, ?matrix : Array<Dynamic>, ?divisor : Float, ?bias : Float, ?preserveAlpha : Bool, ?clamp : Bool, ?color : UInt, ?alpha : Float);
-	DropShadow(?distance : Float, ?angle : Float, ?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+//	DropShadow(?distance : Float, ?angle : Float, ?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+	DropShadow(?distance : Float, ?angle : Float, ?color : UInt, ?alpha : Float);
 	Glow(?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool);
 	GradientBevel(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
 	GradientGlow(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
@@ -242,7 +243,8 @@ enum Filter {
 	Blur(?blurX : Float, ?blurY : Float, ?quality : Int);
 	ColorMatrix(?matrix : Array<Float>);
 	Convolution(?matrixX : Float, ?matrixY : Float, ?matrix : Array<Dynamic>, ?divisor : Float, ?bias : Float, ?preserveAlpha : Bool, ?clamp : Bool, ?color : Int, ?alpha : Float);
-	DropShadow(?distance : Float, ?angle : Float, ?color : Float, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Float, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+//	DropShadow(?distance : Float, ?angle : Float, ?color : Float, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Float, ?inner : Bool, ?knockout : Bool, ?hideObject : Bool);
+	DropShadow(?distance : Float, ?angle : Float, ?color : Float, ?alpha : Float);
 	Glow(?color : Int, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool);
 	GradientBevel(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
 	GradientGlow(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
