@@ -41,16 +41,22 @@ class Scrollbar {
 		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
 		// Called when up is clicked
 		var onUp = function() {
-			currentY = Math.max(0, currentY - buttonMovement);
-			slider.setPositionFn(0, currentY);
+			currentY -= buttonMovement;
 			update();
+			slider.setPositionFn(0, currentY);
 		}
 		
 		// Called when down is clicked
 		var onDown = function() {
-			currentY = Math.min(realHeight, currentY + buttonMovement);
-			slider.setPositionFn(0, currentY);
+			currentY += buttonMovement;
 			update();
+			slider.setPositionFn(0, currentY);
+		}
+		
+		var onMouseWheel = function (delta : Float) {
+			currentY -= delta * 10;
+			update();
+			slider.setPositionFn(0, currentY);
 		}
 		
 		// Metrics
@@ -81,21 +87,16 @@ class Scrollbar {
 						null, 3, Math.PI / 2)
 				);
 			
-			slider = Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, 
-							ColumnStack([ Background(0x000000, Fixed(availableWidth + 2, handleSize),0), handleBlock ] ), 
+			slider = Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, handleBlock, 
 							onScroll, null, currentY, true);
 		
 			sliderBlock = ConstrainHeight(sliderHeight, sliderHeight,
-						OnTop(
 							ColumnStack([ 
-								Background(0x000000, Fixed(availableWidth + 2, sliderHeight), 0),
 								GradientBackground("linear", [0xfefefb, 0xf3f1ec], 0, 0, 
-									Fixed(buttonHeight, sliderHeight),
+									slider.block, //Fixed(buttonHeight, sliderHeight),
 									null, null, 0)
-							]), 
-							slider.block
-						)
-					);
+							])
+						);
 		} else {
 			// No slider
 			sliderBlock = Fixed(0, sliderHeight);
@@ -110,14 +111,17 @@ class Scrollbar {
 						Frame(1, 0xffffff, 
 							LineStack( [
 								makeButton(buttonHeight, true, onUp),
-								Fixed(0, sliderHeight),
+								sliderBlock,
+								Fixed(0, 1),
 								makeButton(buttonHeight, false, onDown)
 							] ) 
 						)
 					)
 				),
-				// The slider area
-				Offset(0, buttonHeight + 2, sliderBlock)
+				MouseWheel(
+					Background(0x000000, Fixed(availableWidth, availableHeight), 0),
+					onMouseWheel
+				)
 			)
 			;
 

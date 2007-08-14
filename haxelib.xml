@@ -1,7 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.8.9">
+    <version name="0.9.0">
 		- Fix slider to keep relative position after resize when there is no onDrag function defined
 
 		- Reimplement scrollbar as an ArcticView, rather than custom code, beautifying in the process
@@ -16,8 +16,9 @@
 		    Arctic.makeDragable(...)   to   Arctic.makeDragable().block
 		    Arctic.makeSlider(...)     to   Arctic.makeSlider().block
 
-		- Dragable and Sliders are not controllable by mouse wheel by default
-		
+		- Dragable and Sliders are not controllable by mouse wheel anymore. Instead, a new
+		  MouseWheel block has been introduced which propagates mouse wheel events
+
 		- Extend Button block with API to get coordinates of click inside Button block, and both
 		  mouse button press and release events.
 		
@@ -25,11 +26,8 @@
 		  is pressed
 		 
 		- Change Frame block parameter order from 
-		
 		    Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing);
-		  
 		  to
-		  
 		    Frame(thickness, color, block, roundRadius, alpha, xspacing, yspacing);
 	</version>
 </project>

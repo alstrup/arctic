@@ -60,10 +60,9 @@ enum ArcticBlock {
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
 	 * When the button is clicked, onClick is called. If onClickExtended is supplied, it is called with the x and y
-	 * coordinates, plus a bool signifying whether the mouse button is pressed (true) or released (false). onClickExtended
-	 * is called even if the click or released is outside the button with the x and y coordinates of the mouse, a bool
-	 * which is false on mouse button down and true on mouse button up, and the final bool telling whether the click is
-	 * inside the button or not.
+	 * coordinates, plus a bool signifying whether the mouse button is pressed (true) or released (false). 
+	 * onClickExtended is called even if the click or released is outside the button, and the final bool tells 
+	 * whether the click is inside the button or not.
 	 * On button release, onClick is called before onClickExtended.
 	 */
 	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void, ?onClickExtended : Float -> Float -> Bool -> Bool-> Void);
@@ -130,7 +129,7 @@ enum ArcticBlock {
 	 * Arctic.makeDragable if you want to preserve the dragged distance across canvas resizes.
 	 */
 	Dragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, block : ArcticBlock, 
-			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void, ?mouseWheel : Null<Bool>);
+			onDrag : DragInfo -> Void, ?onInit : DragInfo -> (Float -> Float -> Void) -> Void);
 
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
@@ -195,6 +194,11 @@ enum ArcticBlock {
 	 * in terms of size.
 	 */
 	Filter(filter : Filter, block : ArcticBlock);
+
+	/**
+	 * Captures mouse wheel movements in the given block
+	 */
+	MouseWheel(block : ArcticBlock, onMouseWheel : Float -> Void);
 }
 
 /// The structure used by CustomBlocks to tell arctic of dimensions and requested resizing behaviour

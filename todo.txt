@@ -2,9 +2,6 @@ Bugs
 ----
 
 Scrollbar bugs:
-- The scrollbar is as wide as the canvas, so you can drag and click outside the visual
-  scrollbar
-- Mouse wheel support for scrollbar should work across entire clip, not just around handle itself
 - Resizing should preserve scrollbar position
 - Button arrows should be 90 degrees - they are a little too narrow now
 
@@ -15,16 +12,18 @@ New features to consider
 ------------------------
 
 Extend blocks with new APIs:
-- Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
 - Add API for text elements to set focus to them, and ask whether they have focus, and to change contents dynamically
-- Add API for changing state of toggle button
+
+- Consider changing ToggleButton to be a MutableBlock(Button( ) ) instead
+ - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
+ - Add API for changing state of toggle button
 
 - Make tooltip have a delay, and make sure they do not go outside the stage
 
 - Add filling behaviour to grid
 
-- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using ArcticState,
-  and probably a Color filter of some kind
+- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using 
+  ArcticState, and probably a Color filter of some kind
 
 - Combo-box
 
