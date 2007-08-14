@@ -1125,7 +1125,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, mouseWheel):
+		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
@@ -1299,20 +1299,6 @@ class ArcticView {
 						}
 					}
 				);
-				if (mouseWheel == true) {
-					// Ideally, it should be on the parent, but limited to the area relevant
-					// (except for dragables that should not stay within where we probably do 
-					// not want mouse wheel events to move anything)
-					clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
-						function (s) {
-							if (upDownMotion) {
-								doDrag(0, -10 * s.delta);
-							} else if (sideMotion) {
-								doDrag(-10 * s.delta, 0);
-							}
-						}
-					);
-				}
 			#else flash
 				clip.onMouseDown = function() {
 					if (me.getActiveClip() == dragClip) {
@@ -1339,25 +1325,6 @@ class ArcticView {
 						}
 					}
 				};
-				if (mouseWheel != false) {
-					var mouseWheelListener = { 
-						onMouseDown : function() {},
-						onMouseMove : function() {},
-						onMouseUp : function() {},
-						onMouseWheel : function ( delta : Float, target ) {
-							if (dragClip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
-								if (upDownMotion) {
-									doDrag(0, -10 * delta);
-								} else if (sideMotion) {
-									doDrag(-10 * delta, 0);
-								}
-							}
-						}
-					};
-					flash.Mouse.addListener(mouseWheelListener);
-					// We record this one so we can remove it again later
-					mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
-				}
 			#end
 
 			if (null != onInit) {
@@ -1506,8 +1473,35 @@ class ArcticView {
 			} else {
 				return buildFun(data, mode, null, availableWidth, availableHeight, null);
 			}
+		
+		case MouseWheel(block, onMouseWheel):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create && child.clip != null) {
+				#if flash9
+					clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+						function (s) {
+							onMouseWheel(s.delta);
+						}
+					);
+				#else flash
+					var mouseWheelListener = { 
+						onMouseDown : function() {},
+						onMouseMove : function() {},
+						onMouseUp : function() {},
+						onMouseWheel : function ( delta : Float, target ) {
+							if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true)) {
+								onMouseWheel(delta);
+							}
+						}
+					};
+					flash.Mouse.addListener(mouseWheelListener);
+					// We record this one so we can remove it again later
+					mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
+				#end
+			}
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		}
-		return null;
 	}
 
 	/// For text elements, we cache the sizes

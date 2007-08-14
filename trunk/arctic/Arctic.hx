@@ -27,7 +27,7 @@ class Arctic {
 	/// This constructs a button which repeatedly triggers the action as long as the mouse is pressed
 	static public function makeRepeatingButton(base : ArcticBlock, hover : ArcticBlock, action : Void -> Void, interval : Int) : ArcticBlock {
 		var timer : haxe.Timer = null;
-		var ourHandler = function (x : Float, y : Float, down : Bool, inside : Bool) {
+		var ourHandler = function (x : Float, y : Float, down, inside : Bool) {
 			var delay = 4;
 			if (!down) {
 				if (timer != null) {
@@ -83,8 +83,7 @@ class Arctic {
 	 * This will *not* trigger a call to any supplied onDrag function.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
-					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float,
-					?mouseWheel : Bool) {
+					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
 		// Local closured variables to remember drag offset
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
@@ -108,7 +107,7 @@ class Arctic {
 			dragInfo.setPositionFn(x, y); 
 		}
 		return { 
-			block: Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, mouseWheel),
+			block: Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit),
 			setPositionFn: setPositionFn
 		};
 	}
@@ -208,7 +207,7 @@ class Arctic {
 		
 		var block = OnTop(
 			Button( Background(0x000000, Fixed(0,0)), Background(0x000000, Fixed(0,0)), null, clickHandler),
-			Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit, mouseWheel)
+			Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit)
 		);
 		return { 
 			block: block, 
