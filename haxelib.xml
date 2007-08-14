@@ -1,33 +1,8 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.0">
-		- Fix slider to keep relative position after resize when there is no onDrag function defined
-
-		- Reimplement scrollbar as an ArcticView, rather than custom code, beautifying in the process
-
-		- Add general Filter block, replacing the specific Shadow block. To upgrade, change
-		    Shadow(block, d, a, c, alpha)
-		  to
-		    Filter(DropShadow(d, a, c, alpha), block)
-		  Notice the Filter block only works on Flash 8 & 9. On Flash 7, it's a no-op.
-
-		 - Add API for repositioning dragable and sliders. To upgrade, change
-		    Arctic.makeDragable(...)   to   Arctic.makeDragable().block
-		    Arctic.makeSlider(...)     to   Arctic.makeSlider().block
-
-		- Dragable and Sliders are not controllable by mouse wheel anymore. Instead, a new
-		  MouseWheel block has been introduced which propagates mouse wheel events
-
-		- Extend Button block with API to get coordinates of click inside Button block, and both
-		  mouse button press and release events.
-		
-		- Add a repeating button wrapper to construct buttons that can auto-repeat while mouse button
-		  is pressed
-		 
-		- Change Frame block parameter order from 
-		    Frame(block, thickness, color, roundRadius, alpha, xspacing, yspacing);
-		  to
-		    Frame(thickness, color, block, roundRadius, alpha, xspacing, yspacing);
+    <version name="0.9.1">
+		- Fix bug in ComponentTour example with Dragable and Slider
+		- Fix scrollbar bug where the mouse wheel layer stole all clicks
 	</version>
 </project>

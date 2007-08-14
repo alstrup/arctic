@@ -374,7 +374,7 @@ class ArcticView {
 					myFilter = new flash.filters.ColorMatrixFilter(matrix);
 				case Convolution(matrixX, matrixY, matrix, divisor, bias, preserveAlpha, clamp, color, alpha):
 					myFilter = new flash.filters.ConvolutionFilter(f(matrixX), f(matrixY), matrix, f(divisor), f(bias), b(preserveAlpha), b(clamp), c(color), f(alpha));
-				case DropShadow(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
+				case DropShadow(distance, angle, color, alpha /*, blurX, blurY, strength, quality, inner, knockout, hideObject*/):
 //					myFilter = new flash.filters.DropShadowFilter(f(distance), f(angle), c(color), f(alpha), f(blurX), f(blurY), f(strength), i(quality), b(inner), b(knockout), b(hideObject));
 					myFilter = new flash.filters.DropShadowFilter(f(distance), f(angle), c(color), f(alpha));
 				case Glow(color, alpha, blurX, blurY, strength, quality, inner, knockout):
@@ -1478,11 +1478,16 @@ class ArcticView {
 		case MouseWheel(block, onMouseWheel):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode == Create && child.clip != null) {
+			if (mode == Create) {
+				// To support empty children, we ensure that we have the right size
+				ArcticMC.setSize(clip, child.width, child.height);
 				#if flash9
-					clip.addEventListener( flash.events.MouseEvent.MOUSE_WHEEL,
+					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_WHEEL,
 						function (s) {
-							onMouseWheel(s.delta);
+							// We do not respect alpha for mouse wheel detection
+							if (ArcticMC.isActive(clip) && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, false)) {
+								onMouseWheel(s.delta);
+							}
 						}
 					);
 				#else flash
@@ -1491,7 +1496,8 @@ class ArcticView {
 						onMouseMove : function() {},
 						onMouseUp : function() {},
 						onMouseWheel : function ( delta : Float, target ) {
-							if (clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true)) {
+							// We do not respect alpha for mouse wheel detection
+							if (ArcticMC.isActive(clip) && clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, false)) {
 								onMouseWheel(delta);
 							}
 						}
