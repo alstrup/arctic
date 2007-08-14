@@ -118,7 +118,7 @@ class Scrollbar {
 					)
 				),
 				MouseWheel(
-					Background(0x000000, Fixed(availableWidth, availableHeight), 0),
+					Fixed(availableWidth, availableHeight),
 					onMouseWheel
 				)
 			)
