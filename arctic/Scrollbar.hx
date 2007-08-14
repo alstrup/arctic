@@ -91,7 +91,7 @@ class Scrollbar {
 							onScroll, null, currentY, true);
 		
 			sliderBlock = ConstrainHeight(sliderHeight, sliderHeight,
-							ColumnStack([ 
+							LineStack([ 
 								GradientBackground("linear", [0xfefefb, 0xf3f1ec], 0, 0, 
 									slider.block, //Fixed(buttonHeight, sliderHeight),
 									null, null, 0)
@@ -112,7 +112,6 @@ class Scrollbar {
 							LineStack( [
 								makeButton(buttonHeight, true, onUp),
 								sliderBlock,
-								Fixed(0, 1),
 								makeButton(buttonHeight, false, onDown)
 							] ) 
 						)
