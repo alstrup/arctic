@@ -3,6 +3,7 @@ del arctic.zip
 cd examples
 haxe DevArcticExamples.hxml
 haxe Bugs.hxml
+haxe DialogsExamples.hxml
 cd ..
 
 SET ZIP="c:\program files\7-zip\7z.exe"
