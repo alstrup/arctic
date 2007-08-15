@@ -1,6 +1,5 @@
 package arctic;
 
-import arctic.ArcticUi;
 import arctic.ArcticBlock;
 import arctic.ArcticState;
 
