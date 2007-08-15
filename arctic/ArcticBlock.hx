@@ -48,8 +48,11 @@ enum ArcticBlock {
 	 * The validator callback is called on each change. You can use this callback to extract the contents of the text input.
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
 	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiLine: true } as style is portable.)
+	 * The onInit parameter is called on construction and returns a function textFn( newHtml : String, setFocus : Bool) : Bool which
+	 * can be used to change the contents of the TextInput, force it to have focus, and will return whether the TextInput currently
+	 * has focus or not.
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>);
+	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (String -> Bool -> Bool) -> Void);
 
 	/**
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.
