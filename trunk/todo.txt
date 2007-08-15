@@ -11,9 +11,6 @@ Other bugs:
 New features to consider
 ------------------------
 
-Extend blocks with new APIs:
-- Add API for text elements to set focus to them, and ask whether they have focus, and to change contents dynamically
-
 - Consider changing ToggleButton to be a MutableBlock(Button( ) ) instead
  - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
  - Add API for changing state of toggle button

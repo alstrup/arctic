@@ -517,7 +517,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: s.width, height: s.height, growWidth: if (wordWrap) true else false, growHeight: false };
 
-		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont) :
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit) :
 			if (mode == Metrics) {
 				return { clip: null, width : width, height : height, growWidth : false, growHeight : false };
 			}
@@ -617,6 +617,40 @@ class ArcticView {
 						flash.Selection.setFocus(txtInput);
 					}
 				#end
+			}
+
+			if (onInit != null) {
+				#if flash9
+				#else flash
+				var hasFocus = focus;
+				txtInput.onSetFocus = function(obj) {
+					hasFocus = true;
+				};
+				txtInput.onKillFocus = function(obj) {
+					hasFocus = false;
+				};
+				#end
+				
+				var textFn = function(html : String, setFocus : Bool) : Bool {
+					if (html != null) {
+						txtInput.htmlText = html;
+					}
+					if (setFocus) {
+						#if flash9
+							clip.stage.focus = txtInput;
+						#else flash
+							flash.Selection.setFocus(txtInput);
+							hasFocus = setFocus;
+						#end
+					}
+					#if flash9
+						return clip.stage.focus == txtInput;
+					#else flash
+						return hasFocus;
+					#end
+
+				}
+				onInit(textFn);
 			}
 
 			var s = ArcticMC.getSize(clip);

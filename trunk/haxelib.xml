@@ -1,8 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.1">
-		- Fix bug in ComponentTour example with Dragable and Slider
-		- Fix scrollbar bug where the mouse wheel layer stole all clicks
+    <version name="0.9.2">
+		- Add API for changing contents of TextInput block, setting focus and asking whether it has focus
 	</version>
 </project>
