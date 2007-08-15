@@ -7,20 +7,21 @@ import arctic.ArcticMC;
 
 /**
  * Make a dragable dialog out of an Arctic block.
+ * 
  * Construct the dialog, then call open() to show the dialog.
  * It is important to call close() to remove the dialog again.
+ * 
+ * If you need a title bar and a close button, ArcticDialogUi is your friend.
  */
 class ArcticDialog {
 	/**
-	 * Construct a dialog, but do not show it yet. The title parameter is currently unused,
-	 * but in the future it might be used for something.
+	 * Construct a dialog, but do not show it yet.
 	 * The xPos and yPos are numbers between 0.0 and 1.0 which define where the dialog should
 	 * appear on the stage. 0.0, 0.0 is in the upper left corner, while 1.0, 1.0 is in the
 	 * lower right corner. The default position is in the middle of the screen (0.5, 0.5).
 	 * The dialog is constructed in the dialog movieclip (from ArcticDialogManager).
 	 */
-	public function new(title0 : String, content : ArcticBlock, ?xPos : Float, ?yPos : Float, ?parentMc: ArcticMovieClip) {
-		title = title0;
+	public function new(content : ArcticBlock, ?xPos : Float, ?yPos : Float, ?parentMc: ArcticMovieClip) {
 		contentBlock = Arctic.makeDragable(false, true, true, content).block;
 		xPosition = if (xPos == null) 0.5 else xPos;
 		yPosition = if (yPos == null) 0.5 else yPos;
@@ -87,7 +88,6 @@ class ArcticDialog {
 		return dialogClip != null && ArcticMC.hitTest(dialogClip, x, y);
 	}
 
-	var title : String;
 	var contentBlock : ArcticBlock;
 	var xPosition : Float;
 	var yPosition : Float;

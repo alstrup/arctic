@@ -33,7 +33,7 @@ class ArcticDialogManager {
 	 * You can call this to initialize the dialog manager with your own parent clip where dialogs should be build on.
 	 * You can also supply a function which will be called whenever a dialog appears, or all dialogs disappear.
 	 */
-	public function init(mc0 : ArcticMovieClip, displayNotifier : Bool -> Void) {
+	public function init(mc0 : ArcticMovieClip, ?displayNotifier : Bool -> Void) {
 		mc = mc0;
 		displayNotificationFn = displayNotifier;
 	}
