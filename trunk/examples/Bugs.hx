@@ -105,7 +105,7 @@ class Bugs {
 								Background(0xAAAAFF,
 									ColumnStack( [
 										Arctic.makeTooltip(
-											Arctic.makeCheckbox( Fixed(0,0), function(state : Bool) { trace(state); } ),
+											Arctic.makeCheckbox( Fixed(0,0), function(state : Bool) { trace(state); } ).block,
 											"Enable this feature (disable to use default)"),
 										Text("<font face='arial' size='20'>Logo banner: </font>"),
 										Filler,
@@ -115,7 +115,7 @@ class Bugs {
 								Background(0xCCCCFF,
 									ColumnStack( [
 										Arctic.makeTooltip(
-											Arctic.makeCheckbox( Fixed(0,0)),
+											Arctic.makeCheckbox( Fixed(0,0)).block,
 											"Enable this feature (disable to use default)"),
 										Text("<font face='arial' size='20'>Logo banner: </font>"),
 										Filler,

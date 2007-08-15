@@ -109,7 +109,7 @@ class ArcticTest {
 							Border( 10, 10,
 								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
-							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)) ),
+							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)).block ),
 							ColumnStack( [
 								Filler,
 								Arctic.makeSimpleButton("Continue",  screen1next, 25)

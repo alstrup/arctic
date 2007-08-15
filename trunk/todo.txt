@@ -5,15 +5,13 @@ Scrollbar bugs:
 - Resizing should preserve scrollbar position
 - Button arrows should be 90 degrees - they are a little too narrow now
 
-Other bugs:
-- Hover effect does not automatically trigger on refresh (see dynamic example)
+- Button hover effect does not automatically trigger on refresh (see dynamic example)
 
 New features to consider
 ------------------------
 
 - Consider changing ToggleButton to be a MutableBlock(Button( ) ) instead
  - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
- - Add API for changing state of toggle button
 
 - Make tooltip have a delay, and make sure they do not go outside the stage
 

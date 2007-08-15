@@ -14,14 +14,16 @@ interface blocks.
 Arctic is relatively simple, so you should have little trouble understanding how it
 is implemented, and thus it should be possible to extend it to cover your needs.
 
-See the example to learn how to build your own arctic views.
+See the examples to learn how to build your own arctic views.
 
 To install, run
 
   haxelib install arctic
 
-Compile the simple demo in your haxe-X\lib\arctic\*\examples
-directory, and launch arctic.swf (Flash 8) or arctic9.swf (Flash 9) to try it.
+Compile the simple demos in your haxe-X\lib\arctic\*\examples
+directory, and launch ComponentTour8.swf (Flash 8) or ComponentTour9.swf (Flash 9) 
+to try it.
+
 
 
 The code is also available as a Google project:
@@ -29,7 +31,6 @@ The code is also available as a Google project:
 http://code.google.com/p/arctic/
 
 Send me your google id if you would like to have access to Google project.
-If you don't have a gmail account, ask for an invitation.
 
 
 If you'd like to extend Arctic, there are three different approaches possible:
