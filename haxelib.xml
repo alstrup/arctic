@@ -5,5 +5,6 @@
 		- Add API for changing contents of TextInput block, setting focus and asking whether it has focus
 		- Add API for changing state of check boxes. To upgrade, change
 		    Arctic.makeCheckbox(...)    to   Arctic.makeCheckbox(...).block
+		- Add ArcticDialogManager and ArcticDialog that handles dragable dialogs
 	</version>
 </project>
