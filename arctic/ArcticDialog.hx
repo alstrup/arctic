@@ -7,8 +7,8 @@ import arctic.ArcticMC;
 
 /**
  * Make a dragable dialog out of an Arctic block.
- * Construct the dialog, then call show() to show the dialog.
- * It is important to call hide() to remove the dialog again.
+ * Construct the dialog, then call open() to show the dialog.
+ * It is important to call close() to remove the dialog again.
  */
 class ArcticDialog {
 	/**
@@ -19,12 +19,13 @@ class ArcticDialog {
 	 * lower right corner. The default position is in the middle of the screen (0.5, 0.5).
 	 * The dialog is constructed in the dialog movieclip (from ArcticDialogManager).
 	 */
-	public function new(title0 : String, content : ArcticBlock, ?xPos : Float, ?yPos : Float) {
+	public function new(title0 : String, content : ArcticBlock, ?xPos : Float, ?yPos : Float, ?parentMc: ArcticMovieClip) {
 		title = title0;
 		contentBlock = Arctic.makeDragable(false, true, true, content).block;
 		xPosition = if (xPos == null) 0.5 else xPos;
 		yPosition = if (yPos == null) 0.5 else yPos;
 		//contentBlock = Arctic.makeSlider(0, 1, 0, 1, content, null, xPosition, yPosition, false);
+		parentClip = if (parentMc == null) ArcticDialogManager.get().mc else parentMc;
 		baseClip = null;
 		dialogClip = null;
 		arcticView = null;
@@ -40,12 +41,9 @@ class ArcticDialog {
 	 * 
 	 * on one line to make and show a dialog.
 	 */
-	public function show(?parent : ArcticMovieClip) : ArcticDialog {
+	public function open() : ArcticDialog {
 		if (baseClip == null) {
-			if (parent == null) {
-				parent = ArcticDialogManager.get().mc;
-			}
-			baseClip = ArcticMC.create(parent);
+			baseClip = ArcticMC.create(parentClip);
 
 			arcticView = new ArcticView(contentBlock, baseClip);
 			arcticView.adjustToFit(0, 0);
@@ -56,8 +54,8 @@ class ArcticDialog {
 		return this;
 	}
 
-	/// This will hide and destroy the dialog view. You can show the dialog again by calling show once more.
-	public function hide() {
+	/// This will hide and destroy the dialog view. You can show the dialog again by calling open once more.
+	public function close() {
 		if (baseClip == null) {
 			// Already hidden
 			return;
@@ -93,7 +91,11 @@ class ArcticDialog {
 	var contentBlock : ArcticBlock;
 	var xPosition : Float;
 	var yPosition : Float;
+	/// The clip where we will construct our view of the dialog
+	var parentClip : ArcticMovieClip;
+	/// The clip that contains the dialog, and only that
 	var baseClip : ArcticMovieClip;
+	/// The root clip of the view, as returned by ArcticView
 	var dialogClip : ArcticMovieClip;
 	var arcticView : ArcticView;
 }
