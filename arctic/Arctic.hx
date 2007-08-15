@@ -215,8 +215,18 @@ class Arctic {
 		};
 	}
 
-	/// Add a check-box in front on the given block
-	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticBlock {
+	/**
+	 * Add a check-box in front on the given block. 
+	 * You can change the state of the check box like this:
+	 *   var myCheckbox = makeCheckbox(Text("Test"));
+	 *   ...
+	 *   // construct view with myCheckbox.block somewhere
+	 *   ...
+	 * 
+	 *   // Change state of check box
+	 *   myCheckbox.state = true;
+	 */
+	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticState<Bool> {
 		
 		// Local closured variables to remember state
 		var selected = defaultSelected;
@@ -255,7 +265,7 @@ class Arctic {
 				});
 			}
 		});
-		return checkBox.block;
+		return checkBox;
 	}
 	
 	/**
