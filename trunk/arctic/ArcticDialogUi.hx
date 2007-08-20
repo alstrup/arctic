@@ -56,7 +56,7 @@ class ArcticDialogUi extends ArcticDialog {
 		if (padding != null && padding != 0) {
 			block = Border(padding, padding, block);
 		}
-		return Frame( 1, borderColor, Background(color, block, null, roundRadius), roundRadius / 2);
+		return Frame( 1, borderColor, Background(color, block, null, roundRadius), roundRadius);
 	}
 	
 	/// Make the dialog frame
