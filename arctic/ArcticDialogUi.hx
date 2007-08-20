@@ -16,6 +16,9 @@ class ArcticDialogUi extends ArcticDialog {
 	public static var buttonsHoveredColor = 0xFFF5C1;
 	public static var buttonsHoveredFrameColor = 0xC2A978;
 
+	public static var buttonsColor = 0xF5F5F5;
+	public static var buttonsFrameColor = 0xC1D8F2;
+
 	/**
 	 * Construct a dialog block with a title bar and a close button.
 	 */
@@ -27,7 +30,7 @@ class ArcticDialogUi extends ArcticDialog {
 		
 		var gui = makeFrame( 
 			Grid( [
-				[ Background(borderColor, ColumnStack([Filler, titleState.block, Filler, Border(2, 2, makeButton(" X ", 7.0, close)) ])) ],
+				[ Background(borderColor, ColumnStack([Filler, titleState.block, Filler, Border(2, 2, makeButton("X", close, 7.0)) ])) ],
 				[ content ]
 			])
 		);
@@ -38,11 +41,14 @@ class ArcticDialogUi extends ArcticDialog {
 	public var title(getTitle, setTitle) : String;
 	
 	/// Make a nice button
-	private static function makeButton(text, size : Float, onClick : Void -> Void) {
-		var t = Arctic.makeText(text, size, buttonsTextColor);
-		var normal = makeRect( t, borderColor, borderColor, 1.0, 2.0 );
-		var hovered = makeRect( t, buttonsHoveredColor, buttonsHoveredFrameColor, 1.0, 2.0 );	
-		return Button(normal, hovered, onClick);
+	public static function makeButton(txt: String, onClick: Void -> Void, ?fontSize : Float): ArcticBlock {
+		if (fontSize == null) { fontSize = 11.0; }
+		
+		var t = Arctic.makeText( " " + txt + " ", fontSize, buttonsTextColor);
+		var normal = makeRect( t, buttonsColor, buttonsFrameColor, 2.0, roundRadius );
+		var hovered = makeRect( t, buttonsHoveredColor, buttonsHoveredFrameColor, 2.0, roundRadius );	
+		
+		return Border(2, 0, Button(normal, hovered, onClick));
 	}
 
 	/// Make a rectangle with a frame
@@ -67,6 +73,4 @@ class ArcticDialogUi extends ArcticDialog {
 		return s;
 	}
 	private var titleState : ArcticState<String>;
-
-	
 }
