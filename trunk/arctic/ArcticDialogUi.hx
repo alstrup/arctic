@@ -48,7 +48,7 @@ class ArcticDialogUi extends ArcticDialog {
 		var normal = makeRect( t, buttonsColor, buttonsFrameColor, 2.0, roundRadius );
 		var hovered = makeRect( t, buttonsHoveredColor, buttonsHoveredFrameColor, 2.0, roundRadius );	
 		
-		return Border(2, 0, Button(normal, hovered, onClick));
+		return Border(2, 1, Button(normal, hovered, onClick));
 	}
 
 	/// Make a rectangle with a frame
@@ -56,7 +56,7 @@ class ArcticDialogUi extends ArcticDialog {
 		if (padding != null && padding != 0) {
 			block = Border(padding, padding, block);
 		}
-		return Frame( 1, borderColor, Background(color, block, null, roundRadius), roundRadius);
+		return Frame( 1, borderColor, Background(color, block, null, roundRadius), roundRadius / 2);
 	}
 	
 	/// Make the dialog frame
