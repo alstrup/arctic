@@ -112,9 +112,11 @@ enum ArcticBlock {
 	 * A bunch of blocks stacked on top of each other. The width is the maximum width
 	 * of the blocks. If you want to make sure the very top of a specific block is visible, 
 	 * pass the index number of the block in the array as second parameter. Notice there
-	 * is no guarantee that all of the entry is visible.
+	 * is no guarantee that all of the entry is visible. If you do not need a scrollbar,
+	 * no matter how high the LineStack is, then pass false as the last parameter. The default
+	 * is to automatically add a scrollbar if needed.
 	 */
-	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Null<Int>);
+	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Null<Int>, ?disableScrollbar : Bool);
 	
 	/**
 	 * A 2-d grid of block. For now, this does not support resizing or scrollbars.
@@ -260,6 +262,13 @@ enum Filter {
  * automatically. See the Mutable ArcticBlock above.
  * This has also been wrapped as an easy-to-use state block. See ArcticState for more info
  * on this.
+ * Example:
+ *   var mutable = new MutableBlock(Text("My block"));
+ *   var gui = Mutable(mutable);
+ *   var dialog = new ArcticDialogUi(gui).open();
+ *   ...
+ *   // Automatically update the block
+ *   mutable.block = Text("New text");
  */
 class MutableBlock {
 	public function new(initialBlock : ArcticBlock) {

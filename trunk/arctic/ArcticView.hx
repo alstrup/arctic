@@ -611,7 +611,10 @@ class ArcticView {
 			if (mode != Metrics) {
 				// Setting focus on txtInput 
 				#if flash9
-					if (focus != null && focus) clip.stage.focus = txtInput;
+					if (focus != null && focus) {
+						clip.stage.focus = txtInput;
+						txtInput.setSelection(0, txtInput.length);
+					}
 				#else flash
 					if (focus != null && focus) {
 						flash.Selection.setFocus(txtInput);
@@ -638,6 +641,7 @@ class ArcticView {
 					if (setFocus) {
 						#if flash9
 							clip.stage.focus = txtInput;
+							txtInput.setSelection(0, txtInput.length);
 						#else flash
 							flash.Selection.setFocus(txtInput);
 							hasFocus = setFocus;
@@ -982,7 +986,7 @@ class ArcticView {
 			m.height = h;
 			return m;
 
-		case LineStack(blocks, ensureVisibleIndex):
+		case LineStack(blocks, ensureVisibleIndex, disableScrollbar):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// Get child 0
@@ -1073,16 +1077,18 @@ class ArcticView {
 				ensureY = y;
 			}
 			
-			if (y - availableHeight >= 1 && availableHeight >= 34) {
-				// Scrollbar
-				if (mode != Metrics) {
-					Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
-				}
-				w += 17;
-				y = availableHeight;
-			} else {
-				if (mode == Reuse) {
-					Scrollbar.removeScrollbar(clip, child);
+			if (disableScrollbar != false) {
+				if (y - availableHeight >= 1 && availableHeight >= 34) {
+					// Scrollbar
+					if (mode != Metrics) {
+						Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
+					}
+					w += 17;
+					y = availableHeight;
+				} else {
+					if (mode == Reuse) {
+						Scrollbar.removeScrollbar(clip, child);
+					}
 				}
 			}
 			m.width = w;

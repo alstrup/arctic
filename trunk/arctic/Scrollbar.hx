@@ -88,7 +88,7 @@ class Scrollbar {
 				);
 			
 			slider = Arctic.makeSlider(0, 0, 0, realHeight - availableHeight, handleBlock, 
-							onScroll, null, currentY, true);
+							onScroll, null, currentY);
 		
 			sliderBlock = ConstrainHeight(sliderHeight, sliderHeight,
 							LineStack([ 

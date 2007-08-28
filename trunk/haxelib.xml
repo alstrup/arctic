@@ -1,10 +1,9 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.2">
-		- Add API for changing contents of TextInput block, setting focus and asking whether it has focus
-		- Add API for changing state of check boxes. To upgrade, change
-		    Arctic.makeCheckbox(...)    to   Arctic.makeCheckbox(...).block
-		- Add ArcticDialogManager, ArcticDialog & ArcticDialogUi that provides dialog support
+    <version name="0.9.3">
+		- Add API for disabling scrollbar. Thanks to KallH! <kallh@smol.org>
+		- Setting focus to text input selects all text in Flash 9 (as it does in Flash 7 & 8)
+		- Remove unused mouseWheel parameter from Arctic.makeSlider
 	</version>
 </project>
