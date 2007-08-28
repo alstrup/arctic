@@ -896,34 +896,44 @@ class ArcticView {
         case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
+			var doClip = false;
 			if (child.width < minimumWidth) {
-				if (mode != Metrics) {
-					ArcticMC.setSize(clip, minimumWidth, child.height);
-				}
+				doClip = true;
 				child.width = minimumWidth;
 			}
 			if (child.width > maximumWidth) {
-				if (mode != Metrics) {
-					ArcticMC.clipSize(clip, maximumWidth, child.height);
-				}
+				doClip = true;
 				child.width = maximumWidth;
+			}
+			if (mode != Metrics) {
+				if (doClip) {
+					ArcticMC.setSize(clip, child.width, child.height);
+				} else {
+					// Undo any clipping we had earlier
+					ArcticMC.setScrollRect(clip, null);
+				}
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: false, growHeight: child.growHeight };
 
         case ConstrainHeight(minimumHeight, maximumHeight, block) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, 0);
+			var doClip = false;
 			if (child.height < minimumHeight) {
-				if (mode != Metrics) {
-					ArcticMC.setSize(clip, child.width, minimumHeight);
-				}
+				doClip = true;
 				child.height = minimumHeight;
 			}
 			if (child.height > maximumHeight) {
-				if (mode != Metrics) {
-					ArcticMC.clipSize(clip, child.width, maximumHeight);
-				}
+				doClip = true;
 				child.height = maximumHeight;
+			}
+			if (mode != Metrics) {
+				if (doClip) {
+					ArcticMC.setSize(clip, child.width, child.height);
+				} else {
+					// Undo any clipping we had earlier
+					ArcticMC.setScrollRect(clip, null);
+				}
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: false };
 
@@ -1086,7 +1096,7 @@ class ArcticView {
 					w += 17;
 					y = availableHeight;
 				} else {
-					if (mode == Reuse) {
+					if (mode != Metrics) {
 						Scrollbar.removeScrollbar(clip, child);
 					}
 				}
