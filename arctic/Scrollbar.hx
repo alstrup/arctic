@@ -139,6 +139,8 @@ class Scrollbar {
 			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
 			Reflect.deleteField(parent, "scrollbar");
+		}
+		if (clip != null) {
 			ArcticMC.setScrollRect(clip, null);
 		}
 	}

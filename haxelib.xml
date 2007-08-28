@@ -5,5 +5,7 @@
 		- Add API for disabling scrollbar. Thanks to KallH! <kallh@smol.org>
 		- Setting focus to text input selects all text in Flash 9 (as it does in Flash 7 & 8)
 		- Remove unused mouseWheel parameter from Arctic.makeSlider
+		- Fix bug with ConstrainHeigh & ConstrainWidth that did not properly undo their clipping
+		  in Reuse scenario
 	</version>
 </project>
