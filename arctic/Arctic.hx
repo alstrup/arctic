@@ -120,7 +120,7 @@ class Arctic {
 	 * trigger a call to any supplied onDrag function.
 	 */
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, handleBlock : ArcticBlock,
-							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?mouseWheel : Bool) {
+							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float) {
 		// The current position in slider coordinate system
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
@@ -249,7 +249,7 @@ class Arctic {
 
 		var notSelectedBlock = ColumnStack( [ CustomBlock(false, build), block ] );
 		var selectedBlock = ColumnStack( [ CustomBlock(true, build), block ] );
-				
+
 		var checkBox = new ArcticState(selected, null);
 		checkBox.setFunction(function(selected : Bool) {
 			if (onCheck != null) {
