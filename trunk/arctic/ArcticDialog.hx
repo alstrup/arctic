@@ -24,7 +24,7 @@ class ArcticDialog {
 	public function new(content : ArcticBlock, ?xPos : Float, ?yPos : Float, ?parentMc: ArcticMovieClip) {
 		xPosition = if (xPos == null) 0.5 else xPos;
 		yPosition = if (yPos == null) 0.5 else yPos;
-		var slider = Arctic.makeSlider(0.0, 1.0, 0.0, 1.0, content, null, xPosition, yPosition);
+		var slider = Arctic.makeSlider(0.0, 1.0, 0.0, 1.0, content, null, xPosition, yPosition, false);
 		setPositionFn = slider.setPositionFn;
 		contentBlock = slider.block;
 		parentClip = if (parentMc == null) ArcticDialogManager.get().mc else parentMc;
