@@ -118,9 +118,11 @@ class Arctic {
 	 * This is suitable for normal sliders, but can also be used for making dragable dialogs.
 	 * You can change the position of the handle by calling the returned setPositionFn. This will *not*
 	 * trigger a call to any supplied onDrag function.
+	 * The last parameter, useClickHandler, defines whether clicks outside the handle should move the slider.
+	 * The default is true.
 	 */
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, handleBlock : ArcticBlock,
-							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float) {
+							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?useClickHandler : Bool) {
 		// The current position in slider coordinate system
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
@@ -171,36 +173,39 @@ class Arctic {
 			}
 		}
 		
-		var clickHandler = function (x, y, up, hit) {
-			if (!up) {
-				return;
-			}
-			var di = moverInfo.di;
-			if (x < 0.0 || x > di.width + di.totalWidth || y < 0.0 || y > di.height + di.totalHeight) {
-				return;
-			}
-			var pixels = convertToPixels();
-			var w = di.width / di.totalWidth * (maximumX - minimumX);
-			var h = di.height / di.totalHeight * (maximumY - minimumY);
-			var move = false;
-			if (x < pixels.x) {
-				currentX -= w;
-				move = true;
-			} else if ((pixels.x + di.width) < x) {
-				currentX += w;
-				move = true;
-			}
-			if (y < pixels.y) {
-				currentY -= h;
-				move = true;
-			} else if ((pixels.y + di.height) < y) {
-				currentY += h;
-				move = true;
-			}
-			if (move) {
-				setPositionFn(currentX, currentY);
-				if (onDrag != null) {
-					onDrag(currentX, currentY);
+		var clickHandler = null;
+		if (useClickHandler != false) {
+			clickHandler = function (x, y, up, hit) {
+				if (!up) {
+					return;
+				}
+				var di = moverInfo.di;
+				if (x < 0.0 || x > di.width + di.totalWidth || y < 0.0 || y > di.height + di.totalHeight) {
+					return;
+				}
+				var pixels = convertToPixels();
+				var w = di.width / di.totalWidth * (maximumX - minimumX);
+				var h = di.height / di.totalHeight * (maximumY - minimumY);
+				var move = false;
+				if (x < pixels.x) {
+					currentX -= w;
+					move = true;
+				} else if ((pixels.x + di.width) < x) {
+					currentX += w;
+					move = true;
+				}
+				if (y < pixels.y) {
+					currentY -= h;
+					move = true;
+				} else if ((pixels.y + di.height) < y) {
+					currentY += h;
+					move = true;
+				}
+				if (move) {
+					setPositionFn(currentX, currentY);
+					if (onDrag != null) {
+						onDrag(currentX, currentY);
+					}
 				}
 			}
 		}
