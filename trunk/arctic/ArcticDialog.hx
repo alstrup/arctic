@@ -22,10 +22,11 @@ class ArcticDialog {
 	 * The dialog is constructed in the dialog movieclip (from ArcticDialogManager).
 	 */
 	public function new(content : ArcticBlock, ?xPos : Float, ?yPos : Float, ?parentMc: ArcticMovieClip) {
-		contentBlock = Arctic.makeDragable(false, true, true, content).block;
 		xPosition = if (xPos == null) 0.5 else xPos;
 		yPosition = if (yPos == null) 0.5 else yPos;
-		//contentBlock = Arctic.makeSlider(0, 1, 0, 1, content, null, xPosition, yPosition, false);
+		var slider = Arctic.makeSlider(0.0, 1.0, 0.0, 1.0, content, null, xPosition, yPosition);
+		setPositionFn = slider.setPositionFn;
+		contentBlock = slider.block;
 		parentClip = if (parentMc == null) ArcticDialogManager.get().mc else parentMc;
 		baseClip = null;
 		dialogClip = null;
@@ -47,11 +48,11 @@ class ArcticDialog {
 			baseClip = ArcticMC.create(parentClip);
 
 			arcticView = new ArcticView(contentBlock, baseClip);
-			arcticView.adjustToFit(0, 0);
-			dialogClip = arcticView.display(false);
+			dialogClip = arcticView.display(true);
 			ArcticDialogManager.get().add(this);
+		} else {
+			updatePosition();
 		}
-		updatePosition();
 		return this;
 	}
 
@@ -76,11 +77,7 @@ class ArcticDialog {
 	}
 	
 	private function updatePosition() {
-		var stageSize = ArcticMC.getStageSize(baseClip);
-		var clipSize = ArcticMC.getSize(baseClip);
-		var maxX = stageSize.width - clipSize.width; 
-		var maxY = stageSize.height - clipSize.height;
-		ArcticMC.setXY(baseClip, xPosition * maxX, yPosition * maxY);
+		setPositionFn(xPosition, yPosition);
 	}
 	
 	/// Used by ArcticDialogManager to test whether the mouse is inside an open dialog
@@ -91,6 +88,7 @@ class ArcticDialog {
 	var contentBlock : ArcticBlock;
 	var xPosition : Float;
 	var yPosition : Float;
+	var setPositionFn : Float -> Float -> Void;
 	/// The clip where we will construct our view of the dialog
 	var parentClip : ArcticMovieClip;
 	/// The clip that contains the dialog, and only that
