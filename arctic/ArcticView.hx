@@ -666,10 +666,17 @@ class ArcticView {
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			#if flash9
-				// TODO: Resource version probably does not work
+				// Resource version does not work
 				if (mode == Create) {
 					var loader = new flash.display.Loader();
+					var dis = loader.contentLoaderInfo;
 					var request = new flash.net.URLRequest(url);
+					dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
+						trace("[ERROR] IO Error with " + url + ": " + event.text);
+					});
+					dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
+						trace("[ERROR] Security Error with " + url + ": " + event.text);						
+					});
 					loader.load(request);
 					clip.addChild(loader);
 				}
