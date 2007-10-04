@@ -3,5 +3,6 @@
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.5">
 		- Catch errors on loading pictures and trace it
+		- Introduce Switch block which allows fast switching between blocks
 	</version>
 </project>
