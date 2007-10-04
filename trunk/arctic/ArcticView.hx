@@ -889,6 +889,41 @@ class ArcticView {
 			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
+		case Switch(blocks, current, onInit ):
+			var cur = current;
+			var children : Array<Metrics> = [];
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var width = 0.0;
+			var height = 0.0;
+			var growWidth = false;
+			var growHeight = false;
+			for (i in 0...blocks.length) {
+				var b = blocks[i];
+				var child = build(b, clip, availableWidth, availableHeight, mode, i);
+				if (mode == Create) {
+					children.push(child);
+				}
+				if (mode != Metrics) {
+					ArcticMC.setVisible(child.clip, i == cur);
+				}
+				width = Math.max(child.width, width);
+				height = Math.max(child.height, height);
+				growWidth = growWidth || child.growWidth;
+				growHeight = growHeight || child.growHeight;
+			}
+			if (mode == Create) {
+				var switchFn = function (current : Int) {
+					if (current != cur) {
+						ArcticMC.setVisible(children[cur].clip, false);
+						ArcticMC.setVisible(children[current].clip, true);
+						cur = current;
+					}
+				}
+				onInit(switchFn);
+			}
+
+			return { clip: clip, width: width, height: height, growWidth: growWidth, growHeight: growHeight };
+
 		case Filler:
 			return { clip: null, width: availableWidth, height: availableHeight, growWidth: true, growHeight: true };
 		

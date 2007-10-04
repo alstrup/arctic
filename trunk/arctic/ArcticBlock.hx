@@ -160,6 +160,23 @@ enum ArcticBlock {
 	Mutable( state : MutableBlock );
 	
 	/**
+	 * A choice block that allows you to choose one of an array of blocks. At any time, 
+	 * just one of these blocks is visible (the initial one is selected by 'current'). The 
+	 * block will cache the views of the other, invisible blocks, so that switching to another 
+	 * block is fast. The onInit function is a function that is called on construction with a 
+	 * function which allows you to switch between the different blocks.
+	 * Example:
+	 * 
+	 *   var switchFn : Int -> Void; 
+	 *   var getSwitchFn = function (fn) { switchFn = fn; };
+	 *   var gui = Choice( [ block0, block1, block2 ], 0, getSwitchFn);
+	 *   ...
+	 *   // Switch to block 1
+	 *   switchFn(1);
+	 */ 
+	Switch(blocks : Array<ArcticBlock>, current : Int, onInit : (Int -> Void) -> Void);
+
+	/**
 	 * Name this block so that we can get to it, and update it using ArcticView.update
 	 * and ArcticView.getRawMovieClip. Has no visual effect besides this.
 	 */
