@@ -889,10 +889,16 @@ class ArcticView {
 			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
-		case Switch(blocks, current, onInit ):
-			var cur = current;
+		case Switch(blocks, current, onInit):
+			var cur;
 			var children : Array<Metrics> = [];
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode == Create) {
+				cur = current;
+				Reflect.setField(clip, "current", cur);
+			} else {
+				cur = Reflect.field(clip, "current");
+			}
 			var width = 0.0;
 			var height = 0.0;
 			var growWidth = false;
@@ -917,6 +923,7 @@ class ArcticView {
 						ArcticMC.setVisible(children[cur].clip, false);
 						ArcticMC.setVisible(children[current].clip, true);
 						cur = current;
+						Reflect.setField(clip, "current", cur);
 					}
 				}
 				onInit(switchFn);
