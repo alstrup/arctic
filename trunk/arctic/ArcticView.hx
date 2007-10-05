@@ -246,7 +246,7 @@ class ArcticView {
 		}
 		#end
 	}
-	
+
 	// We collect all generated movieclips here, so we can be sure to remove all when done
 	private var movieClips : Array<ArcticMovieClip>;
 	
@@ -1452,6 +1452,9 @@ class ArcticView {
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
+					if (!ArcticMC.isActive(child.clip)) {
+						return;
+					}
 					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 						ArcticMC.showMouse(keep);
 						if (cursorMc == null) {
@@ -1486,6 +1489,9 @@ class ArcticView {
 			#else flash
 				
 				var onMove = function() {
+							if (!ArcticMC.isActive(child.clip)) {
+								return;
+							}
 							if (child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
 								if (cursorMc == null) {
 									cursorMc = cursorMcFn();
