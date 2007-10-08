@@ -2,5 +2,6 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.6">
+		- Add a new makePressedButton which is a button with a separate pressed state
 	</version>
 </project>

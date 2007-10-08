@@ -53,6 +53,25 @@ class Arctic {
 		return Button(base, hover, null, ourHandler);
 	}
 	
+	/// Make a button with a pressed state
+	static public function makePressButton(normal : ArcticBlock, hover : ArcticBlock, pressed : ArcticBlock, onClick : Void -> Void) : ArcticBlock {
+		var switchFn : Int -> Void;
+		var captureSwitchFn : ( Int -> Void ) -> Void = function ( fn : Int -> Void) : Void {
+			switchFn = fn;
+		}
+		var advancedHandler = function(x : Float, y : Float, pressed : Bool, inside : Bool) : Void {
+			if (pressed) {
+				switchFn(1);
+			} else {
+				switchFn(0);
+				if (inside && onClick != null) {
+					onClick();
+				}
+			}
+		}
+		return Button( normal, Switch( [ hover, pressed ], 0, captureSwitchFn), null, advancedHandler);
+	}
+	
 	/// Associate a tooltip with a block
 	static public function makeTooltip(block : ArcticBlock, text : String) : ArcticBlock {
 		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, makeText(text)), 100, 3)), true);
