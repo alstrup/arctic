@@ -169,7 +169,7 @@ enum ArcticBlock {
 	 * 
 	 *   var switchFn : Int -> Void; 
 	 *   var getSwitchFn = function (fn) { switchFn = fn; };
-	 *   var gui = Choice( [ block0, block1, block2 ], 0, getSwitchFn);
+	 *   var gui = Switch( [ block0, block1, block2 ], 0, getSwitchFn);
 	 *   ...
 	 *   // Switch to block 1
 	 *   switchFn(1);

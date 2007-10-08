@@ -896,7 +896,7 @@ class ArcticView {
 			if (mode == Create) {
 				cur = current;
 				Reflect.setField(clip, "current", cur);
-			} else {
+			} else if (mode == Reuse) {
 				cur = Reflect.field(clip, "current");
 			}
 			var width = 0.0;
