@@ -298,6 +298,18 @@ class Arctic {
 	*/
 	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
 			{ block: ArcticBlock, selectFn: Int -> Void } {
+		var group = makeTextChoiceBlocks(texts, onSelect, defaultSelected, textSize);
+		return { block: LineStack(group.blocks), selectFn : group.selectFn };
+	}
+	
+	/**
+	 * Make a radio-group to choose between the given texts.
+	 * Returns the array of blocks and a function that can be used to change the currently selected item.
+	 * Caller's problem to arrange the layout of blocks - see makeTextChoice above for an example
+	 */
+	static public function makeTextChoiceBlocks(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
+		{ blocks: Array<ArcticBlock>, selectFn: Int -> Void } {
+			
 		if (textSize == null) {
 			textSize = 12;
 		}
@@ -325,7 +337,8 @@ class Arctic {
 			entries.push( { selected: selected, unselected: unselected, value: text } );
 		}
 		var group = makeRadioButtonGroup(entries, onSelect, defaultSelected);
-		return { block: LineStack(group.blocks), selectFn : group.selectFn };
+		
+		return { blocks: group.blocks, selectFn: group.selectFn }
 	}
 	
 	/**
