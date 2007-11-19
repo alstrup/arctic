@@ -15,27 +15,27 @@ class Piano {
 				Fixed(0, 5),
 				ColumnStack( [ 
 					Fixed(15, 0),
-					blackkey("c#"),
-					blackkey("d#"),
+					blackkey(0),
+					blackkey(1),
 					Fixed(8, 0),
-					blackkey("f#"),
-					blackkey("g#"),
-					blackkey("a#"),
+					blackkey(3),
+					blackkey(4),
+					blackkey(5),
 				]),
 				ColumnStack( [
-					key("c", 25),
-					key("d", 23),
-					key("e", 23),
-					key("f", 22),
-					key("g", 21),
-					key("a", 23),
-					key("h", 23)
+					key(0, 25),
+					key(1, 23),
+					key(2, 23),
+					key(3, 22),
+					key(4, 21),
+					key(5, 23),
+					key(6, 23)
 				])
 			]);
 		
 		noteBlock = new ArcticState(null, getNoteBlock);
-			
-		noteDisplay = new ArcticState("", function(s : String) {
+		
+		scoreDisplay = new ArcticState("", function(s : String) {
 			return Arctic.makeText(s);
 		});
 		
@@ -49,7 +49,7 @@ class Piano {
 						noteBlock.block
 					),
 				] ),
-				noteDisplay.block,
+				scoreDisplay.block,
 				Fixed(0, 30),
 				Background( 0x1C1B1C, 
 					Border(20, 2,
@@ -62,19 +62,53 @@ class Piano {
 			]);
 		
 		view = new ArcticView(ui, flash.Lib.current);
-		var start = haxe.Timer.stamp();
+		start = haxe.Timer.stamp();
 		view.display(true);
-		noteDisplay.state = Std.string(haxe.Timer.stamp() - start);
+		level = null;
+		score = 0;
+		count = 0;
+		scoreDisplay.state = "Select level (" + Std.string(haxe.Timer.stamp() - start) + ")";
 	}
 	
-	private function press(note) {
-		noteBlock.state = note;
-		noteDisplay.state = note;
+	private function press(note, sharp) {
+		if (level == null) {
+			level = note;
+			if (sharp) {
+				level += 7;
+			}
+			if (level == 0) {
+				level = 1;
+			}
+		} else {
+			var correct = (noteBlock.state % 7) == note;
+		//	noteBlock.state = note;
+			var answerTime = haxe.Timer.stamp() - start;
+			score -= answerTime;
+			if (correct) {
+				score += 1;
+			}
+			count++;
+			var roundScore = Math.round(score * 100.0) / 100.0;
+			var roundTime = Math.round(answerTime * 100.0) / 100.0;
+			scoreDisplay.state = 
+				'<font color="' + (correct ? "#00ff00" : "#ff0000") + '">'
+				+ "Score: " 
+				+ roundScore 
+				+ ", count " + count + ", time " + roundTime
+				+ "</font>";
+		}
+		start = haxe.Timer.stamp();
+		
+		var newNote = 0;
+		while ((newNote = Std.random(level + 1)) == noteBlock.state) {
+		}
+		noteBlock.state = newNote;
 	}
 	
-	private function getNoteBlock(note : String) : ArcticBlock {
+	private function getNoteBlock(note : Null<Int>) : ArcticBlock {
 		if (note == null) return Fixed(0,0);
-		var sharp = (note.length == 2);
+		var line = 12 - note;
+/*		var sharp = (note.length == 2);
 		var line = 6 + switch (note.charAt(0)) {
 			case "c": 6;
 			case "d": 5;
@@ -83,7 +117,7 @@ class Piano {
 			case "g": 2;
 			case "a": 1;
 			case "h": 0;
-		};
+		};*/
 		if (line < 7) {
 			return Offset(60, (line + 2) * 0.5 * 9 + 0.5 * 2,
 				Picture("note1.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
@@ -104,15 +138,22 @@ class Piano {
 	
 	private function blackkey(note) {
 		return Button(Background(0x808080, Fixed(25, 78), 0), Background(0xffffff, Fixed(25, 78), 50),
-				callback(press, note));
+				callback(press, note, true));
 	}
 	private function key(note, width) {
 		return Button(Background(0x808080, Fixed(width, 45), 0), Background(0x000000, Fixed(width, 45), 50),
-				callback(press, note));
+				callback(press, note, false));
 	}
 
 	private var view : ArcticView;
-	private var noteBlock : ArcticState<String>;
-	private var noteDisplay : ArcticState<String>;
+	private var noteBlock : ArcticState<Int>;
+	private var scoreDisplay : ArcticState<String>;
+
+	/// What level should we go to?
+	private var level : Null<Int>;
+	
+	private var score : Float;
+	private var start : Float;
+	private var count : Int;
 }
 
