@@ -88,6 +88,13 @@ class Piano {
 			return Offset(60, (line + 2) * 0.5 * 9 + 0.5 * 2,
 				Picture("note1.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
 			);
+		} else if (line == 12) {
+			return OnTop(
+				Offset(58, 37 + 9 + 10 + 10 + 9, Background(0x000000, Fixed(20, 1))),
+				Offset(60, (line - 4) * 0.5 * 9 + 0.5 * 2,
+					Picture("note2.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
+				)
+			);
 		} else {
 			return Offset(60, (line - 4) * 0.5 * 9 + 0.5 * 2,
 				Picture("note2.swf", 0.5 * 32.0, 0.5 * 87.0, 1.0)
