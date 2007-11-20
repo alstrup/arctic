@@ -98,7 +98,7 @@ class Piano {
 			var roundScore = Math.round(score * 100.0) / 100.0;
 			var roundTime = Math.round(answerTime * 10.0) / 10.0;
 			
-			if (count == 10) {
+			if (count == 100) {
 				scoreDisplay.state = '<font color="#0000ff">Final score: '
 					+ roundScore
 					+ ". Errors: " + errorCount
