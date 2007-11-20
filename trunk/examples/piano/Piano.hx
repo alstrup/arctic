@@ -49,8 +49,6 @@ class Piano {
 						noteBlock.block
 					),
 				] ),
-				scoreDisplay.block,
-				Fixed(0, 30),
 				Background( 0x1C1B1C, 
 					Border(20, 2,
 						OnTop(
@@ -58,19 +56,26 @@ class Piano {
 							keys
 						)
 					)
-				)
+				),
+				scoreDisplay.block
 			]);
 		
 		view = new ArcticView(ui, flash.Lib.current);
 		start = haxe.Timer.stamp();
 		view.display(true);
+		restart();
+		scoreDisplay.state = "Select level (" + Std.string(haxe.Timer.stamp() - start) + ")";
+	}
+		
+	private function restart() {
 		level = null;
 		score = 0;
 		count = 0;
-		scoreDisplay.state = "Select level (" + Std.string(haxe.Timer.stamp() - start) + ")";
+		errorCount = 0;
 	}
 	
 	private function press(note, sharp) {
+		var now = haxe.Timer.stamp();
 		if (level == null) {
 			level = note;
 			if (sharp) {
@@ -79,17 +84,30 @@ class Piano {
 			if (level == 0) {
 				level = 1;
 			}
+			scoreDisplay.state = "Go!";
 		} else {
 			var correct = (noteBlock.state % 7) == note;
-		//	noteBlock.state = note;
-			var answerTime = haxe.Timer.stamp() - start;
+			var answerTime = now - start;
 			score -= answerTime;
 			if (correct) {
 				score += 1;
+			} else {
+				errorCount++;
 			}
 			count++;
 			var roundScore = Math.round(score * 100.0) / 100.0;
-			var roundTime = Math.round(answerTime * 100.0) / 100.0;
+			var roundTime = Math.round(answerTime * 10.0) / 10.0;
+			
+			if (count == 10) {
+				scoreDisplay.state = '<font color="#0000ff">Final score: '
+					+ roundScore
+					+ ". Errors: " + errorCount
+					+ '</font>';
+				noteBlock.state = null;
+				restart();
+				return;
+			}
+			
 			scoreDisplay.state = 
 				'<font color="' + (correct ? "#00ff00" : "#ff0000") + '">'
 				+ "Score: " 
@@ -97,12 +115,12 @@ class Piano {
 				+ ", count " + count + ", time " + roundTime
 				+ "</font>";
 		}
-		start = haxe.Timer.stamp();
 		
 		var newNote = 0;
 		while ((newNote = Std.random(level + 1)) == noteBlock.state) {
 		}
 		noteBlock.state = newNote;
+		start = haxe.Timer.stamp();
 	}
 	
 	private function getNoteBlock(note : Null<Int>) : ArcticBlock {
@@ -155,5 +173,6 @@ class Piano {
 	private var score : Float;
 	private var start : Float;
 	private var count : Int;
+	private var errorCount : Int;
 }
 
