@@ -47,7 +47,7 @@ enum ArcticBlock {
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
 	 * The validator callback is called on each change. You can use this callback to extract the contents of the text input.
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
-	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiLine: true } as style is portable.)
+	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiline: true } as style is portable.)
 	 * The onInit parameter is called on construction and returns a function textFn( newHtml : String, setFocus : Bool) : Bool which
 	 * can be used to change the contents of the TextInput, force it to have focus, and will return whether the TextInput currently
 	 * has focus or not.
