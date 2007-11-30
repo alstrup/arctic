@@ -23,7 +23,7 @@ class ComponentTour {
 			[ "Picture(\"images/head2.jpg\", 80, 100, 1.0)", Picture("images/head2.jpg", 80, 100, 1.0) ],
 			[ "Button(<font color='#c0c0c0'>Text(\"A button\")</font>, <font color='#c0c0c0'>Background( 0xc0c0ff, Text(\"A button\") )</font>, null)", Button( Text("A button"), Background( 0xc0c0ff, Text("A button") ), null) ],
 			[ "Arctic.makeSimpleButton(\"A button\", null, 20)", Arctic.makeSimpleButton("A button", null, 20) ],
-			[ "Arctic.makeCheckbox(<font color='#c0c0c0'>Text(\"A checkbox\")</font>)", Arctic.makeCheckbox(Text("A checkbox")) ],
+			[ "Arctic.makeCheckbox(<font color='#c0c0c0'>Text(\"A checkbox\")</font>).block", Arctic.makeCheckbox(Text("A checkbox")).block ],
 			[ "Arctic.makeTextChoice([ \"1\", \"2\", \"3\"], null).block", Arctic.makeTextChoice([ "1", "2", "3"], null).block ],
 			[ "Arctic.makeDateView(<font color='#c0c0c0'>Date.now()</font>)", Arctic.makeDateView(Date.now()) ],
 			[ "Arctic.makeTooltip(<font color='#c0c0c0'>Text(\"Hide\")</font>, \"...and seek\")", Arctic.makeTooltip(Text("Hide"), "...and seek") ],
