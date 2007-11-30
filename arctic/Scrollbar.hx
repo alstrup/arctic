@@ -11,16 +11,20 @@ class Scrollbar {
 	 * should show.
 	 */
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
-                                                         availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
+			 availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
 		var scrollbarWidth = 17; // How wide the scrollbar is
 		var buttonMovement = 15; // How many pixels we move when a scrollbar button is clicked
-
+		
 		var currentY = ensureYVisible;
 		if (Reflect.hasField(parent, "scrollbar")) {
 			// Reuse is for wimps: We just nuke the old one and recreate
 			
+			// TODO: This breaks the ActiveClips: We should reuse the position of the activeclip
+			// we have for the scrollbar when we construct the clip further down in order to
+			// preserve z-ordering. Currently, without that logic, this means that after resizes,
+			// scrollbars in dialogs can not be dragged.
+
 			// TODO: We should capture the current value of the old scrollbar, and use that as currentY scaled to new coordinate system
-			
 			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
 		}
@@ -130,7 +134,6 @@ class Scrollbar {
 		view.adjustToFit(0, 0);
 		var mc = view.display(false);
 		Reflect.setField(parent, "scrollbar", view);
-		return;
 	}
 
 	/// Get rid of the scrollbar

@@ -51,6 +51,7 @@ class ArcticView {
 		if (metricsCache == null) {
 			metricsCache = new Hash<{ width: Float, height : Float } >();
 		}
+
 		#if flash9
 			stageEventHandlers = [];
 		#end
@@ -159,7 +160,6 @@ class ArcticView {
 		}
 		if (rebuild) {
 			movieClips = [];
-			activeClips = [];
 			idMovieClip = new Hash<ArcticMovieClip>();
 			ArcticMC.showMouse();
 			#if flash9
@@ -222,18 +222,19 @@ class ArcticView {
 			}
 			mouseWheelListeners = [];
 		#end
+		var activeClips = ActiveClips.get().activeClips;
 		for (m in movieClips) {
 			ArcticMC.remove(m);
+			activeClips.remove(m);
 		}
 		movieClips = [];
-		activeClips = [];
 		idMovieClip = new Hash<ArcticMovieClip>();
 		base = null;
 	}
 	
 	private function removeClip(c : ArcticMovieClip) {
 		movieClips.remove(c);
-		activeClips.remove(c);
+		ActiveClips.get().activeClips.remove(c);
 		#if flash9
 		#else flash
 		// Clean up mouse wheel listeners
@@ -250,9 +251,6 @@ class ArcticView {
 	// We collect all generated movieclips here, so we can be sure to remove all when done
 	private var movieClips : Array<ArcticMovieClip>;
 	
-	// Here we record active movieclips which are interested in events to implement nesting
-	private var activeClips : Array<ArcticMovieClip>;
-
 	/// We record updates of blocks here.
 	private var updates : Hash<ArcticBlock>;
 	
@@ -523,7 +521,7 @@ class ArcticView {
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Create) {
-				activeClips.push(clip);
+				ActiveClips.get().activeClips.push(clip);
 			}
 			#if flash9
 				var txtInput : flash.text.TextField;
@@ -1240,7 +1238,7 @@ class ArcticView {
 			}
 			
 			if (mode == Create) {
-				activeClips.push(child.clip);
+				ActiveClips.get().activeClips.push(child.clip);
 			}
 
 			var width = child.width;
@@ -1388,7 +1386,7 @@ class ArcticView {
 					};
 				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
-						if (me.getActiveClip() == dragClip) {
+						if (ActiveClips.get().getActiveClip() == dragClip) {
 							dragX = clip.stage.mouseX;
 							dragY = clip.stage.mouseY;
 							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
@@ -1401,7 +1399,7 @@ class ArcticView {
 				);
 			#else flash
 				clip.onMouseDown = function() {
-					if (me.getActiveClip() == dragClip) {
+					if (ActiveClips.get().getActiveClip() == dragClip) {
 						// TODO: Check we do not hit a child which wants drags
 						dragX = flash.Lib.current._xmouse;
 						dragY = flash.Lib.current._ymouse;
@@ -1690,8 +1688,30 @@ class ArcticView {
 		Reflect.setField(clip, "arcticInfo", info);
 	}
 	
+	#if flash9
+	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
+		d.addEventListener(event, handler);
+		stageEventHandlers.push( { obj: d, event: event, handler: handler });
+	}
+	#end
+
+}
+
+class ActiveClips {
+	// We are a singleton
+	static private var instance : ActiveClips;
+	static public function get() : ActiveClips {
+		if (null == instance) {
+			instance = new ActiveClips();
+		}
+		return instance;
+	}
+	public function new() {
+		activeClips = [];
+	}
+	
 	/// Get the topmost active clip under the mouse
-	private function getActiveClip() : MovieClip {
+	public function getActiveClip() : MovieClip {
 		#if flash9
 			var x = flash.Lib.current.mouseX;
 			var y = flash.Lib.current.mouseY;
@@ -1716,11 +1736,15 @@ class ArcticView {
 		return null;
 	}
 	
-	#if flash9
-	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
-		d.addEventListener(event, handler);
-		stageEventHandlers.push( { obj: d, event: event, handler: handler });
+	/*
+	public function trace() {
+		for (m in activeClips) {
+			#if flash9
+			trace(m.name);
+			#end
+		}
 	}
-	#end
-
+*/	
+	/// Here, we record all MovieClips that compete for mouse drags
+	public var activeClips : Array<ArcticMovieClip>;
 }

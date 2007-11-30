@@ -2,6 +2,6 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.7">
-		- Hm, broken release fixed
+		- Start to fix scrollbar and dialog interaction
 	</version>
 </project>
