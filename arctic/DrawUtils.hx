@@ -21,9 +21,8 @@ class DrawUtils {
 			strtY = y;
 			g.moveTo(strtX,strtY);
 			for (i in 0...4) {
-				angle = (Math.PI/4) - (i*Math.PI/2);
-				sideSign = if (Math.cos(angle) >= 0) 1 else -1;
-				cnrSign = if (Math.sin(angle) >= 0) 1 else -1;
+				sideSign = if (i < 2) 1 else -1;
+				cnrSign = if (i == 1 || i == 2) -1 else 1;
 				if ((i%2)== 0) {
 					nextX = strtX + sideSign * (w-2*cornerRadius);
 					nextY = strtY;
