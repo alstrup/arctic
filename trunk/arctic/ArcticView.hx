@@ -1152,6 +1152,119 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
+			
+			if (blocks.length == 0) {
+				return m;
+			}
+		
+			if (xspacing == null) {
+				xspacing = 0;
+			}
+			if (yspacing == null) {
+				yspacing = 0;
+			}
+			
+			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
+			for (block in blocks) {
+				// We want the minimum size, so do not give any extra width and height to this	
+				var cm = build(block, clip, 0, 0, Metrics, 0);
+				if (block != Filler) {
+					m.growHeight = m.growHeight || cm.growHeight;
+				//	m.growWidth = m.growWidth || cm.growWidth;
+				}
+				children.push({block: block, m: cm});
+			}
+			
+			var newRow = function (): {blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int} { 
+					return {  blocks: [], maxHeight: 0.0, width: 0.0, numberOfWideChildren: 0, numberOfTallChildren: 0 };
+			}
+			
+			var rows = [newRow()];
+			for (i in 0...children.length) {
+				var cm = children[i].m;
+				var block = children[i].block;
+				
+				var row = rows[rows.length - 1];
+				row.blocks.push(children[i]);
+				if (cm.growWidth) {
+					row.numberOfWideChildren++;
+				}
+				if (cm.growHeight) {
+					row.numberOfTallChildren++;
+				}
+				// ignore Fillers
+				if (block != Filler) {
+					row.width += ( row.blocks.length > 1 ? xspacing : 0 ) + cm.width;
+					row.maxHeight = Math.max(row.maxHeight, cm.height);
+				}
+				
+				var next = i + 1;
+				while (next < children.length && children[next].block == Filler) {
+					next++;
+				}
+				if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {           
+					rows.push(newRow());
+				}
+			}
+			
+			// Next, determine how much space children get		
+			var numOfTallRows = 0;
+			var rowsHeight = yspacing * (rows.length - 1);
+			for (row in rows) {
+				rowsHeight += row.maxHeight;
+				if (row.numberOfTallChildren > 0) {
+					numOfTallRows++;
+				}
+			}
+			var freeHeight = availableHeight - rowsHeight;
+			// TODO: handle (freeHeight < 0) case
+			if (numOfTallRows > 0 && freeHeight > 0) {
+				freeHeight = freeHeight / numOfTallRows;
+				m.growHeight = true;
+			} else {
+				freeHeight = 0;
+			}
+			
+			var y = 0.0;
+			var i = 0;
+			var width = 0.0;
+			for (row in rows) {
+				var freeWidth = availableWidth - row.width;
+				if (freeWidth < 0) {
+					//TODO
+					freeWidth = 0;
+				} else if (row.numberOfWideChildren > 0) {
+					freeWidth = freeWidth / row.numberOfWideChildren;
+					m.growWidth = true;
+				} else if (eolFiller != null) {
+					var cm = { clip: null, width : 0.0, height : 0.0, growWidth : true, growHeight : false };
+					row.blocks.push({block: eolFiller, m: cm});
+				}
+			
+				var h = row.maxHeight + (row.numberOfTallChildren > 0 ? freeHeight : 0); 
+				var x = 0.0;
+				for (entry in row.blocks) {
+					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
+					var child = build(entry.block, clip, w, h, mode, i);
+					if (mode != Metrics && child.clip != null) {
+						ArcticMC.setXY(child.clip, x, y);
+					}	
+					if (entry.block != Filler) {
+						x += child.width + (entry != row.blocks[row.blocks.length - 1] ? xspacing : 0);
+					}
+					++i;
+				}
+				y += h + yspacing;
+				width = Math.max(width, x);
+			}
+
+			m.width = width;
+			m.height = y - yspacing;
+			return m;
+		
 		case Grid(cells):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = getOrMakeClip(clip, mode, 0);

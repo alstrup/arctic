@@ -122,6 +122,13 @@ enum ArcticBlock {
 	 * A 2-d grid of block. For now, this does not support resizing or scrollbars.
 	 */
 	Grid(blocks: Array<Array<ArcticBlock>>);
+	
+	/**
+	* Places the first block at the top-left corner, then the next block will be placed to the right. 
+	* The layout continues placing blocks along the x axis until a block reaches the maxWidth, then 
+	* the layout will begin placing blocks at the next row.
+	*/
+	Wrap(blocks: Array<ArcticBlock>, maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?endOfLineFiller: ArcticBlock);
 
 	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
     ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);
