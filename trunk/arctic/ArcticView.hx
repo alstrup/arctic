@@ -1173,7 +1173,6 @@ class ArcticView {
 				var cm = build(block, clip, 0, 0, Metrics, 0);
 				if (block != Filler) {
 					m.growHeight = m.growHeight || cm.growHeight;
-				//	m.growWidth = m.growWidth || cm.growWidth;
 				}
 				children.push({block: block, m: cm});
 			}
@@ -1231,6 +1230,7 @@ class ArcticView {
 			var y = 0.0;
 			var i = 0;
 			var width = 0.0;
+			availableWidth = Math.min(availableWidth, maxWidth);
 			for (row in rows) {
 				var freeWidth = availableWidth - row.width;
 				if (freeWidth < 0) {
@@ -1240,6 +1240,7 @@ class ArcticView {
 					freeWidth = freeWidth / row.numberOfWideChildren;
 					m.growWidth = true;
 				} else if (eolFiller != null) {
+					freeWidth = Math.max(0, freeWidth - xspacing);
 					var cm = { clip: null, width : 0.0, height : 0.0, growWidth : true, growHeight : false };
 					row.blocks.push({block: eolFiller, m: cm});
 				}
