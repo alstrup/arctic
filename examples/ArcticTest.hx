@@ -15,6 +15,7 @@ class ArcticTest {
 		//nextWorld();
 		//draggable();
 		//wideText();
+		//wrappingLayout();
 	}
 
 	public function showHelloWorld1() {
@@ -221,14 +222,15 @@ class ArcticTest {
 		if (arcticView != null) { arcticView.destroy(); }
 		var blocks1 = [];
 		var blocks2 = [];
-		for (i in 1...6) {
+		for (i in 1...15) {
 			blocks1.push(Background(0x0000FF, Fixed(50, 50)));
-			blocks2.push(Background(0xFF0000, Fixed(50, 10*i)));
+			blocks2.push(Background(0xFF0000, Fixed(10 * (16 - i), 10*i)));
 		}
 		var gui = LineStack([
 					Background(0xAAAAAA, Wrap(blocks1, 200, 20, 5)),
 					Fixed(0, 50), 
-					Background(0xAAAAAA, Wrap(blocks2, 150, 5, 20, Background(0xFFFF00, Filler))),
+					Background(0xAAAAAA, Wrap(blocks2, null, 5, 20, Background(0xFFFF00, Filler))),
+					Arctic.makeSimpleButton("Continue",  nextWorld, 25)
 				]);
 		arcticView = new ArcticView(gui, parent);
 		arcticView.display(true);
