@@ -107,7 +107,7 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
+								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text", "See wrapping layout" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
 							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)).block ),
 							ColumnStack( [
@@ -128,12 +128,12 @@ class ArcticTest {
 	public function screen1next() {
 		if (arcticView != null) { arcticView.destroy(); }
 		
-		if (radioChoice == 0) {
-			customBlock();
-		} else if (radioChoice == 1) {
-			draggable();
-		} else {
-			wideText();
+		switch (radioChoice) {
+			case 0: customBlock();
+			case 1: draggable();
+			case 2: wideText();
+			case 3: wrappingLayout();
+			default: 0;
 		}
 	}
 	
@@ -215,6 +215,23 @@ class ArcticTest {
 		arcticView = new ArcticView(gui, parent);
 //		arcticView.debug = true;
 		var root = arcticView.display(true);
+	}
+	
+	public function wrappingLayout() {
+		if (arcticView != null) { arcticView.destroy(); }
+		var blocks1 = [];
+		var blocks2 = [];
+		for (i in 1...6) {
+			blocks1.push(Background(0x0000FF, Fixed(50, 50)));
+			blocks2.push(Background(0xFF0000, Fixed(50, 10*i)));
+		}
+		var gui = LineStack([
+					Background(0xAAAAAA, Wrap(blocks1, 200, 20, 5)),
+					Fixed(0, 50), 
+					Background(0xAAAAAA, Wrap(blocks2, 150, 5, 20, Background(0xFFFF00, Filler))),
+				]);
+		arcticView = new ArcticView(gui, parent);
+		arcticView.display(true);
 	}
 
 	var arcticView : ArcticView;
