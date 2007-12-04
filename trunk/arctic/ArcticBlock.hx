@@ -129,8 +129,9 @@ enum ArcticBlock {
 	* the layout will begin placing blocks at the next row.
 	* 	eolFiller: optional block, which will be placed into the end of each row if there is some 
 	* 			free space
+	* If maxWidth is null, the block will grow and use all available width.
 	*/
-	Wrap(blocks: Array<ArcticBlock>, maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock);
+	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock);
 
 	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
     ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);

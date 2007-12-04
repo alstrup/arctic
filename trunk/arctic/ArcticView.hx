@@ -1154,6 +1154,7 @@ class ArcticView {
 		
 		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (maxWidth == null) maxWidth = availableWidth;
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
 			if (blocks.length == 0) {
@@ -1252,7 +1253,10 @@ class ArcticView {
 					var child = build(entry.block, clip, w, h, mode, i);
 					if (mode != Metrics && child.clip != null) {
 						ArcticMC.setXY(child.clip, x, y);
-					}	
+						if (mode == Reuse) {
+							ArcticMC.setVisible(child.clip, true);
+						}
+					}
 					if (entry.block != Filler) {
 						x += child.width + (entry != row.blocks[row.blocks.length - 1] ? xspacing : 0);
 					}
@@ -1260,6 +1264,14 @@ class ArcticView {
 				}
 				y += h + yspacing;
 				width = Math.max(width, x);
+			}
+			
+			if (mode == Reuse) {
+				// Find and hide any left over fillers from earlier
+				while (Reflect.hasField(clip, "c" + i)) {
+					ArcticMC.setVisible(Reflect.field(clip, "c" + i), false);
+					++i;
+				}
 			}
 
 			m.width = width;
