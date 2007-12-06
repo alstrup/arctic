@@ -1180,8 +1180,12 @@ class ArcticView {
 		
 		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			if (maxWidth == null) maxWidth = availableWidth;
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
+			
+			if (maxWidth == null) {
+				maxWidth = availableWidth;
+				m.growWidth = true;
+			}
 			
 			if (blocks.length == 0) {
 				return m;
