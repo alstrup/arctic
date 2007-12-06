@@ -1,9 +1,8 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.8">
-		- Start to fix scrollbar and dialog interaction
-		- Speed up rounded rectangle drawing a lot by avoiding Math.sin, Math.cos and Math.pi
-		- A new Wrap block which is a layout block for arranging blocks in multiple lines
+    <version name="0.9.9">
+	  - advanced runtime text field manipulation API added: now you can control contents, focus, selection
+		and cursor position at runtime
 	</version>
 </project>

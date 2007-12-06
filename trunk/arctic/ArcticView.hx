@@ -636,6 +636,8 @@ class ArcticView {
 					if (null != status) {
 						if (status.html != null) {
 							txtInput.htmlText = status.html;
+						} else if (status.text != null) {
+							txtInput.text = status.text;
 						}
 						if (status.focus == true) {
 							#if flash9
@@ -669,9 +671,9 @@ class ArcticView {
 						var selStart: Null<Int> = txtInput.selectionBeginIndex;
 						var selEnd: Null<Int> = txtInput.selectionEndIndex;
 						var cursorPos: Null<Int> = txtInput.caretIndex;
-						return { html: txtInput.htmlText, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, cursorPos: focus ? cursorPos : null }
+						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, cursorPos: focus ? cursorPos : null }
 					#else flash
-						return { html: txtInput.htmlText, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
+						return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
 								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null }
 					#end
 
