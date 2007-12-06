@@ -8,19 +8,6 @@ package arctic;
 #end
 
 /**
- * TextInputModel is an aux structure to manipulate get and set status of text inputs - see below
- * Note: when setting status, leave the parameters you don't want to change as null
- * Selection takes precedence over cursor position when setting
- */
-typedef TextInputModel = {
-	var html: Null<String>;
-	var focus: Null<Bool>;
-	var selStart: Null<Int>;
-	var selEnd: Null<Int>;
-	var cursorPos: Null<Int>;
-}
-
-/**
  * Arctic is an embedded Domain Specific Language for making user interfaces.
  * A user interface is built from ArcticBlocks. Read this file to learn which
  * blocks are available.
@@ -61,9 +48,10 @@ enum ArcticBlock {
 	 * The validator callback is called on each change. You can use this callback to extract the contents of the text input.
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
 	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiline: true } as style is portable.)
-	 * The onInit parameter is called on construction and returns a function textFn( newHtml : String, setFocus : Bool) : Bool which
-	 * can be used to change the contents of the TextInput, force it to have focus, and will return whether the TextInput currently
-	 * has focus or not.
+	 * The onInit parameter is called on construction and returns a function textFn( TextInputModel ) : TextInputModel which
+	 * can be used to change the contents of the TextInput (html and text), force it to have focus, change selection and cursor position, 
+	 * and will return current TextInput status in each of these dimensions. 
+	 * When changing, pass the values you don't want to change as null. If you only want to get status, you can pass null for the entire structure 
 	 */
 	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void);
 
@@ -270,6 +258,20 @@ typedef DragInfo = {
 	// How much room is available for dragging in pixels?
 	totalWidth : Float,
 	totalHeight : Float
+}
+
+/**
+ * TextInputModel is an aux structure to manipulate get and set status of text inputs - see below
+ * Note: when setting status, leave the parameters you don't want to change as null
+ * Selection takes precedence over cursor position when setting
+ */
+typedef TextInputModel = {
+	var html: Null<String>;
+	var text: Null<String>;
+	var focus: Null<Bool>;
+	var selStart: Null<Int>;
+	var selEnd: Null<Int>;
+	var cursorPos: Null<Int>;
 }
 
 enum Filter {

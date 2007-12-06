@@ -108,7 +108,7 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text", "See wrapping layout" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
+								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text", "See wrapping layout", "See advanced text control" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
 							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)).block ),
 							ColumnStack( [
@@ -134,6 +134,7 @@ class ArcticTest {
 			case 1: draggable();
 			case 2: wideText();
 			case 3: wrappingLayout();
+			case 4: advancedTextControl();
 			default: 0;
 		}
 	}
@@ -234,6 +235,37 @@ class ArcticTest {
 				]);
 		arcticView = new ArcticView(gui, parent);
 		arcticView.display(true);
+	}
+	
+	public function advancedTextControl() {
+		if (arcticView != null) { arcticView.destroy(); }
+
+		var controlFun: TextInputModel -> TextInputModel;
+		
+		var gui = LineStack([
+				Filler,
+				ColumnStack([
+					Filler,
+					TextInput(Arctic.wrapWithDefaultFont("Text is not focused. Click 'Focus & select' to focus and make selection", 20), 700, 50, null, null, null, null, 0xFF0000, null, null,
+						function (fun) { controlFun = fun; }), 
+					Filler
+				]),
+				ColumnStack([
+					Filler,
+					Arctic.makeSimpleButton("Focus & select", function () {
+						var status = controlFun(null);
+						var quarter = Math.floor(status.text.length / 4);
+						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null } );
+					}, 25), 
+					Arctic.makeSimpleButton("Continue", nextWorld, 25),
+					Filler
+				]),
+				Filler
+			]);
+			
+		arcticView = new ArcticView(gui, parent);
+		arcticView.display(true);
+		
 	}
 
 	var arcticView : ArcticView;
