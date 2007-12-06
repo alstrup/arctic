@@ -8,6 +8,19 @@ package arctic;
 #end
 
 /**
+ * TextInputModel is an aux structure to manipulate get and set status of text inputs - see below
+ * Note: when setting status, leave the parameters you don't want to change as null
+ * Selection takes precedence over cursor position when setting
+ */
+typedef TextInputModel = {
+	var html: Null<String>;
+	var focus: Null<Bool>;
+	var selStart: Null<Int>;
+	var selEnd: Null<Int>;
+	var cursorPos: Null<Int>;
+}
+
+/**
  * Arctic is an embedded Domain Specific Language for making user interfaces.
  * A user interface is built from ArcticBlocks. Read this file to learn which
  * blocks are available.
@@ -52,7 +65,7 @@ enum ArcticBlock {
 	 * can be used to change the contents of the TextInput, force it to have focus, and will return whether the TextInput currently
 	 * has focus or not.
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (String -> Bool -> Bool) -> Void);
+	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void);
 
 	/**
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.

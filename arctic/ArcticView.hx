@@ -632,23 +632,47 @@ class ArcticView {
 				};
 				#end
 				
-				var textFn = function(html : String, setFocus : Bool) : Bool {
-					if (html != null) {
-						txtInput.htmlText = html;
+				var textFn = function(status: TextInputModel) : TextInputModel {
+					if (null != status) {
+						if (status.html != null) {
+							txtInput.htmlText = status.html;
+						}
+						if (status.focus == true) {
+							#if flash9
+								clip.stage.focus = txtInput;
+								if (null == status.selStart || null == status.selEnd) {
+									txtInput.setSelection(0, txtInput.length);
+								}
+							#else flash
+								flash.Selection.setFocus(txtInput);
+								hasFocus = status.focus;
+							#end
+						}
+						if (null != status.selStart && null != status.selEnd) {
+							#if flash9
+							txtInput.setSelection(status.selStart, status.selEnd);
+							#else flash
+							flash.Selection.setSelection(status.selStart, status.selEnd);
+							#end
+						} else if (null != status.cursorPos) {
+							#if flash9
+							txtInput.setSelection(status.cursorPos, status.cursorPos);
+							#else flash
+							flash.Selection.setSelection(status.cursorPos, status.cursorPos);
+							#end
+						}
 					}
-					if (setFocus) {
-						#if flash9
-							clip.stage.focus = txtInput;
-							txtInput.setSelection(0, txtInput.length);
-						#else flash
-							flash.Selection.setFocus(txtInput);
-							hasFocus = setFocus;
-						#end
-					}
+					
 					#if flash9
-						return clip.stage.focus == txtInput;
+						var focus = clip.stage.focus == txtInput;
+						// temp variables to work around bugs in Null<Int> -> Int conversion
+						var selStart: Null<Int> = txtInput.selectionBeginIndex;
+						var selEnd: Null<Int> = txtInput.selectionEndIndex;
+						var cursorPos: Null<Int> = txtInput.caretIndex;
+						return { html: txtInput.htmlText, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, cursorPos: focus ? cursorPos : null }
 					#else flash
-						return hasFocus;
+						return { html: txtInput.htmlText, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
+								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null }
 					#end
 
 				}
