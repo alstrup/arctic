@@ -452,7 +452,7 @@ class ArcticView {
 			g.endFill();
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Text(html, embeddedFont, wordWrap):
+		case Text(html, embeddedFont, wordWrap, selectable):
 			if (mode == Metrics && !wordWrap && metricsCache.exists(html)) {
 				var m = metricsCache.get(html);
 				return { clip: null, width : m.width, height : m.height, growWidth : false, growHeight : false };
@@ -473,7 +473,7 @@ class ArcticView {
 					tf.width = availableWidth;
 				}
 				tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
-				tf.selectable = false;
+				tf.selectable = (true == selectable);
 				tf.multiline = true;
 				tf.htmlText = html;
 				if (mode == Create) {
@@ -498,7 +498,7 @@ class ArcticView {
 				}
 				tf.autoSize = true;
 				tf.html = true;
-				tf.selectable = false;
+				tf.selectable = (true == selectable);
 				tf.multiline = true;
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
