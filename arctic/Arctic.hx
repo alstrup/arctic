@@ -14,8 +14,8 @@ class Arctic {
 	static public var isDefaultFontEmbedded = false;
 
 	/// Make a text using the given parameters. Default color is black. If font is omitted, the default font is used
-	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Bool) {
-		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap);
+	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Bool, ?selectable: Bool) {
+		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap, selectable);
 	}
 	
 	/// A text button

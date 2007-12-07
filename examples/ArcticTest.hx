@@ -246,7 +246,7 @@ class ArcticTest {
 				Filler,
 				ColumnStack([
 					Filler,
-					TextInput(Arctic.wrapWithDefaultFont("Text is not focused. Click 'Focus & select' to focus and make selection", 20), 700, 50, null, null, null, null, 0xFF0000, null, null,
+					TextInput(Arctic.wrapWithDefaultFont("Text is not focused. Click 'Focus & select' to focus and make selection\nNote that text can span multiple lines and grow as you type", 20), 700, null, null, null, null, null, 0xFF0000, null, null,
 						function (fun) { controlFun = fun; }), 
 					Filler
 				]),

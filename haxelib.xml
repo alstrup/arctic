@@ -2,9 +2,8 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.10">
-	  - Add Align(x, y, block) block for aligning blocks easily
-	  - Add Arctic.fixSize(width, height, block) shorthand for constraining a block to the given size
-	  - Add support for adding ratios to GradientBackground
-	  - Do not compile Flash 8 examples with debug (results in IO.overflow)
+	  - added selectable parameter to Text block to make text selectable
+	  - you can now specify width or height as null for a textinput, and it will resize itself dynamically
+		when text changes
 	</version>
 </project>
