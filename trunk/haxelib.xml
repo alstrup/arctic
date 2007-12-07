@@ -1,8 +1,10 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.9">
-	  - advanced runtime text field manipulation API added: now you can control contents, focus, selection
-		and cursor position at runtime
+    <version name="0.9.10">
+	  - Add Align(x, y, block) block for aligning blocks easily
+	  - Add Arctic.fixSize(width, height, block) shorthand for constraining a block to the given size
+	  - Add support for adding ratios to GradientBackground
+	  - Do not compile Flash 8 examples with debug (results in IO.overflow)
 	</version>
 </project>

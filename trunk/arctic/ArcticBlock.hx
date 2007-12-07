@@ -28,8 +28,9 @@ enum ArcticBlock {
 	 * Alpha is an array of optional transparencies from 0 to 100.0. It has to have as many entries as the color array.
 	 * roundRadius > 0 makes the gradient rounded at the corners.
 	 * rotation - the amount to rotate, in radians (the default value is 0).
+	 * ratios - an array with numbers from 0 to 255 defining how to "distribute" the gradient colors.
 	 */ 
-	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Null<Float>, ?rotation: Null<Float>);
+	GradientBackground(type : String, colors : Array<Int>, xOffset : Float, yOffset : Float, block : ArcticBlock, ?alpha : Array<Float>, ?roundRadius : Null<Float>, ?rotation: Null<Float>, ?ratios: Array<Int>);
 
 	/// Add some space around the block
 	Border(x : Float, y : Float, block : ArcticBlock);
@@ -98,10 +99,17 @@ enum ArcticBlock {
 	Filler;
 	
 	/**
-	 * An empty block of the given size
+	 * A block of the given size - can be empty
 	 */
 	Fixed(width : Null<Float>, height : Null<Float>);
 
+	/**
+	 * Align a block. 
+	 * xpos: 0=left align, 0.5 = center horizontally, 1=right align, -1 = width to fit
+	 * ypos: 0=top align, 0.5 = center vertically, 1=bottom align, -1 = height o fit
+	 */
+	Align(xpos : Float, ypos : Float, block : ArcticBlock);
+	
 	/**
 	 * Columns are blocks put next to each other horizontally. The height is the maximum
 	 * height of the blocks. If there is an unconstrained filler in the column stack (recursively)
