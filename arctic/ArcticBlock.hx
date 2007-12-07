@@ -42,7 +42,7 @@ enum ArcticBlock {
 	 * If wordWrap is false, the text will always have the same size, and only break lines
 	 * if <br/> tags exist in the text.
 	 */
-	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>);
+	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>);
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
