@@ -40,6 +40,7 @@ enum ArcticBlock {
 	 * If wordWrap is true, the text will grow in the width and height as much as possible,
 	 * and the text inside word wrap according to how much width is available.
 	 * If wordWrap is false, the text will always have the same size, and only break lines
+	 * selectable defines whether user can select & copy contents
 	 * if <br/> tags exist in the text.
 	 */
 	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>);
@@ -47,6 +48,7 @@ enum ArcticBlock {
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
 	 * The validator callback is called on each change. You can use this callback to extract the contents of the text input.
+	 * Width and height, being set to null, cause text field to resize dynamically in the relevant direction (and call refresh(false) upon it)
 	 * All fields of the style parameter is copied verbatim to the textinput object. This allows you to customize the text input in
 	 * all detail, but it's up to you to make sure this works in both Flash 8 & 9. ( { wordWrap: true, multiline: true } as style is portable.)
 	 * The onInit parameter is called on construction and returns a function textFn( TextInputModel ) : TextInputModel which
@@ -54,7 +56,7 @@ enum ArcticBlock {
 	 * and will return current TextInput status in each of these dimensions. 
 	 * When changing, pass the values you don't want to change as null. If you only want to get status, you can pass null for the entire structure 
 	 */
-	TextInput(html : String, width : Float, height : Float, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void);
+	TextInput(html : String, width : Null<Float>, height : Null<Float>, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void);
 
 	/**
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.

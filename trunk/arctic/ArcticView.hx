@@ -521,7 +521,8 @@ class ArcticView {
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit) :
 			if (mode == Metrics) {
-				return { clip: null, width : width, height : height, growWidth : false, growHeight : false };
+				return { clip: null, width : null != width ? width : availableWidth, height : null != height ? height : availableHeight, 
+					growWidth : null == width, growHeight : null == height };
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Create) {
@@ -538,8 +539,12 @@ class ArcticView {
 				if (embeddedFont) {
 					txtInput.embedFonts = true;
 				}
-				txtInput.width = width;
-				txtInput.height = height;
+				if (null != width) {
+					txtInput.width = width;
+				}
+				if (null != height) {
+					txtInput.height = height;
+				}
 			#else flash
 				var txtInput : flash.TextField;
 				if (mode == Create) {
@@ -554,7 +559,13 @@ class ArcticView {
 				txtInput.embedFonts = true;
 			}
 			txtInput.tabEnabled = true;
-			ArcticMC.setSize(clip, width, height);
+			if (null != width && null != height) {
+				ArcticMC.setSize(clip, width, height);
+			} else {
+				txtInput.autoSize = "left";	
+				txtInput.wordWrap = (null != width); // wordWrap is the same as fixed width
+				txtInput.multiline = (null == height); // multiline allows growing in height
+			}
 			if (null != maxChars) {
 				txtInput.maxChars = maxChars;
 			}
@@ -594,7 +605,9 @@ class ArcticView {
 					txtInput.defaultTextFormat = txtFormat;
 					// Set the text again to enforce the formatting
 					txtInput.htmlText = html;
-					var listener = function (e) { validate(); };
+					var me = this;
+					var listener = (null != width && null != height) ? function (e) { validate(); }
+						: function (e) { me.refresh(false); validate(); };
 					txtInput.addEventListener(flash.events.Event.CHANGE, listener);
 					clip.addChild(txtInput);
 					txtInput.type = TextFieldType.INPUT;
@@ -602,9 +615,11 @@ class ArcticView {
 					txtInput.setNewTextFormat(txtFormat);
 					// Set the text again to enforce the formatting
 					txtInput.htmlText = html;
+					var me = this;
 					var listener = {
 						// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
-						onChanged : function (txtFld : TextField) {	validate();	}
+						onChanged : (null != width && null != height) ? function (txtFld : TextField) {	validate();	}
+							: function (txtFld: TextField) { me.refresh(false); validate(); }
 					};
 					txtInput.addListener(listener);
 					txtInput.type = "input";
@@ -686,7 +701,7 @@ class ArcticView {
 			}
 
 			var s = ArcticMC.getSize(clip);
-			return { clip: clip, width: s.width, height: s.height, growWidth: false, growHeight: false };
+			return { clip: clip, width: s.width, height: s.height, growWidth: null == width, growHeight: null == height };
 
 		case Picture(url, w, h, scaling, resource):
 			if (mode == Metrics) {
