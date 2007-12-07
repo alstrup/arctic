@@ -408,19 +408,23 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation):
+		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation, ratios):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Metrics || colors == null || colors.length == 0) {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
-			var ratios = [];
+			if (ratios == null) {
+				ratios = [];
+				var dt = 255 / (colors.length - 1);
+				var r = 0.0;
+				for (i in 0...colors.length) {
+					ratios.push(Math.floor(r));
+					r += dt;
+				}
+			}
 			var alphas = [];
-			var dt = 255 / (colors.length - 1);
-			var r = 0.0;
 			for (i in 0...colors.length) {
-				ratios.push(r);
-				r += dt;
 				if (alpha == null) {
 					alphas.push(ArcticMC.convertAlpha(100.0));
 				} else {
@@ -966,7 +970,27 @@ class ArcticView {
 			#end
 			return { clip: null, width: width, height: height, growWidth: false, growHeight: false };
 
-        case ConstrainWidth(minimumWidth, maximumWidth, block) :
+		case Align(xpos, ypos, block):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var width = if (xpos == -1.0) 0 else availableWidth;
+			var height = if (ypos == -1.0) 0 else availableHeight;
+            var child = build(block, clip, width, height, mode, 0);
+			width = Math.max(width, child.width);
+			height = Math.max(height, child.height);
+			if (mode != Metrics) {
+				var x = 0.0;
+				if (xpos != -1.0) {
+					x = (availableWidth - child.width) * xpos;
+				}
+				var y = 0.0;
+				if (ypos != -1.0) {
+					y = (availableHeight - child.height) * ypos;
+				}
+				ArcticMC.setXY(child.clip, x, y);
+			}
+			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
+
+		case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
 			var doClip = false;

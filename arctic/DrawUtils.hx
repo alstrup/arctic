@@ -52,42 +52,6 @@ class DrawUtils {
 		}
 	}
 
-#if flash9
-#else flash
-
-// draws an arrow at the end of the line specified using current fill settings - i.e.
-// mc.beginFill() and mc.endFill() has to be invoked by the caller
-// original AS2 code taken from http://www.experts-exchange.com/Web/WebDevSoftware/Flash/Q_21655556.html#15442997
-static public function drawArrowHead(mc: MovieClip, startX: Float, startY: Float, endX: Float, endY: Float, arrowW: Float, arrowH: Float) {
-    // calc position of arrow
-    // first find the angle of the line
-    var angle_real = Math.atan2(endY - startY, endX - startX);
-    // calc the hypotenuse component
-    var r2 = Math.abs(if (0 != endY - startY) (endY - startY) / Math.sin(angle_real) else (endX - startX));
-    // find the normalized angle of difference in the arrow w and h
-    var angle_s = Math.abs((Math.PI/2) - Math.atan2(r2 - arrowH, arrowW / 2));
-    // apply the x / y components to the new angle difference
-    var pt2 = new ArcticPoint(startX + (r2-arrowH)*Math.cos(angle_real-angle_s), startY + (r2-arrowH)*Math.sin(angle_real-angle_s));
-    var pt3 = new ArcticPoint(startX + (r2-arrowH)*Math.cos(angle_real+angle_s), startY + (r2-arrowH)*Math.sin(angle_real+angle_s));
-    var pt1 = new ArcticPoint(endX, endY);
-
-    // basically, the arrow is a filled in triangle
-    mc.moveTo(pt1.x, pt1.y);
-    mc.lineTo(pt2.x, pt2.y);
-    mc.lineTo(pt3.x, pt3.y);
-    mc.lineTo(pt1.x, pt1.y);
-}
-
-static public function drawArrow(mc: MovieClip, startX, startY, endX, endY, arrowW, arrowH, color) {
-	mc.beginFill(color);
-	drawArrowHead(mc, startX, startY, endX, endY, arrowW, arrowH);
-	mc.endFill();
-	mc.moveTo(startX, startY);
-	mc.lineTo(endX, endY);
-}
-
-#end
-
 // Draws a circle with optional filling
 static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float)
 {
