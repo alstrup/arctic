@@ -987,8 +987,8 @@ class ArcticView {
 
 		case Align(xpos, ypos, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			var width = if (xpos == -1.0) 0 else availableWidth;
-			var height = if (ypos == -1.0) 0 else availableHeight;
+			var width = availableWidth;
+			var height = availableHeight;
             var child = build(block, clip, width, height, mode, 0);
 			width = Math.max(width, child.width);
 			height = Math.max(height, child.height);
