@@ -282,6 +282,7 @@ typedef TextInputModel = {
 	var selStart: Null<Int>;
 	var selEnd: Null<Int>;
 	var cursorPos: Null<Int>;
+	var disabled: Null<Bool>;
 }
 
 enum Filter {
