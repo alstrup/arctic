@@ -682,6 +682,19 @@ class ArcticView {
 							flash.Selection.setSelection(status.cursorPos, status.cursorPos);
 							#end
 						}
+						if (status.disabled == true) {
+							#if flash9
+							txtInput.type = TextFieldType.DYNAMIC;
+							#else flash
+							txtInput.type = "dynamic";
+							#end
+						} else {
+							#if flash9
+							txtInput.type = TextFieldType.INPUT;
+							#else flash
+							txtInput.type = "input";
+							#end
+						}
 					}
 					
 					#if flash9
@@ -690,10 +703,12 @@ class ArcticView {
 						var selStart: Null<Int> = txtInput.selectionBeginIndex;
 						var selEnd: Null<Int> = txtInput.selectionEndIndex;
 						var cursorPos: Null<Int> = txtInput.caretIndex;
-						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, cursorPos: focus ? cursorPos : null }
+						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
+								 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT }
 					#else flash
 						return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
-								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null }
+								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
+								 disabled: txtInput.type != "input" }
 					#end
 
 				}
