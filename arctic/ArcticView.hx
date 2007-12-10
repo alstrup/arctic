@@ -1009,11 +1009,11 @@ class ArcticView {
 			height = Math.max(height, child.height);
 			if (mode != Metrics) {
 				var x = 0.0;
-				if (xpos != -1.0) {
+				if (xpos != -1.0 && availableWidth > child.width) {
 					x = (availableWidth - child.width) * xpos;
 				}
 				var y = 0.0;
-				if (ypos != -1.0) {
+				if (ypos != -1.0 && availableHeight > child.height) {
 					y = (availableHeight - child.height) * ypos;
 				}
 				ArcticMC.setXY(child.clip, x, y);
@@ -1821,6 +1821,14 @@ class ArcticView {
 				#end
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+
+		case DebugBlock(id, block):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			trace("Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ id);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			trace("built (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
+				+ child.width + "," + child.height + " " + child.growWidth + "," + child.growHeight + ") on " + id );
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		}
 	}
 
@@ -1849,6 +1857,7 @@ class ArcticView {
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
 				Reflect.setField(p, "c" + childNo, clip);
 			#else flash9
+			
 				var clip = new MovieClip();
 				p.addChild(clip);
 				if (p != parent) {

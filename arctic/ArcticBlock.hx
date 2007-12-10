@@ -242,6 +242,9 @@ enum ArcticBlock {
 	 * Captures mouse wheel movements in the given block
 	 */
 	MouseWheel(block : ArcticBlock, onMouseWheel : Float -> Void);
+
+	/// Special block which is useful for debugging
+	DebugBlock(id : String, block : ArcticBlock);
 }
 
 /// The structure used by CustomBlocks to tell arctic of dimensions and requested resizing behaviour
