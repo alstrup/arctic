@@ -1822,6 +1822,19 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
+		case Mask(block, mask) :
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			var mask = build(mask, clip, availableWidth, availableHeight, mode, 1);
+			if (mode == Create) {
+				#if flash9
+					child.clip.mask = mask.clip;
+				#else flash
+					child.clip.setMask(mask.clip);
+				#end
+			}
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			
 		case DebugBlock(id, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			trace("Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ id);
