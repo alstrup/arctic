@@ -51,6 +51,7 @@ class ArcticView {
 		if (metricsCache == null) {
 			metricsCache = new Hash<{ width: Float, height : Float } >();
 		}
+		size = null;
 
 		#if flash9
 			stageEventHandlers = [];
@@ -65,12 +66,15 @@ class ArcticView {
 	private var base : MovieClip;
 	/// Whether or not we should track resizing of the Flash window
 	private var useStageSize : Bool;
+	/// If not using stage size, what size should we use when building?
+	private var size : { width : Float, height : Float };
 	
 	/// This resizes the hosting movieclip to make room for our GUI block minimumsize, plus some extra space
 	public function adjustToFit(extraWidth : Float, extraHeight : Float) : { width: Float, height : Float} {
 		var w = build(gui, parent, 0, 0, Metrics, 0);
 		ArcticMC.setSize(parent, w.width + extraWidth, w.height + extraHeight);
-		return { width: w.width + extraWidth, height: w.height + extraHeight };
+		size = { width: w.width + extraWidth, height: w.height + extraHeight };
+		return size;
 	}
 
 	/**
@@ -84,6 +88,11 @@ class ArcticView {
 		useStageSize = useStageSize0;
 		if (useStageSize) {
 			ArcticMC.stageSize(parent);
+			size = ArcticMC.getStageSize(parent);
+		} else {
+			if (size == null) {
+				size = ArcticMC.getSize(parent);
+			}
 		}
 		
 		refresh(true);
@@ -103,7 +112,7 @@ class ArcticView {
 		}
         return base;
 	}
-
+	
 	#if flash9
 	/// We record all the event handlers we register so that we can clean them up again when destroyed
 	private var stageEventHandlers : Array<{ obj: flash.events.EventDispatcher, event : String, handler : Dynamic } >;
@@ -136,8 +145,8 @@ class ArcticView {
 	public function onResize() {
 		if (true) {
 			/// This is smart refresh, where we reuse MovieClips to reduce flicker
-			var stage = ArcticMC.getStageSize(parent);
-			var result = build(gui, parent, stage.width, stage.height, Reuse, firstChild);
+			size = ArcticMC.getStageSize(parent);
+			var result = build(gui, parent, size.width, size.height, Reuse, firstChild);
 			base = result.clip;
 		} else {
 			/// This is dumb refresh, where we rebuilt everything from scratch
@@ -169,13 +178,6 @@ class ArcticView {
 			mouseWheelListeners = new Array<{ clip: ArcticMovieClip, listener: Dynamic } >();
 			#end
 		}
-		var size;
-		if (useStageSize) {
-			size = ArcticMC.getStageSize(parent);
-		} else {
-			size = ArcticMC.getSize(parent);
-		}
-		
 		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
 		base = result.clip;
 	}
@@ -1007,7 +1009,7 @@ class ArcticView {
             var child = build(block, clip, width, height, mode, 0);
 			width = Math.max(width, child.width);
 			height = Math.max(height, child.height);
-			if (mode != Metrics) {
+			if (mode != Metrics && child.clip != null) {
 				var x = 0.0;
 				if (xpos != -1.0 && availableWidth > child.width) {
 					x = (availableWidth - child.width) * xpos;
