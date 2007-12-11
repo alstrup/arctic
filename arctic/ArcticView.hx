@@ -455,6 +455,9 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case Text(html, embeddedFont, wordWrap, selectable):
+			if (wordWrap == null) {
+				wordWrap = false;
+			}
 			if (mode == Metrics && !wordWrap && metricsCache.exists(html)) {
 				var m = metricsCache.get(html);
 				return { clip: null, width : m.width, height : m.height, growWidth : false, growHeight : false };
@@ -1448,9 +1451,10 @@ class ArcticView {
 					return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 				}
 			}
-			
+
+			var dragClip = clip; 
 			if (mode == Create) {
-				ActiveClips.get().activeClips.push(child.clip);
+				ActiveClips.get().activeClips.push(dragClip);
 			}
 
 			var width = child.width;
@@ -1469,7 +1473,7 @@ class ArcticView {
 			if (mode == Metrics) {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
-
+			
 			var info : BlockInfo;
 			if (mode == Create) {
 				info = {
@@ -1479,15 +1483,14 @@ class ArcticView {
 					childWidth: width,
 					childHeight: height
 				};
-				setBlockInfo(child.clip, info);
+				setBlockInfo(dragClip, info);
 			} else if (mode == Reuse) {
-				info = getBlockInfo(child.clip);
+				info = getBlockInfo(dragClip);
 				info.available = { width: availableWidth, height: availableHeight };
 				info.childWidth = width;
 				info.childHeight = height;
 			}
 			var me = this;
-			var dragClip = child.clip;
 			var setPosition = function (x : Float, y : Float) {
 				var info = me.getBlockInfo(dragClip);
 				if (stayWithin) {
