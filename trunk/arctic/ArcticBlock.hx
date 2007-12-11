@@ -243,6 +243,11 @@ enum ArcticBlock {
 	 */
 	MouseWheel(block : ArcticBlock, onMouseWheel : Float -> Void);
 
+	/**
+	 * A masking block - a block is masked by another block
+	 */
+	Mask(block : ArcticBlock, mask : ArcticBlock);
+	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);
 }

@@ -10,12 +10,13 @@ class ArcticTest {
 	
 	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
-		
+
 		showHelloWorld1();
 		//nextWorld();
 		//draggable();
 		//wideText();
 		//wrappingLayout();
+		//maskBlock();
 	}
 
 	public function showHelloWorld1() {
@@ -108,7 +109,7 @@ class ArcticTest {
 							),
 							LineStack( consultationBlocks ),
 							Border( 10, 10,
-								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text", "See wrapping layout", "See advanced text control" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
+								Arctic.makeTextChoice([ "See custom block", "See dragable blocks", "See wide text", "See wrapping layout", "See advanced text control", "See mask block" ], function(i : Int, text : String) { me.radioChoice = i; }, 0, 20).block
 							),
 							Border( 10, 10, Arctic.makeCheckbox( Arctic.makeText("Check box without effect", 20)).block ),
 							ColumnStack( [
@@ -135,6 +136,7 @@ class ArcticTest {
 			case 2: wideText();
 			case 3: wrappingLayout();
 			case 4: advancedTextControl();
+			case 5: maskBlock();
 			default: 0;
 		}
 	}
@@ -265,7 +267,21 @@ class ArcticTest {
 			
 		arcticView = new ArcticView(gui, parent);
 		arcticView.display(true);
-		
+	}
+	
+	public function maskBlock() {
+		if (arcticView != null) { arcticView.destroy(); }
+
+		var gui = Align(0.5, 0.5, Mask(
+			LineStack([ 
+				Background(0x800000, Arctic.makeSimpleButton("Continue", nextWorld, 25)),
+				Background(0x008000, Filler),
+				Background(0x000080, Fixed(100, 10)),
+			]),
+			Background(0xffffff, LineStack([Fixed(100, 20), Filler]), 100, 30)
+		));
+		arcticView = new ArcticView(gui, parent);
+		arcticView.display(true);
 	}
 
 	var arcticView : ArcticView;

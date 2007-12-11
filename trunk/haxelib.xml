@@ -1,11 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.11">
-	  - added selectable parameter to Text block to make text selectable
-	  - you can now specify width or height as null for a textinput, and it will resize itself dynamically
-		when text changes
-	  - Fix wrong sizing behaviour of the new Align block
-	  - Add a funky DebugBlock block which helps debug trouble with wrong layouts
+    <version name="0.9.12">
+	  - Add Mask block which allows you to mask a block with another block that is treated as the alpha channel
 	</version>
 </project>
