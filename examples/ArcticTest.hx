@@ -255,7 +255,7 @@ class ArcticTest {
 					Arctic.makeSimpleButton("Focus & select", function () {
 						var status = controlFun(null);
 						var quarter = Math.floor(status.text.length / 4);
-						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null } );
+						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null, disabled: false } );
 					}, 25), 
 					Arctic.makeSimpleButton("Continue", nextWorld, 25),
 					Filler
