@@ -12,7 +12,6 @@
 # Dialogs flash8
 -swf Dialogs8.swf
 -main Dialogs
--debug
 -swf-header 800:600:50
 -cp ..
 --flash-strict
