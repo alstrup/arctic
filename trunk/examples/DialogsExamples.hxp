@@ -4,7 +4,7 @@
 --flash-strict
 -swf-version 7
 </output>
-  <output name="Dialogs flash8" mode="swf" out="Dialogs8.swf" class="Dialogs" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
+  <output name="Dialogs flash8" mode="swf" out="Dialogs8.swf" class="Dialogs" lib="" cmd="" main="True" debug="False">-swf-header 800:600:50
 -cp ..
 --flash-strict
 </output>
@@ -12,6 +12,5 @@
 -cp ..
 --flash-strict
 </output>
-
   <files path="/" />
 </haxe>
