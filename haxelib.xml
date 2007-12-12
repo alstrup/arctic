@@ -5,5 +5,6 @@
 	  - Add Mask block which allows you to mask a block with another block that is treated as the alpha channel
 	  - Fix obscure sizing bug when using refresh(false) where get size of dialogs that had been move would 
 	    get increasing bigger
+	  - speed up automatic textfield resize
 	</version>
 </project>

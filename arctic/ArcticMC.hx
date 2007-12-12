@@ -495,4 +495,20 @@ class ArcticMC {
 		#end
 	}
 	#end
+	
+	static public function getTextFieldWidth(field: ArcticTextField): Float {
+		#if flash9
+		return field.width;
+		#else flash
+		return field._width;
+		#end
+	}
+	
+	static public function getTextFieldHeight(field: ArcticTextField): Float {
+		#if flash9
+		return field.height;
+		#else flash
+		return field._height;
+		#end
+	}
 }
