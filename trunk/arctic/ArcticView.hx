@@ -606,13 +606,26 @@ class ArcticView {
 					txtInput.restrict = "0-9";
 					txtFormat.align = "right";
 				}
+				var lastWidth = ArcticMC.getTextFieldWidth(txtInput);
+				var lastHeight = ArcticMC.getTextFieldHeight(txtInput);
+				var sizeChanged = function () {
+					if (null == width && lastWidth != ArcticMC.getTextFieldWidth(txtInput)) {
+						lastWidth = ArcticMC.getTextFieldWidth(txtInput);
+						return true;
+					}
+					if (null == height && lastHeight != ArcticMC.getTextFieldHeight(txtInput)) {
+						lastHeight = ArcticMC.getTextFieldHeight(txtInput);
+						return true;
+					}
+					return false;
+				}
 				#if flash9
 					txtInput.defaultTextFormat = txtFormat;
 					// Set the text again to enforce the formatting
 					txtInput.htmlText = html;
 					var me = this;
 					var listener = (null != width && null != height) ? function (e) { validate(); }
-						: function (e) { me.refresh(false); validate(); };
+						: function (e) { if (sizeChanged()) me.refresh(false); validate(); };
 					txtInput.addEventListener(flash.events.Event.CHANGE, listener);
 					clip.addChild(txtInput);
 					txtInput.type = TextFieldType.INPUT;
@@ -624,7 +637,7 @@ class ArcticView {
 					var listener = {
 						// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
 						onChanged : (null != width && null != height) ? function (txtFld : TextField) {	validate();	}
-							: function (txtFld: TextField) { me.refresh(false); validate(); }
+							: function (txtFld: TextField) { if (sizeChanged()) me.refresh(false); validate(); }
 					};
 					txtInput.addListener(listener);
 					txtInput.type = "input";
