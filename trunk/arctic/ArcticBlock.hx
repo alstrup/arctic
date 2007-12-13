@@ -247,6 +247,11 @@ enum ArcticBlock {
 	 * A masking block - a block is masked by another block
 	 */
 	Mask(block : ArcticBlock, mask : ArcticBlock);
+
+	/**
+	 * Scale a block - original size is 1.0
+	 */
+	Scale(factor : Float, block : ArcticBlock);
 	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);

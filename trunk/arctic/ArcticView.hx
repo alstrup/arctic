@@ -1852,7 +1852,15 @@ class ArcticView {
 				#end
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			
+
+		case Scale(factor, block):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
+				ArcticMC.setScaleXY(child.clip, factor, factor);
+			}
+			return { clip: clip, width: factor * child.width, height: factor * child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		
 		case DebugBlock(id, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			trace("Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ id);
