@@ -3,5 +3,6 @@
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.15">
 	  - onStopDrag parameter added to Dragable
+	  - Change Scale to not take any parameters
 	</version>
 </project>
