@@ -106,7 +106,7 @@ class Arctic {
 	 * This will *not* trigger a call to any supplied onDrag function.
 	 */
 	static public function makeDragable(stayWithinBlock : Bool, sideMotionAllowed : Bool, upDownMotionAllowed : Bool, 
-					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float) {
+					block : ArcticBlock, ?onDrag : DragInfo -> Void, ?initialXOffset : Float, ?initialYOffset : Float, ?onStopDrag: Void -> Void) {
 		// Local closured variables to remember drag offset
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
@@ -130,7 +130,7 @@ class Arctic {
 			dragInfo.setPositionFn(x, y); 
 		}
 		return { 
-			block: Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit),
+			block: Dragable(stayWithinBlock, sideMotionAllowed, upDownMotionAllowed, block, ourOnDrag, ourOnInit, onStopDrag),
 			setPositionFn: setPositionFn
 		};
 	}

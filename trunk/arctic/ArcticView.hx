@@ -163,7 +163,7 @@ class ArcticView {
 	* the GUI using update() below. If you pass true, everything is built
 	* from scratch.
 	*/ 
-	public function refresh(rebuild : Bool) {
+	public function refresh(rebuild : Bool): {width: Float, height: Float} {
 		if (rebuild && base != null) {
 			remove();
 		}
@@ -180,6 +180,7 @@ class ArcticView {
 		}
 		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
 		base = result.clip;
+		return {width: result.width, height: result.height};
 	}
 	/// What child number is the root block on the parent clip?
 	private var firstChild : Int;
@@ -1451,7 +1452,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit):
+		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
@@ -1611,6 +1612,9 @@ class ArcticView {
 						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 						dragX = -1;
 						dragY = -1;
+						if (onStopDrag != null) {
+							onStopDrag();
+						}
 					};
 				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
 					function (s) { 
@@ -1645,6 +1649,9 @@ class ArcticView {
 						}
 						if (clip.onMouseUp == null) {
 							clip.onMouseUp = function() {
+								if (onStopDrag != null) {
+									onStopDrag();
+								}
 								clip.onMouseMove = null;
 								clip.onMouseUp = null;
 							};
