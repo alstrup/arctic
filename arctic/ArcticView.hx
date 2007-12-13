@@ -1040,6 +1040,17 @@ class ArcticView {
 			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
 
 		case ConstrainWidth(minimumWidth, maximumWidth, block) :
+			// Special case: Nested constraints can be optimised a lot!
+			if (mode == Metrics && minimumWidth == maximumWidth) {
+				switch (block) {
+					case ConstrainHeight(minHeight, maxHeight, b):
+						if (minHeight == maxHeight) {
+							return { clip: null, width: minimumWidth, height: minHeight, growWidth: false, growHeight: false };
+						}
+					default:
+				}
+			}
+		
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
 			var doClip = false;
@@ -1062,6 +1073,17 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: false, growHeight: child.growHeight };
 
         case ConstrainHeight(minimumHeight, maximumHeight, block) :
+			// Special case: Nested constraints can be optimised a lot!
+			if (mode == Metrics && minimumHeight == maximumHeight) {
+				switch (block) {
+					case ConstrainWidth(minWidth, maxWidth, b):
+						if (minWidth == maxWidth) {
+							return { clip: null, width: minWidth, height: minimumHeight, growWidth: false, growHeight: false };
+						}
+					default:
+				}
+			}
+		
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, 0);
 			var doClip = false;
