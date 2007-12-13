@@ -251,7 +251,7 @@ enum ArcticBlock {
 	/**
 	 * Scale a block - original size is 1.0
 	 */
-	Scale(factor : Float, block : ArcticBlock);
+	Scale(block : ArcticBlock);
 	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);
