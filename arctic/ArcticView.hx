@@ -1882,11 +1882,11 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Scale(block):
+		case Scale(block, maxScale):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			
 			var metricsChild = build(block, clip, 0, 0, Metrics, 0);
-
+			var grow = true;
 			var scale : Null<Float> = null;
 			if (metricsChild.width != 0) {
 				if (availableWidth != 0) {
@@ -1911,12 +1911,17 @@ class ArcticView {
 			if (scale == null) {
 				scale = 1.0;
 			}
+			if (maxScale != null && scale > maxScale) {
+				scale = maxScale;
+				grow = false;
+			}
+			
 			var excessWidth = 0.0;
 			var excessHeight = 0.0;
-			if (scale > 1.0 && metricsChild.growWidth) {
+			if (scale >= 1.0 && metricsChild.growWidth) {
 				excessWidth = availableWidth / scale;
 			}
-			if (scale > 1.0 && metricsChild.growHeight) {
+			if (scale >= 1.0 && metricsChild.growHeight) {
 				excessHeight = availableHeight / scale;
 			}
 			//trace(availableWidth + "," + availableHeight + " " + metricsChild.width + "," + metricsChild.height + " " + scale + " " + excessWidth + "," + excessHeight);
@@ -1924,7 +1929,7 @@ class ArcticView {
 			if (mode != Metrics) {
 				ArcticMC.setScaleXY(child.clip, scale, scale);
 			}
-			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: true, growHeight: true };
+			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: grow, growHeight: grow };
 		
 		case DebugBlock(id, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
