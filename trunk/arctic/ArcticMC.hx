@@ -410,7 +410,7 @@ class ArcticMC {
 			while (null != parent && active) {
 				active = active && parent.visible && parent.mouseEnabled;
 				parent = parent.parent;
-			}	
+			}
 		#else flash
 			var parent = clip;
 			while (null != parent && active) {
