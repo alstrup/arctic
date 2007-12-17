@@ -953,8 +953,9 @@ class ArcticView {
 			if (mode == Create) {
 				var me = this;
 				mutableBlock.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
+					if (me.gui == null) return null;
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
-					if (oldClip != null) {
+					if (ArcticMC.isActive(oldClip )) {
 						ArcticMC.remove(oldClip);
 						me.removeClip(oldClip);
 					}
