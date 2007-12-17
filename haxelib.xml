@@ -1,8 +1,8 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.15">
+    <version name="0.9.16">
 	  - onStopDrag parameter added to Dragable
-	  - Change Scale to not take any parameters
+	  - Change Scale to take one parameter which is maximum scaling
 	</version>
 </project>
