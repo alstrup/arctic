@@ -249,7 +249,7 @@ enum ArcticBlock {
 	Mask(block : ArcticBlock, mask : ArcticBlock);
 
 	/**
-	 * Scale a block - original size is 1.0
+	 * Scale a block - original size is 1.0. The scaling can be constrained to maxScale.
 	 */
 	Scale(block : ArcticBlock, ? maxScale : Float);
 	
