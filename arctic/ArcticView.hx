@@ -1476,226 +1476,8 @@ class ArcticView {
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag):
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			
-            var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			
-			if (mode != Metrics) {
-				if (child.clip == null) {
-					#if debug
-					trace("Can not make dragable with empty block");
-					#end
-					return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-				}
-			}
+			return buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag);
 
-			var dragClip = clip; 
-			if (mode == Create) {
-				ActiveClips.get().activeClips.push(dragClip);
-			}
-
-			var width = child.width;
-			var height = child.height;
-			if (stayWithin) {
-				if (sideMotion) {
-					child.growWidth = true;
-					child.width = Math.max(child.width, availableWidth);
-				}
-				if (upDownMotion) {
-					child.growHeight = true;
-					child.height = Math.max(child.height, availableHeight);
-				}
-			}
-			
-			if (mode == Metrics) {
-				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-			
-			var info : BlockInfo;
-			if (mode == Create) {
-				info = {
-					available: { width: availableWidth, height: availableHeight },
-					totalDx: 0.0,
-					totalDy: 0.0,
-					childWidth: width,
-					childHeight: height
-				};
-				setBlockInfo(dragClip, info);
-			} else if (mode == Reuse) {
-				info = getBlockInfo(dragClip);
-				info.available = { width: availableWidth, height: availableHeight };
-				info.childWidth = width;
-				info.childHeight = height;
-			}
-			var me = this;
-			var setPosition = function (x : Float, y : Float) {
-				var info = me.getBlockInfo(dragClip);
-				if (stayWithin) {
-					x = Math.min(info.available.width - info.childWidth, x);
-					y = Math.min(info.available.height - info.childHeight, y);
-				}
-				ArcticMC.setXY(dragClip, x, y);
-				info.totalDx = x;
-				info.totalDy = y;
-			}; 
-			
-			if (mode != Create) {
-				if (mode == Reuse && null != onInit) {
-					var dragInfo = { 
-						x : info.totalDx, 
-						y : info.totalDy,
-						width : info.childWidth,
-						height : info.childHeight,
-						totalWidth : info.available.width - info.childWidth, 
-						totalHeight : info.available.height - info.childHeight 
-					};
-					onInit(dragInfo, setPosition);
-				}
-				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-			
-			var dragX = -1.0;
-			var dragY = -1.0;
-			
-			var doDrag = function (dx : Float, dy : Float) {
-				var info = me.getBlockInfo(dragClip);
-				if (!sideMotion) {
-					dx = 0;
-				}
-				if (!upDownMotion) {
-					dy = 0;
-				}
-				var motion = false;
-				if (sideMotion) {
-					while (Math.abs(dx) > 0) {
-						var newTotalDx = info.totalDx + dx;
-						if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childWidth)) {
-							ArcticMC.moveClip(dragClip, dx, 0);
-							info.totalDx = newTotalDx;
-							motion = true;
-							break;
-						}
-						// We just try a smaller drag
-						if (dx > 0) {
-							dx--;
-						} else {
-							dx++;
-						}
-					}
-				}
-				if (upDownMotion) {
-					while (Math.abs(dy) > 0) {
-						var newTotalDy = info.totalDy + dy;
-						if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childHeight)) {
-							ArcticMC.moveClip(dragClip, 0, dy);
-							info.totalDy = newTotalDy;
-							motion = true;
-							break;
-						}
-						// We just try a smaller drag
-						if (dy > 0) {
-							dy--;
-						} else {
-							dy++;
-						}
-					}
-				}
-				if (motion) {
-					if (onDrag != null) {
-						var dragInfo = { 
-							x : info.totalDx, 
-							y : info.totalDy, 
-							width : info.childWidth,
-							height : info.childHeight,
-							totalWidth : info.available.width - info.childWidth, 
-							totalHeight : info.available.height - info.childHeight 
-						};
-						onDrag(dragInfo);
-					}
-				}
-			}
-			
-			#if flash9
-				var firstTime = true;
-				var mouseMove = function(s) {
-					if (!clip.visible) {
-						return;
-					}
-					var dx = clip.stage.mouseX - dragX;
-					var dy = clip.stage.mouseY - dragY;
-					doDrag(dx, dy);
-					dragX = clip.stage.mouseX;
-					dragY = clip.stage.mouseY;
-				}
-				var mouseUp = 
-					function(s) {
-						if (dragX == -1) {
-							return;
-						}
-						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
-						dragX = -1;
-						dragY = -1;
-						if (onStopDrag != null) {
-							onStopDrag();
-						}
-					};
-				clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
-					function (s) { 
-						if (ActiveClips.get().getActiveClip() == dragClip) {
-							dragX = clip.stage.mouseX;
-							dragY = clip.stage.mouseY;
-							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
-							if (firstTime) {
-								me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
-								firstTime = false;
-							}
-						}
-					}
-				);
-			#else flash
-				clip.onMouseDown = function() {
-					if (ActiveClips.get().getActiveClip() == dragClip) {
-						// TODO: Check we do not hit a child which wants drags
-						dragX = flash.Lib.current._xmouse;
-						dragY = flash.Lib.current._ymouse;
-						if (clip.onMouseMove == null) {
-							clip.onMouseMove = function() {
-								if (!clip._visible) {
-									return;
-								}
-								var dx = flash.Lib.current._xmouse - dragX;
-								var dy = flash.Lib.current._ymouse - dragY;
-								doDrag(dx, dy);
-								dragX = flash.Lib.current._xmouse;
-								dragY = flash.Lib.current._ymouse;
-							};
-						}
-						if (clip.onMouseUp == null) {
-							clip.onMouseUp = function() {
-								if (onStopDrag != null) {
-									onStopDrag();
-								}
-								clip.onMouseMove = null;
-								clip.onMouseUp = null;
-							};
-						}
-					}
-				};
-			#end
-
-			if (null != onInit) {
-				var dragInfo = { 
-					x : info.totalDx, 
-					y : info.totalDy, 
-					width : info.childWidth,
-					height : info.childHeight,
-					totalWidth : info.available.width - info.childWidth, 
-					totalHeight : info.available.height - info.childHeight 
-				};
-				onInit(dragInfo, setPosition);
-			}
-			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-		
 		case Cursor(block, cursor, keepNormalCursor) :
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
@@ -1947,6 +1729,229 @@ class ArcticView {
 		}
 	}
 
+	private function buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag) {
+		
+		var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+		
+		var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+		
+		if (mode != Metrics) {
+			if (child.clip == null) {
+				#if debug
+				trace("Can not make dragable with empty block");
+				#end
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+		}
+
+		var dragClip = clip; 
+		if (mode == Create) {
+			ActiveClips.get().activeClips.push(dragClip);
+		}
+
+		var width = child.width;
+		var height = child.height;
+		if (stayWithin) {
+			if (sideMotion) {
+				child.growWidth = true;
+				child.width = Math.max(child.width, availableWidth);
+			}
+			if (upDownMotion) {
+				child.growHeight = true;
+				child.height = Math.max(child.height, availableHeight);
+			}
+		}
+		
+		if (mode == Metrics) {
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		}
+		
+		var info : BlockInfo;
+		if (mode == Create) {
+			info = {
+				available: { width: availableWidth, height: availableHeight },
+				totalDx: 0.0,
+				totalDy: 0.0,
+				childWidth: width,
+				childHeight: height
+			};
+			setBlockInfo(dragClip, info);
+		} else if (mode == Reuse) {
+			info = getBlockInfo(dragClip);
+			info.available = { width: availableWidth, height: availableHeight };
+			info.childWidth = width;
+			info.childHeight = height;
+		}
+		var me = this;
+		var setPosition = function (x : Float, y : Float) {
+			var info = me.getBlockInfo(dragClip);
+			if (stayWithin) {
+				x = Math.min(info.available.width - info.childWidth, x);
+				y = Math.min(info.available.height - info.childHeight, y);
+			}
+			ArcticMC.setXY(dragClip, x, y);
+			info.totalDx = x;
+			info.totalDy = y;
+		}; 
+		
+		if (mode != Create) {
+			if (mode == Reuse && null != onInit) {
+				var dragInfo = { 
+					x : info.totalDx, 
+					y : info.totalDy,
+					width : info.childWidth,
+					height : info.childHeight,
+					totalWidth : info.available.width - info.childWidth, 
+					totalHeight : info.available.height - info.childHeight 
+				};
+				onInit(dragInfo, setPosition);
+			}
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		}
+		
+		var dragX = -1.0;
+		var dragY = -1.0;
+		
+		var doDrag = function (dx : Float, dy : Float) {
+			var info = me.getBlockInfo(dragClip);
+			if (!sideMotion) {
+				dx = 0;
+			}
+			if (!upDownMotion) {
+				dy = 0;
+			}
+			var motion = false;
+			if (sideMotion) {
+				while (Math.abs(dx) > 0) {
+					var newTotalDx = info.totalDx + dx;
+					if (!stayWithin || (newTotalDx >= 0 && newTotalDx <= info.available.width - info.childWidth)) {
+						ArcticMC.moveClip(dragClip, dx, 0);
+						info.totalDx = newTotalDx;
+						motion = true;
+						break;
+					}
+					// We just try a smaller drag
+					if (dx > 0) {
+						dx--;
+					} else {
+						dx++;
+					}
+				}
+			}
+			if (upDownMotion) {
+				while (Math.abs(dy) > 0) {
+					var newTotalDy = info.totalDy + dy;
+					if (!stayWithin || (newTotalDy >= 0 && newTotalDy <= info.available.height - info.childHeight)) {
+						ArcticMC.moveClip(dragClip, 0, dy);
+						info.totalDy = newTotalDy;
+						motion = true;
+						break;
+					}
+					// We just try a smaller drag
+					if (dy > 0) {
+						dy--;
+					} else {
+						dy++;
+					}
+				}
+			}
+			if (motion) {
+				if (onDrag != null) {
+					var dragInfo = { 
+						x : info.totalDx, 
+						y : info.totalDy, 
+						width : info.childWidth,
+						height : info.childHeight,
+						totalWidth : info.available.width - info.childWidth, 
+						totalHeight : info.available.height - info.childHeight 
+					};
+					onDrag(dragInfo);
+				}
+			}
+		}
+		
+		#if flash9
+			var firstTime = true;
+			var mouseMove = function(s) {
+				if (!clip.visible) {
+					return;
+				}
+				var dx = clip.stage.mouseX - dragX;
+				var dy = clip.stage.mouseY - dragY;
+				doDrag(dx, dy);
+				dragX = clip.stage.mouseX;
+				dragY = clip.stage.mouseY;
+			}
+			var mouseUp = 
+				function(s) {
+					if (dragX == -1) {
+						return;
+					}
+					clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+					dragX = -1;
+					dragY = -1;
+					if (onStopDrag != null) {
+						onStopDrag();
+					}
+				};
+			clip.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, 
+				function (s) { 
+					if (ActiveClips.get().getActiveClip() == dragClip) {
+						dragX = clip.stage.mouseX;
+						dragY = clip.stage.mouseY;
+						me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+						if (firstTime) {
+							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
+							firstTime = false;
+						}
+					}
+				}
+			);
+		#else flash
+			clip.onMouseDown = function() {
+				if (ActiveClips.get().getActiveClip() == dragClip) {
+					// TODO: Check we do not hit a child which wants drags
+					dragX = flash.Lib.current._xmouse;
+					dragY = flash.Lib.current._ymouse;
+					if (clip.onMouseMove == null) {
+						clip.onMouseMove = function() {
+							if (!clip._visible) {
+								return;
+							}
+							var dx = flash.Lib.current._xmouse - dragX;
+							var dy = flash.Lib.current._ymouse - dragY;
+							doDrag(dx, dy);
+							dragX = flash.Lib.current._xmouse;
+							dragY = flash.Lib.current._ymouse;
+						};
+					}
+					if (clip.onMouseUp == null) {
+						clip.onMouseUp = function() {
+							if (onStopDrag != null) {
+								onStopDrag();
+							}
+							clip.onMouseMove = null;
+							clip.onMouseUp = null;
+						};
+					}
+				}
+			};
+		#end
+
+		if (null != onInit) {
+			var dragInfo = { 
+				x : info.totalDx, 
+				y : info.totalDy, 
+				width : info.childWidth,
+				height : info.childHeight,
+				totalWidth : info.available.width - info.childWidth, 
+				totalHeight : info.available.height - info.childHeight 
+			};
+			onInit(dragInfo, setPosition);
+		}
+		return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+	}
+		
 	/// For text elements, we cache the sizes
 	static private var metricsCache : Hash< { width: Float, height : Float } >;
 

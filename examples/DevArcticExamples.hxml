@@ -12,6 +12,7 @@
 # ArcticTest flash8
 -swf arctictest8.swf
 -main ArcticTest
+-debug
 -swf-header 800:600:50
 -cp ..
 --flash-strict
@@ -40,9 +41,10 @@
 
 
 --next
-# 
+# DynamicExample flash8
 -swf dynamicexample8.swf
 -main DynamicExample
+-debug
 -swf-header 800:600:50
 -cp ..
 --flash-strict
@@ -72,6 +74,7 @@
 # HelloWorld flash8
 -swf HelloWorld8.swf
 -main HelloWorld
+-debug
 -cp ..
 
 --next
@@ -95,6 +98,7 @@
 # 
 -swf ComponentTour8.swf
 -main ComponentTour
+-debug
 -swf-header 800:600:50
 -cp ..
 
