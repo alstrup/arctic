@@ -128,6 +128,22 @@ class Bugs {
 						100,20
 				)
 			);
+			case 11:
+			var alternatives = [];
+			var push = function(s : String) {
+				alternatives.push( {
+					selected: Arctic.makeSimpleButton("*" + s, null),
+					unselected: Arctic.makeSimpleButton( s, null),
+					value : s
+				});
+			}
+			push("1");
+			push("2");
+			push("3");
+			var change = function(n : Int, s) {
+				trace(n + " " + s);
+			};
+			screen = Align(0.5, 0.5, LineStack( Arctic.makeRadioButtonGroup(alternatives, change, 0).blocks.concat([nextButton]) ) );
 			
 			default:
 			screen = Text("The end");
