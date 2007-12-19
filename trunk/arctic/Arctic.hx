@@ -13,6 +13,10 @@ class Arctic {
 	/// Is the default font an embedded font?
 	static public var isDefaultFontEmbedded = false;
 
+	/// For controlling text: Should it be advanced rendered?
+	static public var textSharpness : Null<Float> = null;
+	static public var textGridFit = 0;
+
 	/// Make a text using the given parameters. Default color is black. If font is omitted, the default font is used
 	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>) {
 		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap, selectable);

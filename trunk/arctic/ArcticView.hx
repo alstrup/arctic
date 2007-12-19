@@ -509,6 +509,9 @@ class ArcticView {
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
 			#end
+			if (Arctic.textSharpness != null && mode == Create) {
+				ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit);
+			}
 			var s = ArcticMC.getSize(clip);
 			if (mode == Metrics) {
 				#if flash9
