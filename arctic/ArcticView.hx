@@ -526,7 +526,7 @@ class ArcticView {
 					metricsCache.set(html, s);
 				}
 			}
-			return { clip: clip, width: s.width, height: s.height, growWidth: if (wordWrap) true else false, growHeight: false };
+			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: false };
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit) :
 			if (mode == Metrics) {
@@ -958,12 +958,12 @@ class ArcticView {
 				mutableBlock.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
 					if (me.gui == null) return null;
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
-					if (ArcticMC.isActive(oldClip )) {
+					if (oldClip != null) { // remove the clip even if it's invisible
 						ArcticMC.remove(oldClip);
 						me.removeClip(oldClip);
 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
-					return me.build(mutableBlock.block, childClip, w, h, mode, 0);
+					return me.build(mutableBlock.block, childClip, w, h, Create, 0);
 				};
 			}
 			var childClip : MovieClip = getOrMakeClip(clip, mode, 0);
