@@ -528,7 +528,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: false };
 
-		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit) :
+		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
 			if (mode == Metrics) {
 				return { clip: null, width : null != width ? width : availableWidth, height : null != height ? height : availableHeight, 
 					growWidth : null == width, growHeight : null == height };
@@ -735,6 +735,43 @@ class ArcticView {
 
 				}
 				onInit(textFn);
+			}
+			
+			if (onInitEvents != null) {
+				var eventsFn = function (events: TextInputEvents): Void {					
+					#if flash9
+					addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
+					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
+						if (e.target == txtInput) events.onSetFocus();
+					});
+					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
+						if (e.target == txtInput) events.onKillFocus();
+					});
+					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
+						events.onPress();
+					});
+					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
+						events.onRelease();
+					});
+					#else flash
+					var buildhandler = function (handler: Void -> Void) { 
+						return function () {
+							if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
+								handler();
+							}
+						}
+					}
+					
+					txtInput.onChanged = null != events.onChange ? function (tf) { events.onChange(); } : txtInput.onChanged;
+					txtInput.onSetFocus = null != events.onSetFocus ? function (tf) { events.onSetFocus(); } : txtInput.onSetFocus;
+					txtInput.onKillFocus = null != events.onKillFocus ? function (tf) { events.onKillFocus(); } : txtInput.onKillFocus;
+					
+					clip.onMouseDown = null != events.onPress ? buildhandler(events.onPress) : clip.onMouseDown;
+					clip.onMouseUp = null != events.onRelease ? buildhandler(events.onRelease) : clip.onMouseUp;
+					#end
+				}
+				
+				onInitEvents(eventsFn);
 			}
 
 			var s = ArcticMC.getSize(clip);
@@ -2019,6 +2056,16 @@ class ArcticView {
 			return getOrMakeClip(p, Create, childNo);
 		#end
 	}
+	
+	#if flash9
+	/// A nice helper function to initialize optional event handlers
+	private static function addOptionalEventListener<Handler>(target: flash.events.EventDispatcher, type: String, handler: Handler, 
+		flashHandler: flash.events.Event -> Void) {
+		if (null != handler) {
+			target.addEventListener(type, flashHandler);
+		}
+	}
+	#end
 
 	/// Get to the book keeping details of the given clip
 	private function getBlockInfo(clip : MovieClip) : BlockInfo {

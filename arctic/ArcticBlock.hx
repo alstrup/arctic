@@ -56,7 +56,7 @@ enum ArcticBlock {
 	 * and will return current TextInput status in each of these dimensions. 
 	 * When changing, pass the values you don't want to change as null. If you only want to get status, you can pass null for the entire structure 
 	 */
-	TextInput(html : String, width : Null<Float>, height : Null<Float>, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void);
+	TextInput(html : String, width : Null<Float>, height : Null<Float>, ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null<Int>, ?numeric : Null<Bool>, ?bgColor : Null<Int>, ?focus : Null<Bool>, ?embeddedFont : Null<Bool>, ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void);
 
 	/**
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.
@@ -296,6 +296,17 @@ typedef TextInputModel = {
 	var selEnd: Null<Int>;
 	var cursorPos: Null<Int>;
 	var disabled: Null<Bool>;
+}
+
+/**
+ * TextInputEvents is an aux structure to manipulate manipulate input events
+ */
+typedef TextInputEvents = {
+	var onChange: Void -> Void;
+	var onSetFocus: Void -> Void;
+	var onKillFocus: Void -> Void;
+	var onPress: Void -> Void;
+	var onRelease: Void -> Void;
 }
 
 enum Filter {
