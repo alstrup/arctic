@@ -243,13 +243,14 @@ class ArcticTest {
 		if (arcticView != null) { arcticView.destroy(); }
 
 		var controlFun: TextInputModel -> TextInputModel;
+		var eventsFun: TextInputEvents -> Void;
 		
 		var gui = LineStack([
 				Filler,
 				ColumnStack([
 					Filler,
 					TextInput(Arctic.wrapWithDefaultFont("Text is not focused. Click 'Focus & select' to focus and make selection\nNote that text can span multiple lines and grow as you type", 20), 700, null, null, null, null, null, 0xFF0000, null, null,
-						function (fun) { controlFun = fun; }), 
+						function (fun) { controlFun = fun; }, function (fun) { eventsFun = fun; }), 
 					Filler
 				]),
 				ColumnStack([
@@ -267,6 +268,9 @@ class ArcticTest {
 			
 		arcticView = new ArcticView(gui, parent);
 		arcticView.display(true);
+		eventsFun({onPress: function () { trace("press!"); }, onRelease: function () { trace("Release!"); },
+			onChange: function () { trace("Change!"); }, onSetFocus: function () { trace("Focus!"); }, 
+			onKillFocus: function () { trace("Kill!"); } });
 	}
 	
 	public function maskBlock() {

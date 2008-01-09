@@ -3,5 +3,6 @@
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.18">
 	  - Support automatic use of advanced text rendering for text elements
+	  - Support for events for text fields
 	</version>
 </project>
