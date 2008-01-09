@@ -13,7 +13,6 @@ New features to consider
 - Resizable dialog
 
 - Consider changing ToggleButton to be a MutableBlock(Button( ) ) instead
- - Add hover state for ToggleButton (can be emulated with a Mutable block with buttons inside)
 
 - Make tooltip have a delay, and make sure they do not go outside the stage
 
@@ -29,8 +28,6 @@ New features to consider
 - Nice default, light-weight look for widgets
 
 - Add horizontal scrollbar (and extend columnstack to add one if needed)
-
-- Resizable bitmap with aspect-ratio preservation
 
 - Calendar widget
 
