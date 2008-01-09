@@ -529,254 +529,8 @@ class ArcticView {
 			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: false };
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
-			if (mode == Metrics) {
-				return { clip: null, width : null != width ? width : availableWidth, height : null != height ? height : availableHeight, 
-					growWidth : null == width, growHeight : null == height };
-			}
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			if (mode == Create) {
-				ActiveClips.get().activeClips.push(clip);
-			}
-			#if flash9
-				var txtInput : flash.text.TextField;
-				if (mode == Create) {
-					txtInput = new flash.text.TextField();
-				} else {
-					var t : Dynamic = clip.getChildAt(0);
-					txtInput = t;
-				}
-				if (embeddedFont) {
-					txtInput.embedFonts = true;
-				}
-				if (null != width) {
-					txtInput.width = width;
-				}
-				if (null != height) {
-					txtInput.height = height;
-				}
-			#else flash
-				var txtInput : flash.TextField;
-				if (mode == Create) {
-					txtInput = ArcticMC.createTextField(clip, 0, 0, width, height);
-					Reflect.setField(clip, "ti", txtInput);
-				} else {
-					txtInput = Reflect.field(clip, "ti");
-				}
-				txtInput.html = true;
-			#end
-			if (embeddedFont) {
-				txtInput.embedFonts = true;
-			}
-			txtInput.tabEnabled = true;
-			if (null != width && null != height) {
-				ArcticMC.setSize(clip, width, height);
-			} else {
-				txtInput.autoSize = "left";	
-				txtInput.wordWrap = (null != width); // wordWrap is the same as fixed width
-				txtInput.multiline = (null == height); // multiline allows growing in height
-			}
-			if (null != maxChars) {
-				txtInput.maxChars = maxChars;
-			}
-			if (null != bgColor) {
-				txtInput.background = true;
-				txtInput.backgroundColor = bgColor;
-			}
-			if (mode == Create) {
-				var validate = function() {
-					if (validator == null) {
-						return;
-					}
-					var isValid = validator(txtInput.text);
-					if (isValid) {
-						txtInput.background = (null != bgColor);
-						if (txtInput.background) {
-							txtInput.backgroundColor = bgColor;
-						}
-					} else {
-						txtInput.background = true;
-						txtInput.backgroundColor = 0xff0000;
-					}
-				}
-				// Setting additional txtInput properties from the style object
-				var fields = Reflect.fields(style);
-				for (i in 0...fields.length){
-					Reflect.setField(txtInput, fields[i], Reflect.field(style,fields[i]));
-				}
-				txtInput.htmlText = html;
-				// Retreive the format of the initial text
-				var txtFormat = txtInput.getTextFormat();
-				if (null != numeric && numeric) {
-					txtInput.restrict = "0-9";
-					txtFormat.align = "right";
-				}
-				var lastWidth = ArcticMC.getTextFieldWidth(txtInput);
-				var lastHeight = ArcticMC.getTextFieldHeight(txtInput);
-				var sizeChanged = function () {
-					if (null == width && lastWidth != ArcticMC.getTextFieldWidth(txtInput)) {
-						lastWidth = ArcticMC.getTextFieldWidth(txtInput);
-						return true;
-					}
-					if (null == height && lastHeight != ArcticMC.getTextFieldHeight(txtInput)) {
-						lastHeight = ArcticMC.getTextFieldHeight(txtInput);
-						return true;
-					}
-					return false;
-				}
-				#if flash9
-					txtInput.defaultTextFormat = txtFormat;
-					// Set the text again to enforce the formatting
-					txtInput.htmlText = html;
-					var me = this;
-					var listener = (null != width && null != height) ? function (e) { validate(); }
-						: function (e) { if (sizeChanged()) me.refresh(false); validate(); };
-					txtInput.addEventListener(flash.events.Event.CHANGE, listener);
-					clip.addChild(txtInput);
-					txtInput.type = TextFieldType.INPUT;
-				#else flash
-					txtInput.setNewTextFormat(txtFormat);
-					// Set the text again to enforce the formatting
-					txtInput.htmlText = html;
-					var me = this;
-					var listener = {
-						// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
-						onChanged : (null != width && null != height) ? function (txtFld : TextField) {	validate();	}
-							: function (txtFld: TextField) { if (sizeChanged()) me.refresh(false); validate(); }
-					};
-					txtInput.addListener(listener);
-					txtInput.type = "input";
-				#end
-			}
-			if (mode != Metrics) {
-				// Setting focus on txtInput 
-				#if flash9
-					if (focus != null && focus) {
-						clip.stage.focus = txtInput;
-						txtInput.setSelection(0, txtInput.length);
-					}
-				#else flash
-					if (focus != null && focus) {
-						flash.Selection.setFocus(txtInput);
-					}
-				#end
-			}
-
-			if (onInit != null) {
-				#if flash9
-				#else flash
-				var hasFocus = focus;
-				txtInput.onSetFocus = function(obj) {
-					hasFocus = true;
-				};
-				txtInput.onKillFocus = function(obj) {
-					hasFocus = false;
-				};
-				#end
-				
-				var textFn = function(status: TextInputModel) : TextInputModel {
-					if (null != status) {
-						if (status.html != null) {
-							txtInput.htmlText = status.html;
-						} else if (status.text != null) {
-							txtInput.text = status.text;
-						}
-						if (status.focus == true) {
-							#if flash9
-								clip.stage.focus = txtInput;
-								if (null == status.selStart || null == status.selEnd) {
-									txtInput.setSelection(0, txtInput.length);
-								}
-							#else flash
-								flash.Selection.setFocus(txtInput);
-								hasFocus = status.focus;
-							#end
-						}
-						if (null != status.selStart && null != status.selEnd) {
-							#if flash9
-							txtInput.setSelection(status.selStart, status.selEnd);
-							#else flash
-							flash.Selection.setSelection(status.selStart, status.selEnd);
-							#end
-						} else if (null != status.cursorPos) {
-							#if flash9
-							txtInput.setSelection(status.cursorPos, status.cursorPos);
-							#else flash
-							flash.Selection.setSelection(status.cursorPos, status.cursorPos);
-							#end
-						}
-						if (status.disabled == true) {
-							#if flash9
-							txtInput.type = TextFieldType.DYNAMIC;
-							#else flash
-							txtInput.type = "dynamic";
-							#end
-						} else {
-							#if flash9
-							txtInput.type = TextFieldType.INPUT;
-							#else flash
-							txtInput.type = "input";
-							#end
-						}
-					}
-					
-					#if flash9
-						var focus = clip.stage.focus == txtInput;
-						// temp variables to work around bugs in Null<Int> -> Int conversion
-						var selStart: Null<Int> = txtInput.selectionBeginIndex;
-						var selEnd: Null<Int> = txtInput.selectionEndIndex;
-						var cursorPos: Null<Int> = txtInput.caretIndex;
-						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
-								 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT }
-					#else flash
-						return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
-								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
-								 disabled: txtInput.type != "input" }
-					#end
-
-				}
-				onInit(textFn);
-			}
-			
-			if (onInitEvents != null) {
-				var eventsFn = function (events: TextInputEvents): Void {					
-					#if flash9
-					addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
-					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
-						if (e.target == txtInput) events.onSetFocus();
-					});
-					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
-						if (e.target == txtInput) events.onKillFocus();
-					});
-					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
-						events.onPress();
-					});
-					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
-						events.onRelease();
-					});
-					#else flash
-					var buildhandler = function (handler: Void -> Void) { 
-						return function () {
-							if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
-								handler();
-							}
-						}
-					}
-					
-					txtInput.onChanged = null != events.onChange ? function (tf) { events.onChange(); } : txtInput.onChanged;
-					txtInput.onSetFocus = null != events.onSetFocus ? function (tf) { events.onSetFocus(); } : txtInput.onSetFocus;
-					txtInput.onKillFocus = null != events.onKillFocus ? function (tf) { events.onKillFocus(); } : txtInput.onKillFocus;
-					
-					clip.onMouseDown = null != events.onPress ? buildhandler(events.onPress) : clip.onMouseDown;
-					clip.onMouseUp = null != events.onRelease ? buildhandler(events.onRelease) : clip.onMouseUp;
-					#end
-				}
-				
-				onInitEvents(eventsFn);
-			}
-
-			var s = ArcticMC.getSize(clip);
-			return { clip: clip, width: s.width, height: s.height, growWidth: null == width, growHeight: null == height };
-
+			return buildTextInput(p, childNo, mode, availableWidth, availableHeight, html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents);
+		
 		case Picture(url, w, h, scaling, resource):
 			if (mode == Metrics) {
 				return { clip: null, width : w, height : h, growWidth : false, growHeight : false };
@@ -1767,6 +1521,256 @@ class ArcticView {
 				+ child.width + "," + child.height + " " + child.growWidth + "," + child.growHeight + ") on " + id );
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		}
+	}
+	
+	private function buildTextInput(p, childNo, mode, availableWidth : Null<Float>, availableHeight : Null<Float>, html, width : Null<Float>, height : Null<Float>, validator, style, maxChars : Null<Int>, numeric : Null<Bool>, bgColor : Null<Int>, focus : Null<Bool>, embeddedFont, onInit, onInitEvents) {
+		if (mode == Metrics) {
+			return { clip: null, width : null != width ? width : availableWidth, height : null != height ? height : availableHeight, 
+				growWidth : null == width, growHeight : null == height };
+		}
+		var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+		if (mode == Create) {
+			ActiveClips.get().activeClips.push(clip);
+		}
+		#if flash9
+			var txtInput : flash.text.TextField;
+			if (mode == Create) {
+				txtInput = new flash.text.TextField();
+			} else {
+				var t : Dynamic = clip.getChildAt(0);
+				txtInput = t;
+			}
+			if (embeddedFont) {
+				txtInput.embedFonts = true;
+			}
+			if (null != width) {
+				txtInput.width = width;
+			}
+			if (null != height) {
+				txtInput.height = height;
+			}
+		#else flash
+			var txtInput : flash.TextField;
+			if (mode == Create) {
+				txtInput = ArcticMC.createTextField(clip, 0, 0, width, height);
+				Reflect.setField(clip, "ti", txtInput);
+			} else {
+				txtInput = Reflect.field(clip, "ti");
+			}
+			txtInput.html = true;
+		#end
+		if (embeddedFont) {
+			txtInput.embedFonts = true;
+		}
+		txtInput.tabEnabled = true;
+		if (null != width && null != height) {
+			ArcticMC.setSize(clip, width, height);
+		} else {
+			txtInput.autoSize = "left";	
+			txtInput.wordWrap = (null != width); // wordWrap is the same as fixed width
+			txtInput.multiline = (null == height); // multiline allows growing in height
+		}
+		if (null != maxChars) {
+			txtInput.maxChars = maxChars;
+		}
+		if (null != bgColor) {
+			txtInput.background = true;
+			txtInput.backgroundColor = bgColor;
+		}
+		if (mode == Create) {
+			var validate = function() {
+				if (validator == null) {
+					return;
+				}
+				var isValid = validator(txtInput.text);
+				if (isValid) {
+					txtInput.background = (null != bgColor);
+					if (txtInput.background) {
+						txtInput.backgroundColor = bgColor;
+					}
+				} else {
+					txtInput.background = true;
+					txtInput.backgroundColor = 0xff0000;
+				}
+			}
+			// Setting additional txtInput properties from the style object
+			var fields = Reflect.fields(style);
+			for (i in 0...fields.length){
+				Reflect.setField(txtInput, fields[i], Reflect.field(style,fields[i]));
+			}
+			txtInput.htmlText = html;
+			// Retreive the format of the initial text
+			var txtFormat = txtInput.getTextFormat();
+			if (null != numeric && numeric) {
+				txtInput.restrict = "0-9";
+				txtFormat.align = "right";
+			}
+			var lastWidth = ArcticMC.getTextFieldWidth(txtInput);
+			var lastHeight = ArcticMC.getTextFieldHeight(txtInput);
+			var sizeChanged = function () {
+				if (null == width && lastWidth != ArcticMC.getTextFieldWidth(txtInput)) {
+					lastWidth = ArcticMC.getTextFieldWidth(txtInput);
+					return true;
+				}
+				if (null == height && lastHeight != ArcticMC.getTextFieldHeight(txtInput)) {
+					lastHeight = ArcticMC.getTextFieldHeight(txtInput);
+					return true;
+				}
+				return false;
+			}
+			#if flash9
+				txtInput.defaultTextFormat = txtFormat;
+				// Set the text again to enforce the formatting
+				txtInput.htmlText = html;
+				var me = this;
+				var listener = (null != width && null != height) ? function (e) { validate(); }
+					: function (e) { if (sizeChanged()) me.refresh(false); validate(); };
+				txtInput.addEventListener(flash.events.Event.CHANGE, listener);
+				clip.addChild(txtInput);
+				txtInput.type = TextFieldType.INPUT;
+			#else flash
+				txtInput.setNewTextFormat(txtFormat);
+				// Set the text again to enforce the formatting
+				txtInput.htmlText = html;
+				var me = this;
+				var listener = {
+					// TODO : Don't know why 'onKillFocus' event is not working.  'onChanged' will be annoying.
+					onChanged : (null != width && null != height) ? function (txtFld : TextField) {	validate();	}
+						: function (txtFld: TextField) { if (sizeChanged()) me.refresh(false); validate(); }
+				};
+				txtInput.addListener(listener);
+				txtInput.type = "input";
+			#end
+		}
+		if (mode != Metrics) {
+			// Setting focus on txtInput 
+			#if flash9
+				if (focus != null && focus) {
+					clip.stage.focus = txtInput;
+					txtInput.setSelection(0, txtInput.length);
+				}
+			#else flash
+				if (focus != null && focus) {
+					flash.Selection.setFocus(txtInput);
+				}
+			#end
+		}
+
+		if (onInit != null) {
+			#if flash9
+			#else flash
+			var hasFocus = focus;
+			txtInput.onSetFocus = function(obj) {
+				hasFocus = true;
+			};
+			txtInput.onKillFocus = function(obj) {
+				hasFocus = false;
+			};
+			#end
+			
+			var textFn = function(status: TextInputModel) : TextInputModel {
+				if (null != status) {
+					if (status.html != null) {
+						txtInput.htmlText = status.html;
+					} else if (status.text != null) {
+						txtInput.text = status.text;
+					}
+					if (status.focus == true) {
+						#if flash9
+							clip.stage.focus = txtInput;
+							if (null == status.selStart || null == status.selEnd) {
+								txtInput.setSelection(0, txtInput.length);
+							}
+						#else flash
+							flash.Selection.setFocus(txtInput);
+							hasFocus = status.focus;
+						#end
+					}
+					if (null != status.selStart && null != status.selEnd) {
+						#if flash9
+						txtInput.setSelection(status.selStart, status.selEnd);
+						#else flash
+						flash.Selection.setSelection(status.selStart, status.selEnd);
+						#end
+					} else if (null != status.cursorPos) {
+						#if flash9
+						txtInput.setSelection(status.cursorPos, status.cursorPos);
+						#else flash
+						flash.Selection.setSelection(status.cursorPos, status.cursorPos);
+						#end
+					}
+					if (status.disabled == true) {
+						#if flash9
+						txtInput.type = TextFieldType.DYNAMIC;
+						#else flash
+						txtInput.type = "dynamic";
+						#end
+					} else {
+						#if flash9
+						txtInput.type = TextFieldType.INPUT;
+						#else flash
+						txtInput.type = "input";
+						#end
+					}
+				}
+				
+				#if flash9
+					var focus = clip.stage.focus == txtInput;
+					// temp variables to work around bugs in Null<Int> -> Int conversion
+					var selStart: Null<Int> = txtInput.selectionBeginIndex;
+					var selEnd: Null<Int> = txtInput.selectionEndIndex;
+					var cursorPos: Null<Int> = txtInput.caretIndex;
+					return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
+							 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT }
+				#else flash
+					return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
+							 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
+							 disabled: txtInput.type != "input" }
+				#end
+
+			}
+			onInit(textFn);
+		}
+		
+		if (onInitEvents != null) {
+			var eventsFn = function (events: TextInputEvents): Void {					
+				#if flash9
+				addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
+				addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
+					if (e.target == txtInput) events.onSetFocus();
+				});
+				addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
+					if (e.target == txtInput) events.onKillFocus();
+				});
+				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
+					events.onPress();
+				});
+				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
+					events.onRelease();
+				});
+				#else flash
+				var buildhandler = function (handler: Void -> Void) { 
+					return function () {
+						if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
+							handler();
+						}
+					}
+				}
+				
+				txtInput.onChanged = null != events.onChange ? function (tf) { events.onChange(); } : txtInput.onChanged;
+				txtInput.onSetFocus = null != events.onSetFocus ? function (tf) { events.onSetFocus(); } : txtInput.onSetFocus;
+				txtInput.onKillFocus = null != events.onKillFocus ? function (tf) { events.onKillFocus(); } : txtInput.onKillFocus;
+				
+				clip.onMouseDown = null != events.onPress ? buildhandler(events.onPress) : clip.onMouseDown;
+				clip.onMouseUp = null != events.onRelease ? buildhandler(events.onRelease) : clip.onMouseUp;
+				#end
+			}
+			
+			onInitEvents(eventsFn);
+		}
+
+		var s = ArcticMC.getSize(clip);
+		return { clip: clip, width: s.width, height: s.height, growWidth: null == width, growHeight: null == height };
 	}
 
 	private function buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag) {
