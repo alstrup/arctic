@@ -130,9 +130,10 @@ enum ArcticBlock {
 	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Null<Int>, ?disableScrollbar : Bool);
 	
 	/**
-	 * A 2-d grid of block. For now, this does not support resizing or scrollbars.
+	 * A 2-d grid of block. For now, this does not support resizing or horizontal scrollbar.
+	 * Vertical scrollbar will be added automatically if the opposite is not specified
 	 */
-	Grid(blocks: Array<Array<ArcticBlock>>);
+	Grid(blocks: Array<Array<ArcticBlock>>, ?disableScrollbar: Bool, ?oddRowColor: Int, ?evenRowColor: Int);
 	
 	/**
 	* Places the first block at the top-left corner, then the next block will be placed to the right. 

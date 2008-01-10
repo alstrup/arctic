@@ -69,8 +69,9 @@ class DynamicExample  {
 	private function grid() {
 		var screen = Background(0x808080, Border( 1, 1, Grid( [ 
 			[ Text("First cell"), Text("Second cell"), Filler ],
-			[ Text("Second line"), Filler, Text("Last") ]
-		]) ) );
+			[ Text("Second line"), Filler, Text("Test") ], 
+			[ Text("Third line"), Text("Some text"), Text("Last") ]
+		], false, 0xFFFF00 ) ) );
 		
 		// Then construct the arctic object
 		arcticView = new ArcticView( screen, parent );
