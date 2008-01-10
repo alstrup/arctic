@@ -526,7 +526,7 @@ class ArcticView {
 					metricsCache.set(html, s);
 				}
 			}
-			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: false };
+			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: wordWrap };
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
 			return buildTextInput(p, childNo, mode, availableWidth, availableHeight, html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents);
@@ -1198,7 +1198,7 @@ class ArcticView {
 			m.height = y - yspacing;
 			return m;
 		
-		case Grid(cells):
+		case Grid(cells, disableScrollbar, oddRowColor, evenRowColor):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = getOrMakeClip(clip, mode, 0);
 
@@ -1244,8 +1244,20 @@ class ArcticView {
 						ArcticMC.setXY(b.clip, xc, yc);
 					}
 					xc += Math.max(b.width, columnWidths[x]);
+					// extra height check (important for text fields with wordWrap=true)
+					if (b.height > lineHeights[y]) {
+						lineHeights[y] = b.height;
+					}
 					++x;
 					++i;
+				}
+				var color = (y + 1) % 2 == 0 ? evenRowColor : oddRowColor;
+				// a fill will not be created if the color is equal to null
+				if (mode != Metrics && color != null) {
+					var g = ArcticMC.getGraphics(child);
+					g.beginFill(color);
+					DrawUtils.drawRect(child, 0, yc, xc, lineHeights[y]);
+					g.endFill();
 				}
 				yc += lineHeights[y];
 				++y;
@@ -1257,6 +1269,22 @@ class ArcticView {
 			var height = 0.0;
 			for (h in lineHeights) {
 				height += h;
+			}
+			
+			if (disableScrollbar != true) {
+				// TODO: draw horizontal scrollbar if (width > availableHeight) 
+				// draw vertical scrollbar
+				if (height - availableHeight >= 1 && availableHeight >= 34) {
+					if (mode != Metrics) {
+						Scrollbar.drawScrollBar(clip, child, width, availableHeight, height, 0);
+					}
+					width += 17;
+					height = availableHeight;
+				} else {
+					if (mode != Metrics) {
+						Scrollbar.removeScrollbar(clip, child);
+					}
+				}	
 			}
 		
 			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
