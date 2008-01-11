@@ -1611,15 +1611,15 @@ class ArcticView {
 					return;
 				}
 				var isValid = validator(txtInput.text);
-				if (isValid) {
+				if (isValid == true) {
 					txtInput.background = (null != bgColor);
 					if (txtInput.background) {
 						txtInput.backgroundColor = bgColor;
 					}
-				} else {
+				} else if (isValid == false) {
 					txtInput.background = true;
 					txtInput.backgroundColor = 0xff0000;
-				}
+				} // don't change background if isValid == null
 			}
 			// Setting additional txtInput properties from the style object
 			var fields = Reflect.fields(style);
