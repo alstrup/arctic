@@ -48,6 +48,27 @@ class ArcticRectangle {
 	public var top : Float;
 	public var width : Float;
 	public var height : Float;
+	
+	public var right(getRight, setRight): Float;
+	public var bottom(getBottom, setBottom): Float;
+	
+	function getRight(): Float {
+		return left + width;
+	}
+	
+	function setRight(v: Float): Float {
+		width = v - left;
+		return getRight();
+	}
+	
+	function getBottom(): Float {
+		return top + height;
+	}
+	
+	function setBottom(v: Float): Float {
+		height = v - top;
+		return getBottom();
+	}
 }
 
 class ArcticPoint {
