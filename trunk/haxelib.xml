@@ -2,5 +2,7 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.20">
+	   - treat null specially in TextInput validation function 
+	   - ArcticRectangle: better emulation on F7
 	</version>
 </project>
