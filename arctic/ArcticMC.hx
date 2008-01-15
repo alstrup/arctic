@@ -245,9 +245,6 @@ class ArcticMC {
 		#end
 	}
 
-	/**
-	 * Changes visiblity of a clip.
-	 */
 	static public function setEnabled(m : ArcticMovieClip, v : Bool) {
 		#if flash9
 			if (m.mouseEnabled != v) {
