@@ -236,6 +236,29 @@ class ArcticMC {
 			}
 		#end
 	}
+
+	static public function isEnabled(m : ArcticMovieClip) : Bool {
+		#if flash9
+			return m.mouseEnabled;
+		#else flash
+			return m.enabled;
+		#end
+	}
+
+	/**
+	 * Changes visiblity of a clip.
+	 */
+	static public function setEnabled(m : ArcticMovieClip, v : Bool) {
+		#if flash9
+			if (m.mouseEnabled != v) {
+				m.mouseEnabled = v;
+			}
+		#else flash
+			if (m.enabled != v) {
+				m.enabled = v;
+			}
+		#end
+	}
 	
 	/// Gets the alpha value of a clip, between 0 and 100
 	static public function getAlpha(m : ArcticMovieClip) : Float {
