@@ -8,12 +8,16 @@ import flash.geom.Point;
 typedef ArcticRectangle = Rectangle
 typedef ArcticPoint = Point
 typedef ArcticTextField = flash.text.TextField
+typedef ArcticTextFormat = flash.text.TextFormat
+typedef ArcticDisplayObjectContaiter = flash.display.DisplayObjectContainer
 #else flash8
 import flash.geom.Rectangle;
 import flash.geom.Point;
 typedef ArcticRectangle = Rectangle<Float>
 typedef ArcticPoint = Point<Float>
 typedef ArcticTextField = flash.TextField
+typedef ArcticTextFormat = flash.TextFormat
+typedef ArcticDisplayObjectContaiter = ArcticMovieClip
 
 import flash.Mouse;
 
@@ -84,6 +88,8 @@ class ArcticPoint {
 }
 
 typedef ArcticTextField = flash.TextField
+typedef ArcticTextFormat = flash.TextFormat
+typedef ArcticDisplayObjectContaiter = ArcticMovieClip
 
 import flash.Mouse;
 #end
@@ -530,6 +536,47 @@ class ArcticMC {
 		return field.height;
 		#else flash
 		return field._height;
+		#end
+	}
+	
+	static public function setDefaultTextFormat(tf : ArcticTextField, textFormat: ArcticTextFormat) {
+		#if flash9
+		return tf.defaultTextFormat = textFormat;
+		#else flash
+		return tf.setNewTextFormat(textFormat);
+		#end
+	}
+	
+	static public function setTextFieldSize(tf : ArcticTextField, width: Null<Float>, height: Null<Float>) {
+		if (width != null) {
+			#if flash9
+				tf.width = width;
+			#else flash
+				tf._width = width;
+			#end
+		}
+		if (height != null) {
+			#if flash9
+				tf.height = height;
+			#else flash
+				tf._height = height;
+			#end
+		}
+	}
+	
+	static public function getParent(mc : ArcticMovieClip): ArcticDisplayObjectContaiter {
+		#if flash9
+		return mc.parent;
+		#else flash
+		return mc._parent;
+		#end
+	}
+	
+	static public function bringToFront(mc : ArcticMovieClip) {
+		#if flash9
+		return mc.parent.setChildIndex(mc, mc.parent.numChildren - 1);
+		#else flash
+		return mc.swapDepths(getNextHighestDepth(mc._parent) - 1);
 		#end
 	}
 }

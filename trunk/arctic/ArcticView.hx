@@ -163,7 +163,7 @@ class ArcticView {
 	* the GUI using update() below. If you pass true, everything is built
 	* from scratch.
 	*/ 
-	public function refresh(rebuild : Bool): {width: Float, height: Float} {
+	public function refresh(rebuild : Bool): {width: Float, height: Float, base: MovieClip} {
 		if (rebuild && base != null) {
 			remove();
 		}
@@ -180,7 +180,7 @@ class ArcticView {
 		}
 		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
 		base = result.clip;
-		return {width: result.width, height: result.height};
+		return {width: result.width, height: result.height, base: base};
 	}
 	/// What child number is the root block on the parent clip?
 	private var firstChild : Int;
