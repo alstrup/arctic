@@ -9,7 +9,7 @@ typedef ArcticRectangle = Rectangle
 typedef ArcticPoint = Point
 typedef ArcticTextField = flash.text.TextField
 typedef ArcticTextFormat = flash.text.TextFormat
-typedef ArcticDisplayObjectContaiter = flash.display.DisplayObjectContainer
+typedef ArcticDisplayObjectContainer = flash.display.DisplayObjectContainer
 #else flash8
 import flash.geom.Rectangle;
 import flash.geom.Point;
@@ -17,7 +17,7 @@ typedef ArcticRectangle = Rectangle<Float>
 typedef ArcticPoint = Point<Float>
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
-typedef ArcticDisplayObjectContaiter = ArcticMovieClip
+typedef ArcticDisplayObjectContainer = ArcticMovieClip
 
 import flash.Mouse;
 
@@ -89,7 +89,7 @@ class ArcticPoint {
 
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
-typedef ArcticDisplayObjectContaiter = ArcticMovieClip
+typedef ArcticDisplayObjectContainer = ArcticMovieClip
 
 import flash.Mouse;
 #end
@@ -564,7 +564,7 @@ class ArcticMC {
 		}
 	}
 	
-	static public function getParent(mc : ArcticMovieClip): ArcticDisplayObjectContaiter {
+	static public function getParent(mc : ArcticMovieClip): ArcticDisplayObjectContainer {
 		#if flash9
 		return mc.parent;
 		#else flash
