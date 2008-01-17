@@ -2,5 +2,9 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.21">
+		- add Arctic.makeSwitch helper
+		- ArcticMC.setVisible is robust against empty clips (which allows the
+		  useful pattern Arctic.makeSwitch([ Fixed(0,0), Something ]) which can
+		  help reserve space for something that might show up later.
 	</version>
 </project>
