@@ -61,6 +61,16 @@ class Arctic {
 		return Button(base, hover, null, ourHandler);
 	}
 	
+	static public function makeSwitch(blocks : Array<ArcticBlock>, ?initial : Int) : { block : ArcticBlock, switchFn : Int -> Void } {
+		var result = {
+			block : null,
+			switchFn : null
+		};
+		var getSwitchFn = function (fn) { result.switchFn = fn; };
+		result.block = Switch( blocks, if (initial != null) initial else 0, getSwitchFn);
+		return result;
+	}
+	
 	/// Make a button with a pressed state
 	static public function makePressButton(normal : ArcticBlock, hover : ArcticBlock, pressed : ArcticBlock, onClick : Void -> Void) : ArcticBlock {
 		var switchFn : Int -> Void;
@@ -180,7 +190,7 @@ class Arctic {
 		};
 
 		/// This function can move the slider
-		var setPositionFn = function (x : Float, y : Float) {
+		var setPositionFn = function (x : Float, y : Float) : Void {
 			// Update position in slider coordinate system
 			currentX = Math.min(maximumX, Math.max(minimumX, x));
 			currentY = Math.min(maximumY, Math.max(minimumY, y));

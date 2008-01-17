@@ -187,6 +187,7 @@ enum ArcticBlock {
 	 * block will cache the views of the other, invisible blocks, so that switching to another 
 	 * block is fast. The onInit function is a function that is called on construction with a 
 	 * function which allows you to switch between the different blocks.
+	 * 
 	 * Example:
 	 * 
 	 *   var switchFn : Int -> Void; 
@@ -195,6 +196,8 @@ enum ArcticBlock {
 	 *   ...
 	 *   // Switch to block 1
 	 *   switchFn(1);
+	 * 
+	 * See Arctic.makeSwitch for an simple wrapper that helps do this.
 	 */ 
 	Switch(blocks : Array<ArcticBlock>, current : Int, onInit : (Int -> Void) -> Void);
 

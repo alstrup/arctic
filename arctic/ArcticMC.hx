@@ -226,6 +226,7 @@ class ArcticMC {
 	 * Changes visiblity of a clip.
 	 */
 	static public function setVisible(m : ArcticMovieClip, v : Bool) {
+		if (m == null) return;
 		#if flash9
 			if (m.visible != v) {
 				m.visible = v;
