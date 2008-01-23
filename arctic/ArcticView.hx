@@ -834,11 +834,11 @@ class ArcticView {
 			}
 			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
 
-		case ConstrainWidth(minimumWidth, maximumWidth, block) :
+		case ConstrainWidth(minimumWidth, maximumWidth, block, dontClip) :
 			// Special case: Nested constraints can be optimised a lot!
 			if (mode == Metrics && minimumWidth == maximumWidth) {
 				switch (block) {
-					case ConstrainHeight(minHeight, maxHeight, b):
+					case ConstrainHeight(minHeight, maxHeight, b, dontClip):
 						if (minHeight == maxHeight) {
 							return { clip: null, width: minimumWidth, height: minHeight, growWidth: false, growHeight: false };
 						}
@@ -858,7 +858,7 @@ class ArcticView {
 				child.width = maximumWidth;
 			}
 			if (mode != Metrics) {
-				if (doClip) {
+				if (doClip && dontClip != true) {
 					ArcticMC.setSize(clip, child.width, child.height);
 				} else {
 					// Undo any clipping we had earlier
@@ -867,11 +867,11 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: false, growHeight: child.growHeight };
 
-        case ConstrainHeight(minimumHeight, maximumHeight, block) :
+        case ConstrainHeight(minimumHeight, maximumHeight, block, dontClip) :
 			// Special case: Nested constraints can be optimised a lot!
 			if (mode == Metrics && minimumHeight == maximumHeight) {
 				switch (block) {
-					case ConstrainWidth(minWidth, maxWidth, b):
+					case ConstrainWidth(minWidth, maxWidth, b, dontClip):
 						if (minWidth == maxWidth) {
 							return { clip: null, width: minWidth, height: minimumHeight, growWidth: false, growHeight: false };
 						}
@@ -891,7 +891,7 @@ class ArcticView {
 				child.height = maximumHeight;
 			}
 			if (mode != Metrics) {
-				if (doClip) {
+				if (doClip && dontClip != true) {
 					ArcticMC.setSize(clip, child.width, child.height);
 				} else {
 					// Undo any clipping we had earlier
