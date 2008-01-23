@@ -28,8 +28,8 @@ class Arctic {
 		return Button(t, Background(0xf0f0f0, t, 70.0, if (fontsize != null) fontsize / 4 else 5.0), onClick);
 	}
 	
-	static public function fixSize(width : Float, height : Float, block : ArcticBlock) : ArcticBlock {
-		return ConstrainWidth(width, width, ConstrainHeight(height, height, block));
+	static public function fixSize(width : Float, height : Float, block : ArcticBlock, ?dontClip : Bool) : ArcticBlock {
+		return ConstrainWidth(width, width, ConstrainHeight(height, height, block, dontClip), dontClip);
 	}
 	
 	/// This constructs a button which repeatedly triggers the action as long as the mouse is pressed
