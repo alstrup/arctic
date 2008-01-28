@@ -7,5 +7,6 @@
 		  useful pattern Arctic.makeSwitch([ Fixed(0,0), Something ]) which can
 		  help reserve space for something that might show up later.
 		- Extend ConstrainWidth, ConstrainHeight and Arctic.fixSize to allow NOT clipping the child
+		- Support leaving hover in Button as null
 	</version>
 </project>
