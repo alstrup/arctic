@@ -579,31 +579,45 @@ class ArcticView {
 			ArcticMC.setSize(clip, w, h);
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
-		case Button(block, hover, action, actionExt):
+		case Button(block, hoverb, action, actionExt):
 			if (mode == Metrics) {
 				var child = build(block, null, availableWidth, availableHeight, Metrics, 0);
-				var hover = build(hover, null, availableWidth, availableHeight, Metrics, 1);
+				if (hoverb == null) {
+					return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+				}
+				var hover = build(hoverb, null, availableWidth, availableHeight, Metrics, 1);
 				return { clip: null, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			var hover = build(hover, clip, availableWidth, availableHeight, mode, 1);
-			if (child.clip == null || hover.clip == null) {
+			if (child.clip == null) {
 				#if debug
 				trace("Can not make button of empty clip");
 				#end
-				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+				return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+			ArcticMC.setVisible(child.clip, true);
+
+			var hover = null;
+			if (hoverb != null) {
+				hover = build(hoverb, clip, availableWidth, availableHeight, mode, 1);
 			}
 			// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
 			// position yet, so we can't do this yet! The parent would have to position us first, which is a change
 			// for another day.
-			ArcticMC.setVisible(child.clip, true);
-			ArcticMC.setVisible(hover.clip, false);
+			
+			var hasHover = hover != null && hover.clip != null;
+			
+			if (hasHover) {
+				ArcticMC.setVisible(hover.clip, false);
+			}
 			#if flash9
 				child.clip.buttonMode = true;
 				child.clip.mouseChildren = false;
-				hover.clip.buttonMode = true;
-				hover.clip.mouseChildren = false;
+				if (hasHover) {
+					hover.clip.buttonMode = true;
+					hover.clip.mouseChildren = false;
+				}
 				if (mode == Create) {
 					if (action != null) {
 						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
@@ -630,20 +644,22 @@ class ArcticView {
 								}
 							} ); 
 					}
-					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
-							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-							if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
-								child.clip.visible = false;
-								hover.clip.visible = true;
-							} else {
-								child.clip.visible = true;
-								hover.clip.visible = false;
-							}
-						} );
-					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
-						child.clip.visible = true;
-						hover.clip.visible = false;
-					});
+					if (hasHover) {
+						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
+								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+									child.clip.visible = false;
+									hover.clip.visible = true;
+								} else {
+									child.clip.visible = true;
+									hover.clip.visible = false;
+								}
+							} );
+						addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
+							child.clip.visible = true;
+							hover.clip.visible = false;
+						});
+					}
 				}
 			#else flash
 				if (mode == Create) {
@@ -669,23 +685,28 @@ class ArcticView {
 							}
 						}
 					}
-					clip.onMouseMove = function() {
-						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-						var mouseInside = child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip);
-						if (mouseInside) {
-							child.clip._visible = false;
-							hover.clip._visible = true;
-						} else {
+					if (hasHover) {
+						clip.onMouseMove = function() {
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							var mouseInside = child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip);
+							if (mouseInside) {
+								child.clip._visible = false;
+								hover.clip._visible = true;
+							} else {
+								child.clip._visible = true;
+								hover.clip._visible = false;
+							}
+						};
+						hover.clip.onRollOut = function() { 
 							child.clip._visible = true;
 							hover.clip._visible = false;
-						}
-					};
-					hover.clip.onRollOut = function() { 
-						child.clip._visible = true;
-						hover.clip._visible = false;
-					};
+						};
+					}
 				}
 			#end
+			if (!hasHover) {
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):

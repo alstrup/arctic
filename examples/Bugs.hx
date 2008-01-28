@@ -145,6 +145,9 @@ class Bugs {
 			};
 			screen = Align(0.5, 0.5, LineStack( Arctic.makeRadioButtonGroup(alternatives, change, 0).blocks.concat([nextButton]) ) );
 			
+			case 12:
+			screen = Button(Arctic.makeText("Test"), null, function() { trace("Click"); });
+			
 			default:
 			screen = Text("The end");
 		}

@@ -71,6 +71,7 @@ enum ArcticBlock {
 	 * onClickExtended is called even if the click or released is outside the button, and the final bool tells 
 	 * whether the click is inside the button or not.
 	 * On button release, onClick is called before onClickExtended.
+	 * hover can be null, in which case the button does not change look when hovered.
 	 */
 	Button(block : ArcticBlock, hover : ArcticBlock, onClick : Void -> Void, ?onClickExtended : Float -> Float -> Bool -> Bool-> Void);
 
