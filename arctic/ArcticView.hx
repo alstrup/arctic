@@ -855,11 +855,11 @@ class ArcticView {
 			}
 			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
 
-		case ConstrainWidth(minimumWidth, maximumWidth, block, dontClip) :
+		case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			// Special case: Nested constraints can be optimised a lot!
 			if (mode == Metrics && minimumWidth == maximumWidth) {
 				switch (block) {
-					case ConstrainHeight(minHeight, maxHeight, b, dontClip):
+					case ConstrainHeight(minHeight, maxHeight, b):
 						if (minHeight == maxHeight) {
 							return { clip: null, width: minimumWidth, height: minHeight, growWidth: false, growHeight: false };
 						}
@@ -867,32 +867,20 @@ class ArcticView {
 				}
 			}
 		
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-            var child = build(block, clip, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, 0);
-			var doClip = false;
+            var child = build(block, p, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, childNo);
 			if (child.width < minimumWidth) {
-				doClip = true;
 				child.width = minimumWidth;
 			}
 			if (child.width > maximumWidth) {
-				doClip = true;
 				child.width = maximumWidth;
 			}
-			if (mode != Metrics) {
-				if (doClip && dontClip != true) {
-					ArcticMC.setSize(clip, child.width, child.height);
-				} else {
-					// Undo any clipping we had earlier
-					ArcticMC.setScrollRect(clip, null);
-				}
-			}
-			return { clip: clip, width: child.width, height: child.height, growWidth: false, growHeight: child.growHeight };
+			return { clip: child.clip, width: child.width, height: child.height, growWidth: false, growHeight: child.growHeight };
 
-        case ConstrainHeight(minimumHeight, maximumHeight, block, dontClip) :
+        case ConstrainHeight(minimumHeight, maximumHeight, block) :
 			// Special case: Nested constraints can be optimised a lot!
 			if (mode == Metrics && minimumHeight == maximumHeight) {
 				switch (block) {
-					case ConstrainWidth(minWidth, maxWidth, b, dontClip):
+					case ConstrainWidth(minWidth, maxWidth, b):
 						if (minWidth == maxWidth) {
 							return { clip: null, width: minWidth, height: minimumHeight, growWidth: false, growHeight: false };
 						}
@@ -900,26 +888,24 @@ class ArcticView {
 				}
 			}
 		
-			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			var child = build(block, clip, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, 0);
-			var doClip = false;
+			var child = build(block, p, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, childNo);
 			if (child.height < minimumHeight) {
-				doClip = true;
 				child.height = minimumHeight;
 			}
 			if (child.height > maximumHeight) {
-				doClip = true;
 				child.height = maximumHeight;
 			}
-			if (mode != Metrics) {
-				if (doClip && dontClip != true) {
-					ArcticMC.setSize(clip, child.width, child.height);
-				} else {
-					// Undo any clipping we had earlier
-					ArcticMC.setScrollRect(clip, null);
-				}
-			}
-			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: false };
+			return { clip: child.clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: false };
+			
+		case Clip(width, height, block):
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, p, availableWidth, availableHeight, mode, childNo);
+			var w = child.width;
+			var h = child.height;
+			if (width != null) w = width;
+			if (height != null) h = height;
+			ArcticMC.clipSize(clip, w, h);
+			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case ColumnStack(blocks):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);

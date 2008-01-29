@@ -89,14 +89,19 @@ enum ArcticBlock {
      * The ArcticBlock will be constrained to the dimensions given - by clipping or extending.
 	 * If dontClip is true, the child will not be clipped.
      */
-    ConstrainWidth(minimumWidth : Float, maximumWidth : Float, block : ArcticBlock, ?dontClip : Bool); 
+    ConstrainWidth(minimumWidth : Float, maximumWidth : Float, block : ArcticBlock); 
 
     /**
      * The ArcticBlock will be constrained to the dimensions given - by clipping or extending
 	 * If dontClip is true, the child will not be clipped.
      */
-    ConstrainHeight(minimumHeight : Float, maximumHeight : Float, block : ArcticBlock, ?dontClip : Bool);
+    ConstrainHeight(minimumHeight : Float, maximumHeight : Float, block : ArcticBlock);
 
+	/**
+	 * Clip the block to a certain size
+	 */
+	Clip(width : Null<Float>, height : Null<Float>, block : ArcticBlock);
+	
 	/**
 	 * Filler is greedy empty space, that eats space when put in a LineStack or ColumnStack.
 	 * This can be used to implement left alignment, centering, and similar layout strategies.
