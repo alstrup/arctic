@@ -236,8 +236,13 @@ class ArcticView {
 	}
 	
 	private function removeClip(c : ArcticMovieClip) {
+		var p = ArcticMC.getParent(c);
+		ArcticMC.remove(c);
 		movieClips.remove(c);
 		ActiveClips.get().activeClips.remove(c);
+
+		Reflect.setField(p, "c0", null);
+		
 		#if flash9
 		#else flash
 		// Clean up mouse wheel listeners
@@ -771,7 +776,6 @@ class ArcticView {
 					if (me.gui == null) return null;
 					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
 					if (oldClip != null) { // remove the clip even if it's invisible
-						ArcticMC.remove(oldClip);
 						me.removeClip(oldClip);
 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
