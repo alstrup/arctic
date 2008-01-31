@@ -86,21 +86,21 @@ enum ArcticBlock {
 	ToggleButton(selected : ArcticBlock, unselected : ArcticBlock, initialState : Bool, onChange : Bool -> Void, ?onInit : (Bool -> Void) -> Void);
 
     /**
-     * The ArcticBlock will be constrained to the dimensions given - by clipping or extending.
-	 * If dontClip is true, the child will not be clipped.
+     * The ArcticBlock will be constrained to the dimensions given - in terms of layout only.
+	 * To crop a clip, use the Crop block.
      */
     ConstrainWidth(minimumWidth : Float, maximumWidth : Float, block : ArcticBlock); 
 
     /**
-     * The ArcticBlock will be constrained to the dimensions given - by clipping or extending
-	 * If dontClip is true, the child will not be clipped.
+     * The ArcticBlock will be constrained to the dimensions given - in terms of layout only.
+	 * To crop a clip, use the Crop block.
      */
     ConstrainHeight(minimumHeight : Float, maximumHeight : Float, block : ArcticBlock);
 
 	/**
 	 * Clip the block to a certain size
 	 */
-	Clip(width : Null<Float>, height : Null<Float>, block : ArcticBlock);
+	Crop(width : Null<Float>, height : Null<Float>, block : ArcticBlock);
 	
 	/**
 	 * Filler is greedy empty space, that eats space when put in a LineStack or ColumnStack.
