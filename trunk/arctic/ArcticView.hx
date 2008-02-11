@@ -536,7 +536,7 @@ class ArcticView {
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
 			return buildTextInput(p, childNo, mode, availableWidth, availableHeight, html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents);
 		
-		case Picture(url, w, h, scaling, resource):
+		case Picture(url, w, h, scaling, resource, crop):
 			if (mode == Metrics) {
 				return { clip: null, width : w, height : h, growWidth : false, growHeight : false };
 			}
@@ -553,6 +553,24 @@ class ArcticView {
 					dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
 						trace("[ERROR] Security Error with " + url + ": " + event.text);						
 					});
+					dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
+						try {
+							var loader : flash.display.Loader = event.target.loader;
+							if (Std.is(loader.content, flash.display.Bitmap)) {
+								// Bitmaps are not smoothed per default when loading. We take care of that here
+								var image : flash.display.Bitmap = cast loader.content;
+								image.smoothing = true;
+							}
+							if (crop != null) {
+								// Crop our clip in attempt to avoid spurious lines
+								loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
+							}
+						} catch (e : Dynamic) {
+							// When running locally, security errors can be called when we access the content
+							// of loaded files, so in that case, we have lost, and can not use nice smoothing
+						}
+					}
+					);
 					loader.load(request);
 					clip.addChild(loader);
 				}
