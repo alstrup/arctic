@@ -9,5 +9,7 @@
 		- Support leaving hover in Button as null
 		- Clean up the mess about clipping and ConstrainWidth/Height. These never clip. Instead,
 		  introduce a new Clip block.
+		- When loading bitmaps (without alpha), smooth the picture
+		- Crop pictures with alpha 1 pixel around the edge to work around Flash rendering problem
 	</version>
 </project>
