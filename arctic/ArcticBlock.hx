@@ -40,8 +40,8 @@ enum ArcticBlock {
 	 * If wordWrap is true, the text will grow in the width and height as much as possible,
 	 * and the text inside word wrap according to how much width is available.
 	 * If wordWrap is false, the text will always have the same size, and only break lines
-	 * selectable defines whether user can select & copy contents
 	 * if <br/> tags exist in the text.
+	 * selectable defines whether user can select & copy contents
 	 */
 	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>);
 
