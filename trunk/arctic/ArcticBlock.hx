@@ -38,10 +38,17 @@ enum ArcticBlock {
 	/**
 	 * A text (in the subset of HTML which Flash understands).
 	 * If wordWrap is true, the text will grow in the width and height as much as possible,
-	 * and the text inside word wrap according to how much width is available.
+	 * and the text inside word wrap according to how much width is available. Notice that
+	 * layout of word-wrapping text can be unreliable when combined with Align or other 
+	 * layout elements because of limitations of the layout algorithm used. In this cases, 
+	 * the result will become much more predictable when you wrap the Text block with a
+	 * ConstrainWidth block: 
+	 * 
+	 *   ConstrainWidth(0, width, Text(text, null, true))
+	 * 
 	 * If wordWrap is false, the text will always have the same size, and only break lines
 	 * if <br/> tags exist in the text.
-	 * selectable defines whether user can select & copy contents
+	 * selectable defines whether user can select & copy contents.
 	 */
 	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>);
 
