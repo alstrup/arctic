@@ -1661,7 +1661,7 @@ class ArcticView {
 			// Retreive the format of the initial text
 			var txtFormat = txtInput.getTextFormat();
 			if (null != numeric && numeric) {
-				txtInput.restrict = "0-9";
+				txtInput.restrict = "0-9\\-\\.";
 				txtFormat.align = "right";
 			}
 			var lastWidth = ArcticMC.getTextFieldWidth(txtInput);
