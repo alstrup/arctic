@@ -11,5 +11,6 @@
 		  introduce a new Clip block.
 		- When loading bitmaps (without alpha), smooth the picture
 		- Crop pictures with alpha 1 pixel around the edge to work around Flash rendering problem
+		- Use native Flash 9 APIs for rectangles, rounded rectangles, and circles for a nice speedup
 	</version>
 </project>
