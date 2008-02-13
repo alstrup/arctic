@@ -14,8 +14,15 @@ class DrawUtils {
 
 	/// Contributed by Zjnue Brzavi <zjnue.brzavi@googlemail.com>
 	static public function drawRect(mc : MovieClip, x : Float, y : Float, w : Float, h : Float, ?cornerRadius : Float) {
-		var angle, sideSign, cnrSign, strtX, strtY, nextX, nextY, cnrX, cnrY, endX, endY;
 		var g = ArcticMC.getGraphics(mc);
+		#if flash9
+		if (cornerRadius != null && cornerRadius > 0) {
+			g.drawRoundRect(x, y, w, h, cornerRadius);
+		} else {
+			g.drawRect(x, y, w, h);
+		}
+		#else true
+		var angle, sideSign, cnrSign, strtX, strtY, nextX, nextY, cnrX, cnrY, endX, endY;
 		if (cornerRadius != null && cornerRadius > 0) {
 			strtX = x + cornerRadius;
 			strtY = y;
@@ -50,6 +57,7 @@ class DrawUtils {
 			g.lineTo(x, y+h);
 			g.lineTo(x, y);
 		}
+		#end
 	}
 
 // Draws a circle with optional filling
@@ -60,7 +68,11 @@ static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius :
 	if (null != fillColor) {
 		g.beginFill(fillColor, ArcticMC.convertAlpha(fillAlpha));
 	}
+	#if flash9
+	g.drawCircle(x, y, radius);
+	#else true
 	DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
+	#end
 	if (null != fillColor) {
 		g.endFill();
 	}
