@@ -1,16 +1,6 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.21">
-		- add Arctic.makeSwitch helper
-		- ArcticMC.setVisible is robust against empty clips (which allows the
-		  useful pattern Arctic.makeSwitch([ Fixed(0,0), Something ]) which can
-		  help reserve space for something that might show up later.
-		- Support leaving hover in Button as null
-		- Clean up the mess about clipping and ConstrainWidth/Height. These never clip. Instead,
-		  introduce a new Clip block.
-		- When loading bitmaps (without alpha), smooth the picture
-		- Crop pictures with alpha 1 pixel around the edge to work around Flash rendering problem
-		- Use native Flash 9 APIs for rectangles, rounded rectangles, and circles for a nice speedup
+    <version name="0.9.22">
 	</version>
 </project>
