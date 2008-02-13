@@ -267,6 +267,7 @@ class Arctic {
 	 * 
 	 *   // Change state of check box
 	 *   myCheckbox.state = true;
+	 * Notice that the boxes in front of the text are fairly slow to draw on the screen!
 	 */
 	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticState<Bool> {
 		
@@ -323,7 +324,8 @@ class Arctic {
 	/**
 	 * Make a radio-group to choose between the given texts.
 	 * Returns the array of blocks and a function that can be used to change the currently selected item.
-	 * Caller's problem to arrange the layout of blocks - see makeTextChoice above for an example
+	 * Caller's problem to arrange the layout of blocks - see makeTextChoice above for an example.
+	 * Notice that the circles are fairly slow to draw on the screen!
 	 */
 	static public function makeTextChoiceBlocks(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
 		{ blocks: Array<ArcticBlock>, selectFn: Int -> Void } {
@@ -363,6 +365,7 @@ class Arctic {
 	 * Make a radio-group to choose between the given blocks.
 	 * Returns an array of coupled blocks, and a function which can be used to change the
 	 * current selected item.
+	 * Notice that the circles are fairly slow to draw on the screen!
 	 */ 
 	static public function makeRadioButtonGroup(entries : Array< { selected : ArcticBlock, unselected : ArcticBlock, value : Dynamic } >, onSelect : Int -> Dynamic -> Void, ?defaultSelected : Int) 
 			: { blocks: Array<ArcticBlock>, selectFn : Int -> Void } {
