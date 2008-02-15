@@ -546,7 +546,7 @@ class ArcticView {
 				if (mode == Create) {
 					var loader = new flash.display.Loader();
 					var dis = loader.contentLoaderInfo;
-					var request = new flash.net.URLRequest(url);
+					var request = new flash.net.URLRequest(Arctic.baseurl + url);
 					dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
 						trace("[ERROR] IO Error with " + url + ": " + event.text);
 					});
@@ -583,7 +583,7 @@ class ArcticView {
 					var child;
 					if (mode == Create) {
 						var d = ArcticMC.getNextHighestDepth(clip);
-						child = clip.attachMovie(url, "picture", d);
+						child = clip.attachMovie(Arctic.baseurl + url, "picture", d);
 						Reflect.setField(clip, "picture", child);
 					} else {
 						child = Reflect.field(clip, "picture");
