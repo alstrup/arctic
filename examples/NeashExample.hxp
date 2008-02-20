@@ -1,0 +1,4 @@
+﻿<haxe selected="0">
+  <output name="HelloWorld neash" mode="neko" out="HelloWorld.n" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
+  <files path="/" />
+</haxe>

@@ -5,6 +5,8 @@ package arctic;
 	typedef ArcticMovieClip = flash.display.MovieClip
 #else flash
 	typedef ArcticMovieClip = flash.MovieClip
+#else neko
+	typedef ArcticMovieClip = neash.display.MovieClip
 #end
 
 /**

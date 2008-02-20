@@ -3,8 +3,10 @@ package arctic;
 import arctic.ArcticMC;
 #if flash9
 import flash.display.MovieClip;
-#else true
+#else flash
 import flash.MovieClip;
+#else neko
+import neash.display.MovieClip;
 #end
 
 /**

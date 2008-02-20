@@ -14,6 +14,8 @@ import flash.MovieClipLoader;
 import flash.TextField;
 import flash.TextFormat;
 import flash.Mouse;
+#else neko
+import neash.display.MovieClip;
 #end
 
 /// Information we need at runtime to implement updating
@@ -2079,8 +2081,7 @@ class ArcticView {
 				var d = p.getNextHighestDepth();
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
 				Reflect.setField(p, "c" + childNo, clip);
-			#else flash9
-			
+			#else (flash9 || neko)
 				var clip = new MovieClip();
 				p.addChild(clip);
 				if (p != parent) {
