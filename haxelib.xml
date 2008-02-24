@@ -2,5 +2,7 @@
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
     <version name="0.9.22">
+		- Huge speedup gained by avoiding setSize when it's not necessary - setSize is crap, because
+		  it uses graphics to fix the size, and that's very bad for performance
 	</version>
 </project>
