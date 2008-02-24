@@ -333,7 +333,6 @@ class ArcticView {
 			child.height += 2 * y;
 			if (mode != Metrics && child.clip != null) {
 				ArcticMC.setXY(child.clip, x, y);
-				ArcticMC.setSize(clip, child.width, child.height);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		
@@ -601,7 +600,6 @@ class ArcticView {
 					clip._yscale = s;
 				}
 			#end
-			ArcticMC.setSize(clip, w, h);
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case Button(block, hoverb, action, actionExt):
@@ -1625,7 +1623,6 @@ class ArcticView {
 		}
 		txtInput.tabEnabled = true;
 		if (null != width && null != height) {
-			ArcticMC.setSize(clip, width, height);
 		} else {
 			txtInput.autoSize = "left";	
 			txtInput.wordWrap = (null != width); // wordWrap is the same as fixed width

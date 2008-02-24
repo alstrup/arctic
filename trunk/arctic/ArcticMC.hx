@@ -302,6 +302,7 @@ class ArcticMC {
 	 * A helper function which forces a movieclip to have at least a certain size.
 	 * Notice, that this will never shrink a movieclip. Use clipSize for that.
 	 * Notice also that it clears out any graphics that might exist in the clip.
+	 * Also notice that this is an expensive thing to do!
 	 */
 	static public function setSize(clip : ArcticMovieClip, width : Float, height : Float) {
 		if (clip == null) {
