@@ -16,6 +16,8 @@ import flash.TextFormat;
 import flash.Mouse;
 #else neko
 import neash.display.MovieClip;
+import neash.text.TextField;
+import neash.text.TextFieldType;
 #end
 
 /// Information we need at runtime to implement updating
@@ -514,6 +516,27 @@ class ArcticView {
 				tf.multiline = true;
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
+			#else neko
+				var tf : neash.text.TextField;
+				if (mode == Create || mode == Metrics) {
+					tf = new neash.text.TextField();
+				} else if (mode == Reuse) {
+					tf = cast(clip.getChildAt(0), neash.text.TextField);
+				}
+				if (embeddedFont) {
+					tf.embedFonts = true;
+				}
+				if (wordWrap) {
+					tf.wordWrap = true;
+					tf.width = availableWidth;
+				}
+				tf.autoSize = neash.text.TextFieldAutoSize.LEFT;
+				tf.selectable = (true == selectable);
+				tf.multiline = true;
+				tf.htmlText = html;
+				if (mode == Create) {
+					clip.addChild(tf);
+				}
 			#end
 			if (Arctic.textSharpness != null && mode == Create) {
 				ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit);
@@ -1617,6 +1640,23 @@ class ArcticView {
 				txtInput = Reflect.field(clip, "ti");
 			}
 			txtInput.html = true;
+		#else neko
+			var txtInput : neash.text.TextField;
+			if (mode == Create) {
+				txtInput = new neash.text.TextField();
+			} else {
+				var t : Dynamic = clip.getChildAt(0);
+				txtInput = t;
+			}
+			if (embeddedFont) {
+				txtInput.embedFonts = true;
+			}
+			if (null != width) {
+				txtInput.width = width;
+			}
+			if (null != height) {
+				txtInput.height = height;
+			}
 		#end
 		if (embeddedFont) {
 			txtInput.embedFonts = true;
@@ -1702,7 +1742,7 @@ class ArcticView {
 		}
 		if (mode != Metrics) {
 			// Setting focus on txtInput 
-			#if flash9
+			#if (flash9 || neko)
 				if (focus != null && focus) {
 					clip.stage.focus = txtInput;
 					txtInput.setSelection(0, txtInput.length);
@@ -1734,7 +1774,7 @@ class ArcticView {
 						txtInput.text = status.text;
 					}
 					if (status.focus == true) {
-						#if flash9
+						#if (flash9 || neko)
 							clip.stage.focus = txtInput;
 							if (null == status.selStart || null == status.selEnd) {
 								txtInput.setSelection(0, txtInput.length);
@@ -1745,26 +1785,26 @@ class ArcticView {
 						#end
 					}
 					if (null != status.selStart && null != status.selEnd) {
-						#if flash9
+						#if (flash9 || neko)
 						txtInput.setSelection(status.selStart, status.selEnd);
 						#else flash
 						flash.Selection.setSelection(status.selStart, status.selEnd);
 						#end
 					} else if (null != status.cursorPos) {
-						#if flash9
+						#if (flash9 || neko)
 						txtInput.setSelection(status.cursorPos, status.cursorPos);
 						#else flash
 						flash.Selection.setSelection(status.cursorPos, status.cursorPos);
 						#end
 					}
 					if (status.disabled == true) {
-						#if flash9
+						#if (flash9 || neko)
 						txtInput.type = TextFieldType.DYNAMIC;
 						#else flash
 						txtInput.type = "dynamic";
 						#end
 					} else {
-						#if flash9
+						#if (flash9 || neko)
 						txtInput.type = TextFieldType.INPUT;
 						#else flash
 						txtInput.type = "input";
@@ -1772,7 +1812,7 @@ class ArcticView {
 					}
 				}
 				
-				#if flash9
+				#if (flash9 || neko)
 					var focus = clip.stage.focus == txtInput;
 					// temp variables to work around bugs in Null<Int> -> Int conversion
 					var selStart: Null<Int> = txtInput.selectionBeginIndex;
@@ -1804,6 +1844,20 @@ class ArcticView {
 					events.onPress();
 				});
 				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
+					events.onRelease();
+				});
+				#else neko
+				addOptionalEventListener(txtInput, neash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
+				addOptionalEventListener(txtInput, neash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
+					if (e.target == txtInput) events.onSetFocus();
+				});
+				addOptionalEventListener(txtInput, neash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
+					if (e.target == txtInput) events.onKillFocus();
+				});
+				addOptionalEventListener(txtInput, neash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
+					events.onPress();
+				});
+				addOptionalEventListener(txtInput, neash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
 					events.onRelease();
 				});
 				#else flash
@@ -2094,7 +2148,7 @@ class ArcticView {
 			return clip;
 		}
 		// Reuse case
-		#if flash9
+		#if (flash9 || neko)
 			if (p != parent) {
 				if (Reflect.hasField(p, "c" + childNo)) {
 					return Reflect.field(p, "c" + childNo);
@@ -2122,6 +2176,15 @@ class ArcticView {
 	/// A nice helper function to initialize optional event handlers
 	private static function addOptionalEventListener<Handler>(target: flash.events.EventDispatcher, type: String, handler: Handler, 
 		flashHandler: flash.events.Event -> Void) {
+		if (null != handler) {
+			target.addEventListener(type, flashHandler);
+		}
+	}
+	#end
+	#if neko
+	/// A nice helper function to initialize optional event handlers
+	private static function addOptionalEventListener<Handler>(target: neash.events.EventDispatcher, type: String, handler: Handler, 
+		flashHandler: neash.events.Event -> Void) {
 		if (null != handler) {
 			target.addEventListener(type, flashHandler);
 		}

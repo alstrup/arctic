@@ -507,7 +507,7 @@ class ArcticMC {
 		#else flash8
 		var d = parent.getNextHighestDepth();
 		return parent.createTextField("tf" + d, d, x, y, width, height);
-		#else flash9
+		#else (flash9 || neko)
 		var tf = new ArcticTextField();
 		tf.x = x;
 		tf.y = y;
