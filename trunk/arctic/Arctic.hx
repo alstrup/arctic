@@ -37,7 +37,11 @@ class Arctic {
 	
 	/// This constructs a button which repeatedly triggers the action as long as the mouse is pressed
 	static public function makeRepeatingButton(base : ArcticBlock, hover : ArcticBlock, action : Void -> Void, interval : Int) : ArcticBlock {
+		#if neko
+		var timer : neash.Timer = null;
+		#else flash
 		var timer : haxe.Timer = null;
+		#end
 		var ourHandler = function (x : Float, y : Float, down, inside : Bool) {
 			var delay = 4;
 			if (!down) {
@@ -54,7 +58,11 @@ class Arctic {
 			if (!inside || timer != null) {
 				return;
 			}
+			#if neko
+			timer = new neash.Timer(interval);
+			#else flash
 			timer = new haxe.Timer(interval);
+			#end
 			timer.run = function() { 
 				if (delay == 4) action(); 
 				if (delay > 0) delay--; 

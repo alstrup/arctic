@@ -1,10 +1,17 @@
 import arctic.Arctic;
 import arctic.ArcticView;
 import arctic.ArcticBlock;
+import arctic.ArcticMC;
 
 class HelloWorld {
 	static public function main() {
-		new HelloWorld(flash.Lib.current);
+		#if neko
+		neash.Lib.Init("Hello, Arctic", 400, 400);
+		#end
+		new HelloWorld(ArcticMC.getCurrentClip());
+		#if neko
+		neash.Lib.Run();
+		#end
 	}
 	
 	public function new(parent : ArcticMovieClip) {

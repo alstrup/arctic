@@ -109,6 +109,14 @@ typedef ArcticDisplayObjectContainer = neash.display.DisplayObjectContainer
  * A class which makes it simpler to make Flash 8 / 9 compatible code.
  */
 class ArcticMC {
+	static public function getCurrentClip() : ArcticMovieClip {
+		#if flash
+		return flash.Lib.current;
+		#else neko
+		return neash.Lib.current;
+		#end
+	}
+	
 	/// Create a new clip on the given parent
 	static public function create(parent : ArcticMovieClip) : ArcticMovieClip {
 		#if (flash9 || neko)
@@ -383,7 +391,7 @@ class ArcticMC {
 	
 	static public function getScrollRect(clip : ArcticMovieClip) : ArcticRectangle {
 		#if flash6
-		// TODO
+		// TODO: Scrollrect for Flash 6
 		return null;
 		#else flash7
 		return Reflect.field(clip, "scrollRect");

@@ -1,10 +1,17 @@
 import arctic.Arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticDialogUi;
+import arctic.ArcticMC;
 
 class Dialogs {
 	static public function main() {
-		new Dialogs(flash.Lib.current);
+		#if neko
+		neash.Lib.Init("Dialogs", 800, 600);
+		#end
+		new Dialogs(ArcticMC.getCurrentClip());
+		#if neko
+		neash.Lib.Run();
+		#end
 	}
 	
 	public function new(parent : ArcticMovieClip) {

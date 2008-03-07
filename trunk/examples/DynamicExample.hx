@@ -1,11 +1,18 @@
 import arctic.Arctic;
 import arctic.ArcticView;
 import arctic.ArcticBlock;
+import arctic.ArcticMC;
 
 class DynamicExample  {
 
 	static public function main() {
-		new DynamicExample(flash.Lib.current);
+		#if neko
+		neash.Lib.Init("DynamicExample", 800, 600);
+		#end
+		new DynamicExample(ArcticMC.getCurrentClip());
+		#if neko
+		neash.Lib.Run();
+		#end
 	}
 	
 	public function new(parent_ : ArcticMovieClip) {

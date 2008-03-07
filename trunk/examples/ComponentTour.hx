@@ -1,6 +1,7 @@
 import arctic.Arctic;
 import arctic.ArcticView;
 import arctic.ArcticBlock;
+import arctic.ArcticMC;
 
 /**
  * This example provides a tour of most of the components in Arctic
@@ -80,10 +81,18 @@ class ComponentTour {
 				10, null, 0, 0)
 			);
 
+		#if neko
+		neash.Lib.Init("ComponentTour", 800, 600);
+		#end
+			
 		// Then construct the arctic view object
-		arcticView = new ArcticView( screen, flash.Lib.current );
+		arcticView = new ArcticView( screen, ArcticMC.getCurrentClip() );
+		
 		// And finally display on the given movieclip
 		var root = arcticView.display(true);
+		#if neko
+		neash.Lib.Run();
+		#end
 	}
 	public function chooseComponent(selected : Int, text : String) {
 		// Change the preview block
