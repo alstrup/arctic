@@ -25,7 +25,7 @@ class ArcticDialogManager {
 
 	public function new() {
 		currentDialogs = [];
-		mc = flash.Lib.current;
+		mc = ArcticMC.getCurrentClip();
 		displayNotificationFn = null;
 	}
 	

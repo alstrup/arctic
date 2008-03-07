@@ -5,7 +5,13 @@ import arctic.ArcticView;
 
 class ArcticTest {
 	static public function main() {
-		new ArcticTest(flash.Lib.current);
+		#if neko
+		neash.Lib.Init("ArcticTest", 800, 600);
+		#end
+		new ArcticTest(ArcticMC.getCurrentClip());
+		#if neko
+		neash.Lib.Run();
+		#end
 	}
 	
 	public function new(parent_ : ArcticMovieClip) {

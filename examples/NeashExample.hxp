@@ -1,4 +1,23 @@
-﻿<haxe selected="0">
-  <output name="HelloWorld neash" mode="neko" out="HelloWorld.n" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..</output>
-  <files path="/" />
+﻿<haxe selected="3">
+  <output name="HelloWorld.n" mode="neko" out="HelloWorld.n" class="HelloWorld" lib="" cmd="" main="True" debug="True">-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+</output>
+  <output name="ComponentTour.n" mode="neko" out="ComponentTour.n" class="ComponentTour" lib="" cmd="" main="True" debug="False">-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+</output>
+  <output name="ArcticTest.n" mode="neko" out="ArcticTest.n" class="ArcticTest" lib="" cmd="" main="True" debug="False">-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+</output>
+  <output name="DynamicExample.n" mode="neko" out="DynamicExample.n" class="DynamicExample" lib="" cmd="" main="True" debug="True">-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+</output>
+  <output name="Dialogs.n" mode="neko" out="Dialogs.n" class="Dialogs" lib="" cmd="" main="True" debug="True">-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+</output>
+  <files path="" />
 </haxe>
