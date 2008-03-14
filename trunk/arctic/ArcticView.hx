@@ -119,7 +119,7 @@ class ArcticView {
 	
 	#if (flash9||neko)
 	/// We record all the event handlers we register so that we can clean them up again when destroyed
-	private var stageEventHandlers : Array<{ obj: neash.events.EventDispatcher, event : String, handler : Dynamic } >;
+	private var stageEventHandlers : Array<{ obj: flash.events.EventDispatcher, event : String, handler : Dynamic } >;
 	#end
 	
 	/**
@@ -666,34 +666,34 @@ class ArcticView {
 				}
 				if (mode == Create) {
 					if (action != null) {
-						clip.addEventListener(neash.events.MouseEvent.MOUSE_UP, function(s) { 
+						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-								if (ArcticMC.isActive(clip) && clip.hitTestPoint(neash.Lib.current.mouseX, neash.Lib.current.mouseY, true)) {
+								if (ArcticMC.isActive(clip) && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 									action(); 
 								}
 							} ); 
 					}
 					if (actionExt != null) {
-						addStageEventListener( clip.stage, neash.events.MouseEvent.MOUSE_UP, function(s) { 
+						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									actionExt(clip.mouseX, clip.mouseY, false, clip.hitTestPoint(neash.Lib.current.mouseX, neash.Lib.current.mouseY, true));
+									actionExt(clip.mouseX, clip.mouseY, false, clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
 								}
 							} ); 
-						addStageEventListener( clip.stage, neash.events.MouseEvent.MOUSE_DOWN, function(s) { 
+						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_DOWN, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									actionExt(clip.mouseX, clip.mouseY, true, clip.hitTestPoint(neash.Lib.current.mouseX, neash.Lib.current.mouseY, true));
+									actionExt(clip.mouseX, clip.mouseY, true, clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
 								}
 							} ); 
 					}
 					if (hasHover) {
-						addStageEventListener( clip.stage, neash.events.MouseEvent.MOUSE_MOVE, function (s) {
+						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								if (clip.hitTestPoint(neash.Lib.current.mouseX, neash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
 									child.clip.visible = false;
 									hover.clip.visible = true;
 								} else {
@@ -701,7 +701,7 @@ class ArcticView {
 									hover.clip.visible = false;
 								}
 							} );
-						addStageEventListener( clip.stage, neash.events.Event.MOUSE_LEAVE, function() {
+						addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
 							child.clip.visible = true;
 							hover.clip.visible = false;
 						});
@@ -2202,7 +2202,7 @@ class ArcticView {
 	}
 	
 	#if (flash9||neko)
-	private function addStageEventListener(d : neash.events.EventDispatcher, event : String, handler : Dynamic) {
+	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
 		d.addEventListener(event, handler);
 		stageEventHandlers.push( { obj: d, event: event, handler: handler });
 	}
