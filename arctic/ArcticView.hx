@@ -2219,7 +2219,7 @@ class ActiveClips {
 		}
 		return instance;
 	}
-	public function new() {
+	private function new() {
 		activeClips = [];
 	}
 	
@@ -2240,7 +2240,7 @@ class ActiveClips {
 					return clip;
 				}
 			#else flash
-				if (clip.hitTest(x, y, true)) {
+				if (clip.hitTest(x, y, true) && ArcticMC.isActive(clip)) {
 					return clip;
 				}
 			#end
