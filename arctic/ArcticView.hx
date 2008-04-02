@@ -665,30 +665,61 @@ class ArcticView {
 					hover.clip.mouseChildren = false;
 				}
 				if (mode == Create) {
+					#if arcticevidence
+					var aem = ArcticEvidenceManager.get();
+					var abId = ArcticEvidenceManager.idFromArctic(block);
+					#end
 					if (action != null) {
+						#if arcticevidence
+						var eventName = "buttonclick";
+						aem.registerReplayer(eventName, abId, action);
+						#end
 						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
 								if (ArcticMC.isActive(clip) && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+									#if arcticevidence
+									aem.recordEvent(eventName, abId, []);
+									#end
 									action(); 
 								}
 							} ); 
 					}
 					if (actionExt != null) {
+						#if arcticevidence
+						var eventName = "buttonclickxyup";
+						aem.registerReplayer(eventName, abId, actionExt);
+						#end
 						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									actionExt(clip.mouseX, clip.mouseY, false, clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
+									#if arcticevidence
+									aem.recordEvent(eventName, abId, 
+													[clip.mouseX, clip.mouseY, false,
+													 clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)]);
+									#end
+									actionExt(clip.mouseX, clip.mouseY, false,
+											  clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
 								}
-							} ); 
+							} );
+						#if arcticevidence
+						var eventName = "buttonclickxydown";
+						aem.registerReplayer(eventName, abId, actionExt);
+						#end
 						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_DOWN, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									actionExt(clip.mouseX, clip.mouseY, true, clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
+									#if arcticevidence
+									aem.recordEvent(eventName, abId, 
+													[clip.mouseX, clip.mouseY, true,
+													 clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)]);
+									#end
+									actionExt(clip.mouseX, clip.mouseY, true,
+											  clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
 								}
-							} ); 
+							} );
 					}
 					if (hasHover) {
 						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
