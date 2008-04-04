@@ -566,37 +566,41 @@ class ArcticView {
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			#if flash9
-				// Resource version does not work
 				if (mode == Create) {
-					var loader = new flash.display.Loader();
-					var dis = loader.contentLoaderInfo;
-					var request = new flash.net.URLRequest(Arctic.baseurl + url);
-					dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
-						trace("[ERROR] IO Error with " + url + ": " + event.text);
-					});
-					dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
-						trace("[ERROR] Security Error with " + url + ": " + event.text);						
-					});
-					dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
-						try {
-							var loader : flash.display.Loader = event.target.loader;
-							if (Std.is(loader.content, flash.display.Bitmap)) {
-								// Bitmaps are not smoothed per default when loading. We take care of that here
-								var image : flash.display.Bitmap = cast loader.content;
-								image.smoothing = true;
+					if (Type.resolveClass(url) != null) {
+						var loader = flash.Lib.attach(url);
+						clip.addChild(loader);
+					} else {
+						var loader = new flash.display.Loader();
+						var dis = loader.contentLoaderInfo;
+						var request = new flash.net.URLRequest(Arctic.baseurl + url);
+						dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
+							trace("[ERROR] IO Error with " + url + ": " + event.text);
+						});
+						dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
+							trace("[ERROR] Security Error with " + url + ": " + event.text);						
+						});
+						dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
+							try {
+								var loader : flash.display.Loader = event.target.loader;
+								if (Std.is(loader.content, flash.display.Bitmap)) {
+									// Bitmaps are not smoothed per default when loading. We take care of that here
+									var image : flash.display.Bitmap = cast loader.content;
+									image.smoothing = true;
+								}
+								if (crop != null) {
+									// Crop our clip in attempt to avoid spurious lines
+									loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
+								}
+							} catch (e : Dynamic) {
+								// When running locally, security errors can be called when we access the content
+								// of loaded files, so in that case, we have lost, and can not use nice smoothing
 							}
-							if (crop != null) {
-								// Crop our clip in attempt to avoid spurious lines
-								loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
-							}
-						} catch (e : Dynamic) {
-							// When running locally, security errors can be called when we access the content
-							// of loaded files, so in that case, we have lost, and can not use nice smoothing
 						}
+						);
+						loader.load(request);
+						clip.addChild(loader);
 					}
-					);
-					loader.load(request);
-					clip.addChild(loader);
 				}
 				var s = scaling;
 				clip.scaleX = s;
