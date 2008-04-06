@@ -89,16 +89,9 @@ class Arctic {
 			switchFn = fn;
 		}
 		var advancedHandler = function(x : Float, y : Float, pressed : Bool, inside : Bool) : Void {
-			if (pressed) {
-				switchFn(1);
-			} else {
-				switchFn(0);
-				if (inside && onClick != null) {
-					onClick();
-				}
-			}
+			switchFn(pressed ? 1 : 0);
 		}
-		return Button( normal, Switch( [ hover, pressed ], 0, captureSwitchFn), null, advancedHandler);
+		return Button( normal, Switch( [ hover, pressed ], 0, captureSwitchFn), onClick, advancedHandler);
 	}
 	
 	/// Associate a tooltip with a block
