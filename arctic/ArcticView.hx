@@ -209,7 +209,8 @@ class ArcticView {
 	* on the new clip for the named block.
 	*/
 	public function getRawMovieClip(id : String) : ArcticMovieClip {
-		return idMovieClip.get(id);
+		if (idMovieClip != null) return idMovieClip.get(id);
+		else return null;
 	}
 	
 	/**
