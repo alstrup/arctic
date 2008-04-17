@@ -56,6 +56,7 @@ class ArcticView {
 			metricsCache = new Hash<{ width: Float, height : Float } >();
 		}
 		size = null;
+		pendingPictureRequests = 0;
 
 		#if (flash9||neko)
 			stageEventHandlers = [];
@@ -572,6 +573,10 @@ class ArcticView {
 						var loader = flash.Lib.attach(url);
 						clip.addChild(loader);
 					} else {
+						
+						// Count how many pictures we are loading
+						pendingPictureRequests++;
+						
 						var loader = new flash.display.Loader();
 						var dis = loader.contentLoaderInfo;
 						var request = new flash.net.URLRequest(Arctic.baseurl + url);
@@ -581,6 +586,7 @@ class ArcticView {
 						dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
 							trace("[ERROR] Security Error with " + url + ": " + event.text);						
 						});
+						var me = this;
 						dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
 							try {
 								var loader : flash.display.Loader = event.target.loader;
@@ -593,10 +599,14 @@ class ArcticView {
 									// Crop our clip in attempt to avoid spurious lines
 									loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
 								}
+								if (me.pictureLoadedFn != null) {
+									me.pictureLoadedFn(--me.pendingPictureRequests);
+								}
 							} catch (e : Dynamic) {
 								// When running locally, security errors can be called when we access the content
 								// of loaded files, so in that case, we have lost, and can not use nice smoothing
 							}
+							
 						}
 						);
 						loader.load(request);
@@ -2146,6 +2156,11 @@ class ArcticView {
 		
 	/// For text elements, we cache the sizes
 	static private var metricsCache : Hash< { width: Float, height : Float } >;
+
+	/// Count of how many pictures are loaded
+	public var pendingPictureRequests : Int;
+	/// Callback for when picture is loaded
+	public var pictureLoadedFn : Int -> Void;
 
 	/**
 	 * Creates a clip (if construct is true) as childNo, otherwise gets existing movieclip at that point.
