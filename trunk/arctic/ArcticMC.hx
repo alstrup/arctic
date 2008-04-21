@@ -488,6 +488,17 @@ class ArcticMC {
 			var parent = clip;
 			while (null != parent && active) {
 				active = active && parent._visible && parent.enabled;
+				var scrollRect = getScrollRect(parent);
+				if (parent != clip && scrollRect != null) {
+					var bounds = clip.getBounds(parent);
+					var xOffset = (bounds.xMax - bounds.xMin) * 0.25; // 25% of the clip width
+					var yOffset = (bounds.yMax - bounds.yMin) * 0.25; // 25% of the clip height
+					if (bounds.xMin + xOffset < scrollRect.left || bounds.yMin + yOffset < scrollRect.top || 
+						bounds.xMax - xOffset > scrollRect.right || bounds.yMax - yOffset > scrollRect.bottom) {
+						// more than 25% of the clip is invisible (because of scrolling)
+						active = false;
+					}
+				}
 				parent = parent._parent;
 			}
 		#end
