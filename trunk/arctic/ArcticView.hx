@@ -2112,7 +2112,6 @@ class ArcticView {
 		#else flash
 			clip.onMouseDown = function() {
 				if (ActiveClips.get().getActiveClip() == dragClip) {
-					// TODO: Check we do not hit a child which wants drags
 					dragX = flash.Lib.current._xmouse;
 					dragY = flash.Lib.current._ymouse;
 					if (clip.onMouseMove == null) {
@@ -2283,8 +2282,9 @@ class ActiveClips {
 			var x = flash.Lib.current._xmouse;
 			var y = flash.Lib.current._ymouse;
 		#end
-		var i = 0;
-		while (i < activeClips.length) {
+		// bottom-up traverse: from children to parent
+		var i = activeClips.length - 1;
+		while (i >= 0) {
 			var clip = activeClips[i];
 			#if flash9
 				if (clip.hitTestPoint(x, y, true)) {
@@ -2295,7 +2295,7 @@ class ActiveClips {
 					return clip;
 				}
 			#end
-			++i;
+			i--;
 		}
 		return null;
 	}
