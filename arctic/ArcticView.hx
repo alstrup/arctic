@@ -231,10 +231,9 @@ class ArcticView {
 			}
 			mouseWheelListeners = [];
 		#end
-		var activeClips = ActiveClips.get().activeClips;
 		for (m in movieClips) {
+			ActiveClips.get().remove(m);
 			ArcticMC.remove(m);
-			activeClips.remove(m);
 		}
 		movieClips = [];
 		idMovieClip = new Hash<ArcticMovieClip>();
@@ -245,7 +244,7 @@ class ArcticView {
 		var p = ArcticMC.getParent(c);
 		ArcticMC.remove(c);
 		movieClips.remove(c);
-		ActiveClips.get().activeClips.remove(c);
+		ActiveClips.get().remove(c);
 
 		Reflect.setField(p, "c0", null);
 		
@@ -1658,7 +1657,7 @@ class ArcticView {
 		}
 		var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 		if (mode == Create) {
-			ActiveClips.get().activeClips.push(clip);
+			ActiveClips.get().add(clip);
 		}
 		#if flash9
 			var txtInput : flash.text.TextField;
@@ -1948,7 +1947,7 @@ class ArcticView {
 
 		var dragClip = clip; 
 		if (mode == Create) {
-			ActiveClips.get().activeClips.push(dragClip);
+			ActiveClips.get().add(dragClip);
 		}
 
 		var width = child.width;
@@ -2210,7 +2209,7 @@ class ArcticView {
 				// Fallback - should never happen
 				return getOrMakeClip(p, Create, childNo);
 			} else {
-				var d : Dynamic= p.getChildAt(childNo);
+				var d : Dynamic = p.getChildAt(childNo);
 				return d;
 			}
 		#else flash
@@ -2300,15 +2299,86 @@ class ActiveClips {
 		return null;
 	}
 	
+	public function remove(mc: ArcticMovieClip): Bool {
+		return activeClips.remove(mc);
+	}
+	
+	// add movie clip in smart way - according to its z-order
+	public function add(mc: ArcticMovieClip) {
+		#if flash9
+		//TODO: find proper insert position
+		activeClips.push(mc);
+		#else flash
+		var i = findInsertIndex(mc);
+		if (i != null) {
+			activeClips.insert(i, mc);	
+		}
+		#end
+	}
+	
+	private function findInsertIndex(mc: ArcticMovieClip): Null<Int> {
+		var start = 0;
+		var end = activeClips.length - 1;
+		while (start < end) {
+			var i = Math.floor((end - start) / 2);
+			var res = compare(mc, activeClips[i]);
+			if (res == 0) {
+				// return i;
+				// the array contains this clip already
+				// should not happen
+				return null;
+			} 
+			if (res > 0) {
+				// this clip is higher
+				start = i + 1;
+			} else {
+				end = i - 1;
+			}
+		}
+		return start;
+	}
+	
+	private function compare(mc1: ArcticMovieClip, mc2: ArcticMovieClip): Int {
+		if (mc1 == mc2) {
+			return 0;
+		}		
+		#if flash9
+		//TODO
+		return 1;
+		#else flash		
+		var path1 = mc1._target.split("/");
+		var path2 = mc2._target.split("/");
+		// find the nearest common parent (it can be root)
+		var length = Std.int(Math.min(path1.length, path2.length));
+		var diffIndex = 0;
+		while (diffIndex < length && path1[diffIndex] == path2[diffIndex]) {
+			diffIndex++;
+		}
+		if (diffIndex == length) {
+			// one clip is a parent of another
+			return path1.length < path2.length ? -1 : 1;
+		}
+		// we use ["c" + childNo] notation
+		// (should be faster than evaluating depth of the 'fork')
+		var childNo1 = Std.parseInt(path1[diffIndex].substr(1));
+		var childNo2 = Std.parseInt(path2[diffIndex].substr(1));
+		return childNo1 < childNo2 ? -1 : 1;
+		#end
+	}
+
 	/*
 	public function trace() {
+		trace("active clips: ");
 		for (m in activeClips) {
 			#if flash9
 			trace(m.name);
+			#else flash
+			trace(" " + m._target);
 			#end
 		}
 	}
-*/	
+	*/
+	
 	/// Here, we record all MovieClips that compete for mouse drags
-	public var activeClips : Array<ArcticMovieClip>;
+	private var activeClips : Array<ArcticMovieClip>;
 }
