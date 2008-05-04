@@ -2319,8 +2319,8 @@ class ActiveClips {
 	private function findInsertIndex(mc: ArcticMovieClip): Null<Int> {
 		var start = 0;
 		var end = activeClips.length - 1;
-		while (start < end) {
-			var i = Math.floor((end - start) / 2);
+		while (start <= end) {
+			var i = Math.floor((end + start) / 2);
 			var res = compare(mc, activeClips[i]);
 			if (res == 0) {
 				// return i;
