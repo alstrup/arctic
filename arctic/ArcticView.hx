@@ -178,6 +178,11 @@ class ArcticView {
 			ArcticMC.showMouse();
 			#if flash9
 			firstChild = parent.numChildren;
+			// remove stage listeners
+			for (e in stageEventHandlers) {
+				e.obj.removeEventListener(e.event, e.handler);
+			}
+			stageEventHandlers = [];
 			#else flash
 			firstChild = ArcticMC.getNextHighestDepth(parent);
 			mouseWheelListeners = new Array<{ clip: ArcticMovieClip, listener: Dynamic } >();
