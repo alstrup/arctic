@@ -8,6 +8,7 @@ import flash.display.MovieClip;
 import flash.text.TextField;
 import flash.text.TextFieldType;
 import flash.events.FocusEvent;
+import flash.display.DisplayObjectContainer;
 #else flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
@@ -2310,15 +2311,10 @@ class ActiveClips {
 	
 	// add movie clip in smart way - according to its z-order
 	public function add(mc: ArcticMovieClip) {
-		#if flash9
-		//TODO: find proper insert position
-		activeClips.push(mc);
-		#else flash
 		var i = findInsertIndex(mc);
 		if (i != null) {
 			activeClips.insert(i, mc);	
 		}
-		#end
 	}
 	
 	private function findInsertIndex(mc: ArcticMovieClip): Null<Int> {
@@ -2343,17 +2339,30 @@ class ActiveClips {
 		return start;
 	}
 	
+	#if flash9
+	private function buildPath(mc: MovieClip): Array<DisplayObjectContainer> {
+		var path = new Array<DisplayObjectContainer>();
+		var parent: DisplayObjectContainer = mc;
+		while (parent != null) {
+			path.unshift(parent);
+			parent = parent.parent;
+		}
+		return path;
+	}
+	#end
+	
 	private function compare(mc1: ArcticMovieClip, mc2: ArcticMovieClip): Int {
 		if (mc1 == mc2) {
 			return 0;
 		}		
-		#if flash9
-		//TODO
-		return 1;
-		#else flash		
+	#if flash9
+		var path1 = buildPath(mc1);
+		var path2 = buildPath(mc2);
+	#else flash	
 		var path1 = mc1._target.split("/");
 		var path2 = mc2._target.split("/");
-		// find the nearest common parent (it can be root)
+	#end
+		// find the Least Common Ancestor (it can be root)
 		var length = Std.int(Math.min(path1.length, path2.length));
 		var diffIndex = 0;
 		while (diffIndex < length && path1[diffIndex] == path2[diffIndex]) {
@@ -2363,12 +2372,17 @@ class ActiveClips {
 			// one clip is a parent of another
 			return path1.length < path2.length ? -1 : 1;
 		}
+	#if flash9
+		var lca = path1[diffIndex - 1];
+		var childNo1 = lca.getChildIndex(path1[diffIndex]);
+		var childNo2 = lca.getChildIndex(path2[diffIndex]);
+	#else flash
 		// we use ["c" + childNo] notation
 		// (should be faster than evaluating depth of the 'fork')
 		var childNo1 = Std.parseInt(path1[diffIndex].substr(1));
 		var childNo2 = Std.parseInt(path2[diffIndex].substr(1));
+	#end
 		return childNo1 < childNo2 ? -1 : 1;
-		#end
 	}
 
 	/*
@@ -2383,7 +2397,7 @@ class ActiveClips {
 		}
 	}
 	*/
-	
+
 	/// Here, we record all MovieClips that compete for mouse drags
 	private var activeClips : Array<ArcticMovieClip>;
 }
