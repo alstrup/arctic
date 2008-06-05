@@ -248,9 +248,9 @@ class ArcticView {
 	
 	private function removeClip(c : ArcticMovieClip) {
 		var p = ArcticMC.getParent(c);
+		ActiveClips.get().remove(c);
 		ArcticMC.remove(c);
 		movieClips.remove(c);
-		ActiveClips.get().remove(c);
 
 		Reflect.setField(p, "c0", null);
 		
@@ -2305,12 +2305,39 @@ class ActiveClips {
 		return null;
 	}
 	
+	// remove clip and all its children from the activeClips	
 	public function remove(mc: ArcticMovieClip): Bool {
-		return activeClips.remove(mc);
+		if (mc == null) {
+			return false;
+		}
+			
+		var contains = function (clip: ArcticMovieClip) {
+			#if flash9		
+				return mc.contains(clip);
+			#else flash	
+				return mc == clip || StringTools.startsWith(clip._target, mc._target + "/");
+			#end
+		}
+		
+		var i = 0;
+		var del = false;
+		while (i < activeClips.length) {
+			if (contains(activeClips[i])) {
+				activeClips.splice(i, 1);
+				del = true;
+			} else {
+				i++;
+			}
+		}
+		return del;
 	}
 	
 	// add movie clip in smart way - according to its z-order
 	public function add(mc: ArcticMovieClip) {
+		if (mc == null) {
+			return;
+		}
+		
 		var i = findInsertIndex(mc);
 		if (i != null) {
 			activeClips.insert(i, mc);	
@@ -2318,6 +2345,13 @@ class ActiveClips {
 	}
 	
 	private function findInsertIndex(mc: ArcticMovieClip): Null<Int> {
+		#if flash9
+		if (mc.stage == null) {
+			// the display object is not added to the display list
+			return null;
+		}
+		#end
+		
 		var start = 0;
 		var end = activeClips.length - 1;
 		while (start <= end) {
@@ -2354,7 +2388,7 @@ class ActiveClips {
 	private function compare(mc1: ArcticMovieClip, mc2: ArcticMovieClip): Int {
 		if (mc1 == mc2) {
 			return 0;
-		}		
+		}
 	#if flash9
 		var path1 = buildPath(mc1);
 		var path2 = buildPath(mc2);
@@ -2386,14 +2420,18 @@ class ActiveClips {
 	}
 
 	/*
-	public function trace() {
+	private function getTraceInfo(mc: ArcticMovieClip): String {
+		#if flash9	
+		return mc.name;
+		#else flash	
+		return mc._target;
+		#end
+	}
+	
+	public function check() {
 		trace("active clips: ");
 		for (m in activeClips) {
-			#if flash9
-			trace(m.name);
-			#else flash
-			trace(" " + m._target);
-			#end
+			trace(getTraceInfo(m));
 		}
 	}
 	*/
