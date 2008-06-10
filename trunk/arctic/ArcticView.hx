@@ -818,9 +818,7 @@ class ArcticView {
 				} else {
 					#if flash9
 						unsel.clip.buttonMode = true;
-						unsel.clip.mouseChildren = false;
 						sel.clip.buttonMode = true;
-						sel.clip.mouseChildren = false;
 						if (mode == Create) {
 							sel.clip.visible = initialState;
 							unsel.clip.visible = !initialState;
