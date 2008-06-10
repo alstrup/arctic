@@ -63,9 +63,7 @@ class Bugs {
 					]);
 			case 5:
 			// This should be a clickable 20x20 red box
-			// TODO: This does not work with Flash 9!
-			screen = Background(0xff0000, Button(Fixed(20, 20), Fixed(20, 20), next) );
-//			screen = LineStack( [ Background(0xff0000, ColumnStack( [ Button(Fixed(20, 20), Fixed(20, 20), next), Filler ] )) ] );
+			screen = Background(0xff0000, Button(Background(0xff0000,Fixed(20, 20)), null, next) );
 			fullsize = false;
 			case 6:
 			// On resize, this should work correctly such that the scrollbar comes and disappears correctly
@@ -73,7 +71,7 @@ class Bugs {
 			case 7:
 			// This should be a red 50x50 box with a green 10x10 box below - the fillers become 0 height, because we do not fullsize it
 			screen = LineStack( [
-								  LineStack( [ Filler, Background(0xff0000, Button(Fixed(50, 50), Fixed(50, 50), next)) ]),
+								  LineStack( [ Filler, Background(0xff0000, Button(Background(0xee0000, Fixed(50, 50)), null, next)) ]),
 								  LineStack( [ Filler, Background(0x00ff00, Fixed(10, 10)) ] )
 					] );
 			fullsize = false;
