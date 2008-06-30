@@ -5,10 +5,13 @@ import arctic.ArcticMC;
 
 #if flash9
 import flash.display.MovieClip;
+import flash.display.DisplayObjectContainer;
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.FocusEvent;
+import flash.events.MouseEvent;
 import flash.text.TextField;
 import flash.text.TextFieldType;
-import flash.events.FocusEvent;
-import flash.display.DisplayObjectContainer;
 #else flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
@@ -17,6 +20,10 @@ import flash.TextFormat;
 import flash.Mouse;
 #else neko
 import neash.display.MovieClip;
+import neash.display.DisplayObjectContainer;
+import neash.events.Event;
+import neash.events.EventDispatcher;
+import neash.events.MouseEvent;
 import neash.text.TextField;
 import neash.text.TextFieldType;
 #end
@@ -121,7 +128,7 @@ class ArcticView {
 	
 	#if (flash9||neko)
 	/// We record all the event handlers we register so that we can clean them up again when destroyed
-	private var stageEventHandlers : Array<{ obj: flash.events.EventDispatcher, event : String, handler : Dynamic } >;
+	private var stageEventHandlers : Array<{ obj: EventDispatcher, event : String, handler : Dynamic } >;
 	#end
 	
 	/**
@@ -694,10 +701,11 @@ class ArcticView {
 						var eventName = "buttonclick";
 						aem.registerReplayer(eventName, abId, action);
 						#end
-						clip.addEventListener(flash.events.MouseEvent.MOUSE_UP, function(s) { 
+						clip.addEventListener(MouseEvent.MOUSE_UP, function(s) { 
+								var m = ArcticMC.getMouseXY();
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-								if (ArcticMC.isActive(clip) && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+								if (ArcticMC.isActive(clip) && clip.hitTestPoint(m.x, m.y, true)) {
 									#if arcticevidence
 									aem.recordEvent(eventName, abId, []);
 									#end
@@ -710,41 +718,44 @@ class ArcticView {
 						var eventName = "buttonclickxyup";
 						aem.registerReplayer(eventName, abId, actionExt);
 						#end
-						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, function(s) { 
+						addStageEventListener( clip.stage, MouseEvent.MOUSE_UP, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+									var m = ArcticMC.getMouseXY();
 									#if arcticevidence
 									aem.recordEvent(eventName, abId, 
 													[clip.mouseX, clip.mouseY, false,
-													 clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)]);
+													 clip.hitTestPoint(m.x, m.y, true)]);
 									#end
 									actionExt(clip.mouseX, clip.mouseY, false,
-											  clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
+											  clip.hitTestPoint(m.x, m.y, true));
 								}
 							} );
 						#if arcticevidence
 						var eventName = "buttonclickxydown";
 						aem.registerReplayer(eventName, abId, actionExt);
 						#end
-						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_DOWN, function(s) { 
+						addStageEventListener( clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+									var m = ArcticMC.getMouseXY();
 									#if arcticevidence
 									aem.recordEvent(eventName, abId, 
 													[clip.mouseX, clip.mouseY, true,
-													 clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)]);
+													 clip.hitTestPoint(m.x, m.y, true)]);
 									#end
 									actionExt(clip.mouseX, clip.mouseY, true,
-											  clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true));
+											  clip.hitTestPoint(m.x, m.y, true));
 								}
 							} );
 					}
 					if (hasHover) {
-						addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, function (s) {
+						addStageEventListener( clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
+								var m = ArcticMC.getMouseXY();
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								if (clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true) && ArcticMC.isActive(clip)) {
+								if (clip.hitTestPoint(m.x, m.y, true) && ArcticMC.isActive(clip)) {
 									child.clip.visible = false;
 									hover.clip.visible = true;
 								} else {
@@ -752,7 +763,7 @@ class ArcticView {
 									hover.clip.visible = false;
 								}
 							} );
-						addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
+						addStageEventListener( clip.stage, Event.MOUSE_LEAVE, function() {
 							child.clip.visible = true;
 							hover.clip.visible = false;
 						});
@@ -2227,7 +2238,7 @@ class ArcticView {
 	
 	#if flash9
 	/// A nice helper function to initialize optional event handlers
-	private static function addOptionalEventListener<Handler>(target: flash.events.EventDispatcher, type: String, handler: Handler, 
+	private static function addOptionalEventListener<Handler>(target: EventDispatcher, type: String, handler: Handler, 
 		flashHandler: flash.events.Event -> Void) {
 		if (null != handler) {
 			target.addEventListener(type, flashHandler);
@@ -2236,7 +2247,7 @@ class ArcticView {
 	#end
 	#if neko
 	/// A nice helper function to initialize optional event handlers
-	private static function addOptionalEventListener<Handler>(target: neash.events.EventDispatcher, type: String, handler: Handler, 
+	private static function addOptionalEventListener<Handler>(target: EventDispatcher, type: String, handler: Handler, 
 		flashHandler: neash.events.Event -> Void) {
 		if (null != handler) {
 			target.addEventListener(type, flashHandler);
@@ -2255,7 +2266,7 @@ class ArcticView {
 	}
 	
 	#if (flash9||neko)
-	private function addStageEventListener(d : flash.events.EventDispatcher, event : String, handler : Dynamic) {
+	private function addStageEventListener(d : EventDispatcher, event : String, handler : Dynamic) {
 		d.addEventListener(event, handler);
 		stageEventHandlers.push( { obj: d, event: event, handler: handler });
 	}
@@ -2310,7 +2321,7 @@ class ActiveClips {
 		}
 			
 		var contains = function (clip: ArcticMovieClip) {
-			#if flash9		
+			#if (flash9||neko)
 				return mc.contains(clip);
 			#else flash	
 				return mc == clip || StringTools.startsWith(clip._target, mc._target + "/");
@@ -2371,7 +2382,7 @@ class ActiveClips {
 		return start;
 	}
 	
-	#if flash9
+	#if (flash9||neko)
 	private function buildPath(mc: MovieClip): Array<DisplayObjectContainer> {
 		var path = new Array<DisplayObjectContainer>();
 		var parent: DisplayObjectContainer = mc;
@@ -2387,7 +2398,7 @@ class ActiveClips {
 		if (mc1 == mc2) {
 			return 0;
 		}
-	#if flash9
+	#if (flash9||neko)
 		var path1 = buildPath(mc1);
 		var path2 = buildPath(mc2);
 	#else flash	
@@ -2404,7 +2415,7 @@ class ActiveClips {
 			// one clip is a parent of another
 			return path1.length < path2.length ? -1 : 1;
 		}
-	#if flash9
+	#if (flash9||neko)
 		var lca = path1[diffIndex - 1];
 		var childNo1 = lca.getChildIndex(path1[diffIndex]);
 		var childNo2 = lca.getChildIndex(path2[diffIndex]);
