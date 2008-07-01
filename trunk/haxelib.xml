@@ -4,5 +4,9 @@
     <version name="0.9.25">
 	  - fix dragable block fix from last release to prevent infinite loop
 	  - fix buttons inside ToggleButtons. Reported by Maxim Prokoshin
+	  - add support for fixing the width of tooltips
+	  - add support for reserving extra space in ConstrainWidth and ConstrainHeight
+	    by using negative minimum metrics. This works such that this extra space is 
+		only used if necessary.
 	</version>
 </project>

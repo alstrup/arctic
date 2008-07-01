@@ -556,6 +556,17 @@ class ArcticView {
 				ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit);
 			}
 			var s = ArcticMC.getSize(clip);
+			/* This stuff is useful, but breaks lots of layouts so we have to disable it and find some way to introduce it without breaking stuff:
+			#if flash9
+				if (wordWrap) {
+					// If we are word wrapped and there is plenty of room in the width, we shrink ourselves accordingly
+					if (s.width - tf.textWidth > 5) {
+						tf.width = tf.textWidth + 5;
+					}
+					s = ArcticMC.getSize(clip);
+				}
+			#end
+			*/
 			if (mode == Metrics) {
 				#if flash9
 					s.width = tf.width;
@@ -971,9 +982,9 @@ class ArcticView {
 					default:
 				}
 			}
-		
-            var child = build(block, p, Math.max( minimumWidth, Math.min(availableWidth, maximumWidth) ), availableHeight, mode, childNo);
-			if (child.width < minimumWidth) {
+
+            var child = build(block, p, Math.max( Math.abs(minimumWidth), Math.min(availableWidth, maximumWidth)), availableHeight, mode, childNo);
+			if (minimumWidth >= 0 && child.width < minimumWidth) {
 				child.width = minimumWidth;
 			}
 			if (child.width > maximumWidth) {
@@ -993,8 +1004,8 @@ class ArcticView {
 				}
 			}
 		
-			var child = build(block, p, availableWidth, Math.max( minimumHeight, Math.min(availableHeight, maximumHeight) ), mode, childNo);
-			if (child.height < minimumHeight) {
+			var child = build(block, p, availableWidth, Math.max( Math.abs(minimumHeight), Math.min(availableHeight, maximumHeight)), mode, childNo);
+			if (minimumHeight >= 0 && child.height < minimumHeight) {
 				child.height = minimumHeight;
 			}
 			if (child.height > maximumHeight) {
