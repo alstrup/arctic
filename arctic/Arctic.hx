@@ -94,11 +94,16 @@ class Arctic {
 		return Button( normal, Switch( [ hover, pressed ], 0, captureSwitchFn), onClick, advancedHandler);
 	}
 	
-	/// Associate a tooltip with a block
-	static public function makeTooltip(block : ArcticBlock, text : String) : ArcticBlock {
-		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, makeText(text)), 100, 3)), true);
+	/// Associate a tooltip with a block - with an optional forced width for long tooltips that need word wrapping
+	static public function makeTooltip(block : ArcticBlock, text : String, ?width : Float) : ArcticBlock {
+		var t;
+		if (width != null) {
+			t = ConstrainWidth(-width, width, makeText(text, null, null, null, null, true));
+		} else {
+			t = makeText(text);
+		}
+		return Cursor(block, Offset(-30, -20, Background(0xFFFCA9, Border(5, 5, t), 100, 3)), true);
 	}
-
 	/// A block which looks like a page in a tear-off calendar on the given date
 	static public function makeDateView(date : Date, ?background : Int) : ArcticBlock {
 		var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];

@@ -97,13 +97,19 @@ enum ArcticBlock {
 
     /**
      * The ArcticBlock will be constrained to the dimensions given - in terms of layout only.
-	 * To crop a clip, use the Crop block.
+	 * To crop a clip, use the Crop block. 
+	 * If the minimumWidth is negative, the absolute value is reserved for layout purposes 
+	 * even if there is not extra space from the environment. However, the block is not 
+	 * artificially grown in case there was enough space to begin with.
      */
     ConstrainWidth(minimumWidth : Float, maximumWidth : Float, block : ArcticBlock); 
 
     /**
      * The ArcticBlock will be constrained to the dimensions given - in terms of layout only.
 	 * To crop a clip, use the Crop block.
+	 * If the minimumHeight is negative, the absolute value is reserved for layout purposes 
+	 * even if there is not extra space from the environment. However, the block is not 
+	 * artificially grown in case there was enough space to begin with.
      */
     ConstrainHeight(minimumHeight : Float, maximumHeight : Float, block : ArcticBlock);
 
