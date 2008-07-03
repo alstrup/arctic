@@ -2114,7 +2114,9 @@ class ArcticView {
 					if (dragX == -1) {
 						return;
 					}
-					clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+					if (clip != null) {
+						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+					}
 					dragX = -1;
 					dragY = -1;
 					if (onStopDrag != null) {
