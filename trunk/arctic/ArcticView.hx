@@ -1053,12 +1053,15 @@ class ArcticView {
 
 			// Next, determine how much space children get
             var freeSpace = availableWidth - width;
+			var remainder = 0.0;
+			
 			if (freeSpace < 0) {
 				// Hmm, we should do a scrollbar instead
 				freeSpace = 0;
 			}
 			if (numberOfWideChildren > 0) {
-				freeSpace = freeSpace / numberOfWideChildren;
+				freeSpace = Math.round(freeSpace / numberOfWideChildren);
+				remainder = availableWidth - width - (numberOfWideChildren * freeSpace);
 				m.growWidth = true;
 			} else {
 				freeSpace = 0;
@@ -1067,8 +1070,13 @@ class ArcticView {
 			var h = 0.0;
 			var x = 0.0;
 			var i = 0;
+			var firstGrowWidthChild = true;
 			for (l in blocks) {
 				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
+				if (firstGrowWidthChild && childMetrics[i].growWidth) {
+					firstGrowWidthChild = false;
+					w += remainder;
+				}
 				var child = build(l, clip, w, maxHeight, mode, i);
                 // var child = build(l, clip, w, availableHeight, mode, i);
 				if (mode != Metrics && child.clip != null) {
@@ -1131,10 +1139,16 @@ class ArcticView {
 				}
 				if (gh >= -freeSpace) {
 					// We could use knapsack to reduce children instead
-					var reductionPerGrowingChild = freeSpace / shrinkable;
+					var reductionPerGrowingChild = Math.round(freeSpace / shrinkable);
+					var remainder = freeSpace - (reductionPerGrowingChild * shrinkable);
+					var firstGrowHeightChild = true;
 					for (cm in childMetrics) {
 						if (cm.growHeight && cm.height > cutoffHeight) {
 							cm.height += reductionPerGrowingChild;
+							if (firstGrowHeightChild) {
+								cm.height += remainder;
+								firstGrowHeightChild = false;
+							}
 						}
 					}
 					freeSpace = 0;
