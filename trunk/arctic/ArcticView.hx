@@ -2114,7 +2114,7 @@ class ArcticView {
 		#if flash9
 			var firstTime = true;
 			var mouseMove = function(s) {
-				if (!clip.visible) {
+				if (clip == null || !clip.visible || clip.stage == null) {
 					return;
 				}
 				var dx = clip.stage.mouseX - dragX;
@@ -2128,7 +2128,7 @@ class ArcticView {
 					if (dragX == -1) {
 						return;
 					}
-					if (clip != null) {
+					if (clip != null && clip.stage != null) {
 						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 					}
 					dragX = -1;
