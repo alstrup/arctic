@@ -1840,17 +1840,6 @@ class ArcticView {
 		}
 
 		if (onInit != null) {
-			#if flash9
-			#else flash
-			var hasFocus = focus;
-			txtInput.onSetFocus = function(obj) {
-				hasFocus = true;
-			};
-			txtInput.onKillFocus = function(obj) {
-				hasFocus = false;
-			};
-			#end
-			
 			var textFn = function(status: TextInputModel) : TextInputModel {
 				if (null != status) {
 					if (status.html != null) {
@@ -1866,7 +1855,6 @@ class ArcticView {
 							}
 						#else flash
 							flash.Selection.setFocus(txtInput);
-							hasFocus = status.focus;
 						#end
 					}
 					if (null != status.selStart && null != status.selEnd) {
@@ -1906,6 +1894,7 @@ class ArcticView {
 					return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
 							 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT }
 				#else flash
+					var hasFocus = flash.Selection.getFocus() == txtInput._target;
 					return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
 							 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
 							 disabled: txtInput.type != "input" }
