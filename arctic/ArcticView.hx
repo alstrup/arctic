@@ -490,8 +490,11 @@ class ArcticView {
 				var tf : flash.text.TextField;
 				if (mode == Create || mode == Metrics) {
 					tf = new flash.text.TextField();
+					if (mode == Create) {
+						Reflect.setField(clip, "tf", tf);
+					}
 				} else if (mode == Reuse) {
-					tf = cast(clip.getChildAt(0), flash.text.TextField);
+					tf = Reflect.field(clip, "tf");
 				}
 				if (embeddedFont) {
 					tf.embedFonts = true;
