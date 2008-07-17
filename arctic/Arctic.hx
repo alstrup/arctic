@@ -72,6 +72,10 @@ class Arctic {
 		return Button(base, hover, null, ourHandler);
 	}
 	
+	/**
+	 * A helper to construct a switch-block. Notice that the switchFn is NOT valid on return.
+	 * It will first be initialized when the view is displayed.
+	 */
 	static public function makeSwitch(blocks : Array<ArcticBlock>, ?initial : Int) : { block : ArcticBlock, switchFn : Int -> Void } {
 		var result = {
 			block : null,
