@@ -495,6 +495,9 @@ class ArcticView {
 					}
 				} else if (mode == Reuse) {
 					tf = Reflect.field(clip, "tf");
+					if (tf == null) {
+						return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };						
+					}
 				}
 				if (embeddedFont) {
 					tf.embedFonts = true;
