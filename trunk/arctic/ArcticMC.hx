@@ -553,8 +553,6 @@ class ArcticMC {
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
 			tf.gridFitType = if (gridFit == 1) { flash.text.GridFitType.PIXEL; } 
 							else if (gridFit == 2) { flash.text.GridFitType.SUBPIXEL; } else { flash.text.GridFitType.NONE; };
-		} else {
-			tf.antiAliasType = flash.text.AntiAliasType.NORMAL;
 		}
 		#end
 	}
