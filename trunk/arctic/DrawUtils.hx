@@ -63,10 +63,10 @@ class DrawUtils {
 	}
 
 // Draws a circle with optional filling
-static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float)
+static public function drawCircle(mc : MovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float, ?lineThick : Null<Float>)
 {
 	var g = ArcticMC.getGraphics(mc);
-	g.lineStyle(1, color);
+	g.lineStyle((if (lineThick == null) 1 else lineThick), color);
 	if (null != fillColor) {
 		g.beginFill(fillColor, ArcticMC.convertAlpha(fillAlpha));
 	}
