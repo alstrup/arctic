@@ -1,6 +1,4 @@
 package arctic;
-
-import ;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
 
