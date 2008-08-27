@@ -141,7 +141,7 @@ enum ArcticBlock {
 	 * height of the blocks. If there is an unconstrained filler in the column stack (recursively)
 	 * this block will use all available width.
 	 */
-	ColumnStack(columns : Array< ArcticBlock > );
+	ColumnStack(columns: Array<ArcticBlock>, ?useIntergerFillings: Bool);
 
 	/**
 	 * A bunch of blocks stacked on top of each other. The width is the maximum width
@@ -151,7 +151,7 @@ enum ArcticBlock {
 	 * no matter how high the LineStack is, then pass false as the last parameter. The default
 	 * is to automatically add a scrollbar if needed.
 	 */
-	LineStack(blocks : Array<ArcticBlock>, ?ensureVisibleIndex : Null<Int>, ?useScrollbar : Bool);
+	LineStack(blocks: Array<ArcticBlock>, ?ensureVisibleIndex: Null<Int>, ?useScrollbar : Bool, ?useIntergerFillings: Bool);
 	
 	/**
 	 * A 2-d grid of block. For now, this does not support resizing or horizontal scrollbar.

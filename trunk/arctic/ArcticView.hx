@@ -1031,7 +1031,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
-		case ColumnStack(blocks):
+		case ColumnStack(blocks, useIntegerFillings):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// The number of children which wants to grow (including our own fillers)
@@ -1066,8 +1066,12 @@ class ArcticView {
 				freeSpace = 0;
 			}
 			if (numberOfWideChildren > 0) {
-				freeSpace = Math.round(freeSpace / numberOfWideChildren);
-				remainder = availableWidth - width - (numberOfWideChildren * freeSpace);
+				if (useIntegerFillings) {
+					freeSpace = Math.round(freeSpace / numberOfWideChildren);
+					remainder = availableWidth - width - (numberOfWideChildren * freeSpace);
+				} else {
+					freeSpace = freeSpace / numberOfWideChildren;
+				}
 				m.growWidth = true;
 			} else {
 				freeSpace = 0;
@@ -1098,7 +1102,7 @@ class ArcticView {
 			m.height = h;
 			return m;
 
-		case LineStack(blocks, ensureVisibleIndex, disableScrollbar):
+		case LineStack(blocks, ensureVisibleIndex, disableScrollbar, useIntegerFillings):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// Get child 0
@@ -1145,8 +1149,12 @@ class ArcticView {
 				}
 				if (gh >= -freeSpace) {
 					// We could use knapsack to reduce children instead
-					var reductionPerGrowingChild = Math.round(freeSpace / shrinkable);
-					var remainder = freeSpace - (reductionPerGrowingChild * shrinkable);
+					var reductionPerGrowingChild = freeSpace / shrinkable;
+					var remainder = 0.0;
+					if (useIntegerFillings) {
+						reductionPerGrowingChild = Math.round(reductionPerGrowingChild);
+						remainder = freeSpace - (reductionPerGrowingChild * shrinkable);
+					}
 					var firstGrowHeightChild = true;
 					for (cm in childMetrics) {
 						if (cm.growHeight && cm.height > cutoffHeight) {
