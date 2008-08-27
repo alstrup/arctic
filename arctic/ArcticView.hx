@@ -1,5 +1,6 @@
 package arctic;
 
+import ;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
 
@@ -1779,7 +1780,7 @@ class ArcticView {
 				if (validator == null) {
 					return;
 				}
-				var isValid = validator(txtInput.text);
+				var isValid: Null<Bool> = validator(txtInput.text);
 				if (isValid == true) {
 					txtInput.background = (null != bgColor);
 					if (txtInput.background) {
