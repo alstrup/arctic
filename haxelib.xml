@@ -1,12 +1,6 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.9.25">
-	  - fix dragable block fix from last release to prevent infinite loop
-	  - fix buttons inside ToggleButtons. Reported by Maxim Prokoshin
-	  - add support for fixing the width of tooltips
-	  - add support for reserving extra space in ConstrainWidth and ConstrainHeight
-	    by using negative minimum metrics. This works such that this extra space is 
-		only used if necessary.
+    <version name="0.9.26">
 	</version>
 </project>
