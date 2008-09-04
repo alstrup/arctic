@@ -1843,7 +1843,11 @@ class ArcticView {
 			#if (flash9 || neko)
 				if (focus != null && focus) {
 					clip.stage.focus = txtInput;
-					txtInput.setSelection(0, txtInput.length);
+					if (txtInput.text != " ") {
+						txtInput.setSelection(0, txtInput.length);
+					} else {
+						txtInput.setSelection(1, 1);
+					}
 				}
 			#else flash
 				if (focus != null && focus) {
@@ -2330,11 +2334,11 @@ class ActiveClips {
 		while (i >= 0) {
 			var clip = activeClips[i];
 			#if flash9
-				if (clip.hitTestPoint(x, y, true)) {
+				if (clip.hitTestPoint(x, y, false)) {
 					return clip;
 				}
 			#else flash
-				if (clip.hitTest(x, y, true) && ArcticMC.isActive(clip)) {
+				if (clip.hitTest(x, y, false) && ArcticMC.isActive(clip)) {
 					return clip;
 				}
 			#end
