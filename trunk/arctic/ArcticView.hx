@@ -58,7 +58,6 @@ class ArcticView {
 		parent = parent0;
 		base = null;
 		useStageSize = false;
-		updates = new Hash<ArcticBlock>();
 		if (metricsCache == null) {
 			metricsCache = new Hash<{ width: Float, height : Float } >();
 		}
@@ -202,19 +201,6 @@ class ArcticView {
 	private var firstChild : Int;
 
 	/**
-	 * Use this to change the named block to the new block. You have to
-	 * call refresh yourself afterwards to update the screen. See the
-	 * dynamic example to see how this is done.
-	 */
-	public function update(id : String, block : ArcticBlock) {
-		if (block == null) {
-			updates.remove(id);
-		} else {
-			updates.set(id, block);
-		}
-	}
-	
-	/**
 	* Get access to the raw movieclip for the named block.
 	* Notice! This movieclip is destroyed on refresh, and thus you have to
 	* do call this method again to do the special stuff you do again
@@ -252,9 +238,6 @@ class ArcticView {
 		base = null;
 	}
 
-	/// We record updates of blocks here.
-	private var updates : Hash<ArcticBlock>;
-	
 	/// And the movieclips for named ids here
 	private var idMovieClip : Hash<ArcticMovieClip>;
 	
@@ -1565,16 +1548,6 @@ class ArcticView {
 		case Id(id, block) :
 			// ToDo: This does not work for Destroy, as we do not have a handle to the old block to be destroyed.
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
-			if (updates.exists(id)) {
-				// Refine this to send build in rebuilt if it's a new update
-				var child = build(updates.get(id), clip, availableWidth, availableHeight, mode, 0);
-				if (mode == Destroy) {
-					idMovieClip.remove(id);
-				} else if (mode != Metrics) {
-					idMovieClip.set(id, child.clip);
-				}
-				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Destroy) {
 				idMovieClip.remove(id);
@@ -2490,7 +2463,7 @@ class ActiveClips {
 		while (diffIndex < length && path1[diffIndex] == path2[diffIndex]) {
 			diffIndex++;
 		}
-		if (diffIndex == length) {
+		if (diffIndex == length || diffIndex == 0) {
 			// one clip is a parent of another
 			return path1.length < path2.length ? -1 : 1;
 		}
