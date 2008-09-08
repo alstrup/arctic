@@ -115,7 +115,7 @@ class ArcticView {
 				parent.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
 				parent.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
-				addStageEventListener(parent.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
+				addStageEventListener(parent, parent.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
 			#else flash
 				flash.Stage.addListener(this);
 				flash.Stage.scaleMode = "noScale";
@@ -127,7 +127,7 @@ class ArcticView {
 	
 	#if (flash9||neko)
 	/// We record all the event handlers we register so that we can clean them up again when destroyed
-	private var stageEventHandlers : Array<{ obj: EventDispatcher, event : String, handler : Dynamic } >;
+	private var stageEventHandlers : Array<{ obj: EventDispatcher, event : String, handler : Dynamic, ref : Dynamic } >;
 	#end
 	
 	/**
@@ -180,7 +180,6 @@ class ArcticView {
 			remove();
 		}
 		if (rebuild) {
-			movieClips = [];
 			idMovieClip = new Hash<ArcticMovieClip>();
 			ArcticMC.showMouse();
 			#if flash9
@@ -243,39 +242,16 @@ class ArcticView {
 			}
 			mouseWheelListeners = [];
 		#end
-		for (m in movieClips) {
-			ActiveClips.get().remove(m);
-			ArcticMC.remove(m);
-		}
-		movieClips = [];
+		var result = build(gui, parent, size.width, size.height, Destroy, firstChild);
+		ArcticMC.remove(base);
+		#if flash9
+		#else flash
+		Reflect.deleteField(parent, "c" + firstChild);
+		#end
 		idMovieClip = new Hash<ArcticMovieClip>();
 		base = null;
 	}
-	
-	private function removeClip(c : ArcticMovieClip) {
-		var p = ArcticMC.getParent(c);
-		ActiveClips.get().remove(c);
-		ArcticMC.remove(c);
-		movieClips.remove(c);
 
-		Reflect.setField(p, "c0", null);
-		
-		#if flash9
-		#else flash
-		// Clean up mouse wheel listeners
-		for (s in mouseWheelListeners) {
-			if (s.clip == c) {
-				flash.Mouse.removeListener(s.listener);
-				mouseWheelListeners.remove(s);
-				return;
-			}
-		}
-		#end
-	}
-
-	// We collect all generated movieclips here, so we can be sure to remove all when done
-	private var movieClips : Array<ArcticMovieClip>;
-	
 	/// We record updates of blocks here.
 	private var updates : Hash<ArcticBlock>;
 	
@@ -334,7 +310,7 @@ class ArcticView {
 		#end
 		switch (gui) {
 		case Border(x, y, block):
-			if (mode != Metrics) {
+			if (mode != Metrics && mode != Destroy) {
 				if (availableWidth < 2 * x) {
 					x = availableWidth / 2;
 				}
@@ -346,7 +322,7 @@ class ArcticView {
 			var child = build(block, clip, Math.max(0.0, availableWidth - 2 * x), Math.max(availableHeight - 2 * y, 0.0), mode, 0);
 			child.width += 2 * x;
 			child.height += 2 * y;
-			if (mode != Metrics && child.clip != null) {
+			if (mode != Metrics && mode != Destroy && child.clip != null) {
 				ArcticMC.setXY(child.clip, x, y);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -361,7 +337,7 @@ class ArcticView {
 				block = Border(x, y, block);
 			}	
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode != Metrics && thickness != 0) {
+			if (mode != Metrics && mode != Destroy && thickness != 0) {
 				var delta = thickness / 2;
 				var g = ArcticMC.getGraphics(clip);
 				g.clear();
@@ -417,7 +393,7 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		
 		case Background(color, block, alpha, roundRadius):
-			if (mode == Metrics) {
+			if (mode == Metrics || mode == Destroy) {
 				return build(block, null, availableWidth, availableHeight, Metrics, 0);
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
@@ -435,7 +411,7 @@ class ArcticView {
 		case GradientBackground(type, colors, xOffset, yOffset, block, alpha, roundRadius, rotation, ratios):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode == Metrics || colors == null || colors.length == 0) {
+			if (mode == Metrics || mode == Destroy || colors == null || colors.length == 0) {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			if (ratios == null) {
@@ -485,6 +461,9 @@ class ArcticView {
 				return { clip: null, width : m.width, height : m.height, growWidth : false, growHeight : false };
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			if (mode == Destroy) {
+				return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };
+			}
 			#if flash9
 				var tf : flash.text.TextField;
 				if (mode == Create || mode == Metrics) {
@@ -679,14 +658,12 @@ class ArcticView {
 			}
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (child.clip == null) {
+			if (child.clip == null && mode != Destroy) {
 				#if debug
 				trace("Can not make button of empty clip");
 				#end
 				return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
-			ArcticMC.setVisible(child.clip, true);
-
 			var hover = null;
 			if (hoverb != null) {
 				hover = build(hoverb, clip, availableWidth, availableHeight, mode, 1);
@@ -696,7 +673,16 @@ class ArcticView {
 			// for another day.
 			
 			var hasHover = hover != null && hover.clip != null;
-			
+			if (mode == Destroy) {
+				removeStageEventListeners(clip);
+				if (!hasHover) {
+					return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+				} else {
+					return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+				}
+			}
+
+			ArcticMC.setVisible(child.clip, true);
 			if (hasHover) {
 				ArcticMC.setVisible(hover.clip, false);
 			}
@@ -734,7 +720,7 @@ class ArcticView {
 						var eventName = "buttonclickxyup";
 						aem.registerReplayer(eventName, abId, actionExt);
 						#end
-						addStageEventListener( clip.stage, MouseEvent.MOUSE_UP, function(s) { 
+						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_UP, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
@@ -752,7 +738,7 @@ class ArcticView {
 						var eventName = "buttonclickxydown";
 						aem.registerReplayer(eventName, abId, actionExt);
 						#end
-						addStageEventListener( clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
+						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
 								if (ArcticMC.isActive(clip)) {
 									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
@@ -768,7 +754,7 @@ class ArcticView {
 							} );
 					}
 					if (hasHover) {
-						addStageEventListener( clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
+						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
 								var m = ArcticMC.getMouseXY();
 								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 								if (clip.hitTestPoint(m.x, m.y, true) && ArcticMC.isActive(clip)) {
@@ -779,7 +765,7 @@ class ArcticView {
 									hover.clip.visible = false;
 								}
 							} );
-						addStageEventListener( clip.stage, Event.MOUSE_LEAVE, function() {
+						addStageEventListener( clip, clip.stage, Event.MOUSE_LEAVE, function() {
 							child.clip.visible = true;
 							hover.clip.visible = false;
 						});
@@ -837,7 +823,7 @@ class ArcticView {
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var sel = build(selected, clip, availableWidth, availableHeight, mode, 0);
 			var unsel = build(unselected, clip, availableWidth, availableHeight, mode, 1);
-			if (mode != Metrics) {
+			if (mode != Metrics && mode != Destroy) {
 				if (sel.clip == null || unsel.clip == null) {
 					#if debug
 					trace("Can not make ToggleButton of empty blocks");
@@ -889,12 +875,14 @@ class ArcticView {
 			}
 			if (mode == Create) {
 				var me = this;
-				mutableBlock.arcticUpdater = function(block : ArcticBlock, w, h) : Metrics {
+				mutableBlock.arcticUpdater = function(oldBlock : ArcticBlock, block : ArcticBlock, w, h) : Metrics {
 					if (me.gui == null) return null;
-					var oldClip = me.getOrMakeClip(clip, Reuse, 0);
-					if (oldClip != null) { // remove the clip even if it's invisible
-						me.removeClip(oldClip);
-					}
+					var oldClip = me.getOrMakeClip(clip, Destroy, 0);
+					ArcticMC.remove(oldClip);
+					Reflect.setField(clip, "c0", null);
+ 					if (oldBlock != null) {
+ 						me.build(oldBlock, oldClip, w, h, Destroy, 0);
+ 					}
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
 					return me.build(mutableBlock.block, childClip, w, h, Create, 0);
 				};
@@ -923,7 +911,7 @@ class ArcticView {
 				if (mode == Create) {
 					children.push(child);
 				}
-				if (mode != Metrics) {
+				if (mode != Metrics && mode != Destroy) {
 					ArcticMC.setVisible(child.clip, i == cur);
 				}
 				width = Math.max(child.width, width);
@@ -972,7 +960,9 @@ class ArcticView {
 				if (ypos != -1.0 && availableHeight > child.height) {
 					y = (availableHeight - child.height) * ypos;
 				}
-				ArcticMC.setXY(child.clip, x, y);
+				if (mode != Destroy) {
+					ArcticMC.setXY(child.clip, x, y);
+				}
 			}
 			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
 
@@ -1025,7 +1015,7 @@ class ArcticView {
 			var h = child.height;
 			if (width != null) w = width;
 			if (height != null) h = height;
-			if (mode != Metrics) {
+			if (mode != Metrics && mode != Destroy) {
 				ArcticMC.clipSize(clip, w, h);
 			}
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
@@ -1088,7 +1078,7 @@ class ArcticView {
 				}
 				var child = build(l, clip, w, maxHeight, mode, i);
                 // var child = build(l, clip, w, availableHeight, mode, i);
-				if (mode != Metrics && child.clip != null) {
+				if (mode != Metrics && mode != Destroy && child.clip != null) {
 					ArcticMC.setXY(child.clip, x, null);
 				}
 				x += child.width;
@@ -1182,7 +1172,7 @@ class ArcticView {
 				h = Math.max(0, h);
                 var line = build(l, child, maxWidth, h, mode, i);
                 // var line = build(l, child, availableWidth, h, mode, i);
-				if (mode != Metrics && line.clip != null) {
+				if (mode != Metrics && mode != Destroy && line.clip != null) {
 					ArcticMC.setXY(line.clip, null, y);
 				}
 				if (i == ensureVisibleIndex) {
@@ -1203,7 +1193,7 @@ class ArcticView {
 			}
 			
 			if (disableScrollbar != false) {
-				if (y - availableHeight >= 1 && availableHeight >= 34) {
+				if (y - availableHeight >= 1 && availableHeight >= 34 && mode != Destroy) {
 					// Scrollbar
 					if (mode != Metrics) {
 						Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
@@ -1323,7 +1313,7 @@ class ArcticView {
 				for (entry in row.blocks) {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
 					var child = build(entry.block, clip, w, h, mode, i);
-					if (mode != Metrics && child.clip != null) {
+					if (mode != Metrics && mode != Destroy && child.clip != null) {
 						ArcticMC.setXY(child.clip, x, y);
 						if (mode == Reuse) {
 							ArcticMC.setVisible(child.clip, true);
@@ -1392,7 +1382,7 @@ class ArcticView {
 				var xc = 0.0;
 				for (block in line) {
 					var b = build(block, child, columnWidths[x], lineHeights[y], mode, i);
-					if (mode != Metrics && b.clip != null) {
+					if (mode != Metrics && mode != Destroy && b.clip != null) {
 						ArcticMC.setXY(b.clip, xc, yc);
 					}
 					xc += Math.max(b.width, columnWidths[x]);
@@ -1405,7 +1395,7 @@ class ArcticView {
 				}
 				var color = (y + 1) % 2 == 0 ? evenRowColor : oddRowColor;
 				// a fill will not be created if the color is equal to null
-				if (mode != Metrics && color != null) {
+				if (mode != Metrics && mode != Destroy && color != null) {
 					var g = ArcticMC.getGraphics(child);
 					g.beginFill(color);
 					DrawUtils.drawRect(child, 0, yc, xc, lineHeights[y]);
@@ -1426,7 +1416,7 @@ class ArcticView {
 			if (disableScrollbar != true) {
 				// TODO: draw horizontal scrollbar if (width > availableHeight) 
 				// draw vertical scrollbar
-				if (height - availableHeight >= 1 && availableHeight >= 34) {
+				if (height - availableHeight >= 1 && availableHeight >= 34 && mode != Destroy) {
 					if (mode != Metrics) {
 						Scrollbar.drawScrollBar(clip, child, width, availableHeight, height, 0);
 					}
@@ -1444,7 +1434,9 @@ class ArcticView {
 		case ScrollBar(block, availableWidth, availableHeight):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode != Metrics) {
+			if (mode == Destroy) {
+				Scrollbar.removeScrollbar(clip, child.clip);
+			} else if (mode != Metrics) {
 				Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, child.height, 0);
 			}
 			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -1458,7 +1450,7 @@ class ArcticView {
 			if (mode == Metrics) {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
-			if (child.clip == null) {
+			if (child.clip == null && mode != Destroy) {
 				#if debug
 				trace("Can not make cursor of empty block");
 				#end
@@ -1466,6 +1458,13 @@ class ArcticView {
 			}
 			var me = this;
 			var cursorMc = null;
+			if (mode == Destroy) {
+				if (cursorMc != null) {
+					build(cursor, parent, 0, 0, mode, 1);
+				}
+				removeStageEventListeners(clip);
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
 			// We need to construct the cursor lazily because we want it to come on top of everything
 			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, mode, 1);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
@@ -1495,8 +1494,8 @@ class ArcticView {
 					}
 				};
 				if (mode == Create) {
-					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
-					addStageEventListener( clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
+					addStageEventListener( clip, clip.stage, flash.events.MouseEvent.MOUSE_MOVE, onMove);
+					addStageEventListener( clip, clip.stage, flash.events.Event.MOUSE_LEAVE, function() {
 							if (cursorMc != null && cursorMc.clip != null) {
 								cursorMc.clip.visible = false;
 							}
@@ -1564,17 +1563,22 @@ class ArcticView {
 					growWidth: child.growWidth || over.growWidth, growHeight: child.growHeight || over.growHeight};
 		 
 		case Id(id, block) :
+			// ToDo: This does not work for Destroy, as we do not have a handle to the old block to be destroyed.
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			if (updates.exists(id)) {
 				// Refine this to send build in rebuilt if it's a new update
 				var child = build(updates.get(id), clip, availableWidth, availableHeight, mode, 0);
-				if (mode != Metrics) {
+				if (mode == Destroy) {
+					idMovieClip.remove(id);
+				} else if (mode != Metrics) {
 					idMovieClip.set(id, child.clip);
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode != Metrics) {
+			if (mode == Destroy) {
+				idMovieClip.remove(id);
+			} else if (mode != Metrics) {
 				idMovieClip.set(id, child.clip);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
@@ -1585,8 +1589,11 @@ class ArcticView {
 				var result = buildFun(data, mode, clip, availableWidth, availableHeight, null);
 				Reflect.setField(clip, "customClip", result.clip);
 				return result;
-			} else if (mode == Reuse) {
+			} else if (mode == Reuse || mode == Destroy) {
 				var dclip = Reflect.field(clip, "customClip");
+				if (mode == Destroy) {
+					Reflect.deleteField(clip, "customClip");
+				}
 				return buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
 			} else {
 				return buildFun(data, mode, null, availableWidth, availableHeight, null);
@@ -1599,7 +1606,7 @@ class ArcticView {
 				// To support empty children, we ensure that we have the right size
 				ArcticMC.setSize(clip, child.width, child.height);
 				#if flash9
-					addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_WHEEL,
+					addStageEventListener( clip, clip.stage, flash.events.MouseEvent.MOUSE_WHEEL,
 						function (s) {
 							// We do not respect alpha for mouse wheel detection
 							if (ArcticMC.isActive(clip) && clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, false)) {
@@ -1623,6 +1630,8 @@ class ArcticView {
 					// We record this one so we can remove it again later
 					mouseWheelListeners.push({ clip: clip, listener: mouseWheelListener } );
 				#end
+			} else if (mode == Destroy) {
+				removeStageEventListeners(clip);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
@@ -1688,7 +1697,7 @@ class ArcticView {
 			}
 			//trace(availableWidth + "," + availableHeight + " " + metricsChild.width + "," + metricsChild.height + " " + scale + " " + excessWidth + "," + excessHeight);
 			var child = build(block, clip, excessWidth, excessHeight, mode, 0);
-			if (mode != Metrics) {
+			if (mode != Metrics && mode != Destroy) {
 				ArcticMC.setScaleXY(child.clip, scale, scale);
 			}
 			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: growWidth, growHeight: growHeight };
@@ -1711,6 +1720,8 @@ class ArcticView {
 		var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 		if (mode == Create) {
 			ActiveClips.get().add(clip);
+		} else if (mode == Destroy) {
+			ActiveClips.get().remove(clip);
 		}
 		#if flash9
 			var txtInput : flash.text.TextField;
@@ -1838,7 +1849,7 @@ class ArcticView {
 				txtInput.type = "input";
 			#end
 		}
-		if (mode != Metrics) {
+		if (mode != Metrics && mode != Destroy) {
 			// Setting focus on txtInput 
 			#if (flash9 || neko)
 				if (focus != null && focus) {
@@ -1921,7 +1932,7 @@ class ArcticView {
 			onInit(textFn);
 		}
 		
-		if (onInitEvents != null) {
+		if (onInitEvents != null && mode == Create) {
 			var eventsFn = function (events: TextInputEvents): Void {					
 				#if flash9
 				addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
@@ -1982,7 +1993,7 @@ class ArcticView {
 		
 		var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 		
-		if (mode != Metrics) {
+		if (mode != Metrics && mode != Destroy) {
 			if (child.clip == null) {
 				#if debug
 				trace("Can not make dragable with empty block");
@@ -1994,6 +2005,8 @@ class ArcticView {
 		var dragClip = clip; 
 		if (mode == Create) {
 			ActiveClips.get().add(dragClip);
+		} else if (mode == Destroy) {
+			ActiveClips.get().remove(dragClip);
 		}
 
 		var width = child.width;
@@ -2042,7 +2055,9 @@ class ArcticView {
 		}; 
 		
 		if (mode != Create) {
-			if (mode == Reuse && null != onInit) {
+			if (mode == Destroy) {
+				removeStageEventListeners(clip);
+			} else if (mode == Reuse && null != onInit) {
 				var dragInfo = { 
 					x : info.totalDx, 
 					y : info.totalDy,
@@ -2135,7 +2150,7 @@ class ArcticView {
 						return;
 					}
 					if (clip != null && clip.stage != null) {
-						clip.stage.removeEventListener( flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+						me.removeStageEventListener( clip, clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 					}
 					dragX = -1;
 					dragY = -1;
@@ -2148,9 +2163,9 @@ class ArcticView {
 					if (ActiveClips.get().getActiveClip() == dragClip) {
 						dragX = clip.stage.mouseX;
 						dragY = clip.stage.mouseY;
-						me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
+						me.addStageEventListener( clip, clip.stage, flash.events.MouseEvent.MOUSE_MOVE, mouseMove );
 						if (firstTime) {
-							me.addStageEventListener( clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
+							me.addStageEventListener( clip, clip.stage, flash.events.MouseEvent.MOUSE_UP, mouseUp );
 							firstTime = false;
 						}
 					}
@@ -2240,21 +2255,26 @@ class ArcticView {
 					// like flash.Lib.current in Flash 9
 				}
 			#end
-			movieClips.push(clip);
 			clip.tabEnabled = false;
 			return clip;
 		}
-		// Reuse case
+		// Reuse/Destroy case
 		#if (flash9 || neko)
 			if (p != parent) {
 				if (Reflect.hasField(p, "c" + childNo)) {
 					return Reflect.field(p, "c" + childNo);
 				}
 				// Fallback - should never happen
+#if debug
+				trace("getOrMakeClip() unexpected fallback 1.");
+#end
 				return getOrMakeClip(p, Create, childNo);
 			}
 			if (p.numChildren < childNo) {
 				// Fallback - should never happen
+#if debug
+				trace("getOrMakeClip() unexpected fallback 2.");
+#end
 				return getOrMakeClip(p, Create, childNo);
 			} else {
 				var d : Dynamic = p.getChildAt(childNo);
@@ -2299,9 +2319,35 @@ class ArcticView {
 	}
 	
 	#if (flash9||neko)
-	private function addStageEventListener(d : EventDispatcher, event : String, handler : Dynamic) {
+	private function addStageEventListener(refObj : Dynamic, d : EventDispatcher, event : String, handler : Dynamic) {
 		d.addEventListener(event, handler);
-		stageEventHandlers.push( { obj: d, event: event, handler: handler });
+		stageEventHandlers.push( { obj: d, event: event, handler: handler, ref: refObj });
+	}
+	private function removeStageEventListeners(refObj : Dynamic) {
+		var i : Int = stageEventHandlers.length;
+		while (i > 0) {
+			i--;
+			if (stageEventHandlers[i].ref == refObj) {
+				stageEventHandlers[i].obj.removeEventListener(stageEventHandlers[i].event, stageEventHandlers[i].handler);
+				stageEventHandlers.splice(i, 1);
+			}
+		}
+	}
+	private function removeStageEventListener(refObj : Dynamic, d : EventDispatcher, event : String, handler : Dynamic) {
+		d.removeEventListener(event, handler);
+		var i : Int = stageEventHandlers.length;
+		while (i > 0) {
+			i--;
+			if (stageEventHandlers[i].ref == refObj && stageEventHandlers[i].obj == d &&
+				stageEventHandlers[i].event == event && stageEventHandlers[i].handler == handler) {
+				stageEventHandlers.splice(i, 1);
+			}
+		}
+	}
+	#else true
+	private function removeStageEventListeners(refObj : Dynamic) {
+	}
+	private function removeStageEventListener(refObj : Dynamic, d : Dynamic, event : String, handler : Dynamic) {
 	}
 	#end
 

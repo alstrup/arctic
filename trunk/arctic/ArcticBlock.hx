@@ -296,6 +296,8 @@ enum BuildMode {
 	Reuse;
 	/// Do not create or change any movieclips - just calculate metrics
 	Metrics;
+	/// Destroy, removing movieClip and event listeners.
+	Destroy;
 }
 
 /// Information returned about draggable blocks
@@ -386,22 +388,23 @@ class MutableBlock {
 		return myBlock;
 	}
 	private function set(block : ArcticBlock) : ArcticBlock {
+		var oldBlock = myBlock;
 		myBlock = block;
-		update();
+		update(oldBlock);
 		return myBlock;
 	}
 	
 	/// For safety, provide an explicit way to update the view (should never be necessary)
-	public function update() : Metrics {
+	public function update(?oldBlock : ArcticBlock) : Metrics {
 		if (arcticUpdater != null) {
-			return arcticUpdater(block, availableWidth, availableHeight);
+			return arcticUpdater(oldBlock, block, availableWidth, availableHeight);
 		} else {
 			return null;
 		}
 	}
 
 	/// Updated by ArcticView.build
-	public var arcticUpdater(null, default) : ArcticBlock -> Float -> Float -> Metrics;
+	public var arcticUpdater(null, default) : ArcticBlock -> ArcticBlock -> Float -> Float -> Metrics;
 	public var availableWidth(null, default) : Float;
 	public var availableHeight(null, default) : Float;
 }	
