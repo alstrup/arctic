@@ -861,11 +861,11 @@ class ArcticView {
 				mutableBlock.arcticUpdater = function(oldBlock : ArcticBlock, block : ArcticBlock, w, h) : Metrics {
 					if (me.gui == null) return null;
 					var oldClip = me.getOrMakeClip(clip, Destroy, 0);
-					ArcticMC.remove(oldClip);
-					Reflect.setField(clip, "c0", null);
  					if (oldBlock != null) {
  						me.build(oldBlock, oldClip, w, h, Destroy, 0);
  					}
+					ArcticMC.remove(oldClip);
+					Reflect.setField(clip, "c0", null);
 					var childClip : MovieClip = me.getOrMakeClip(clip, Create, 0);
 					return me.build(mutableBlock.block, childClip, w, h, Create, 0);
 				};
