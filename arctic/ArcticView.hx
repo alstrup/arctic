@@ -1445,14 +1445,22 @@ class ArcticView {
 			if (mode == Destroy) {
 				removeStageEventListeners(clip);
 				if (cursorMc != null) {
-					build(cursor, parent, 0, 0, mode, 1);
+					// Since cursors are constructed lazily, we have to search for our child 
+					// because other Cursors might have gone before us changing the child numbering
+					for (i in 0...parent.numChildren) {
+						var c : Dynamic = parent.getChildAt(i);
+						if (c == cursorMc.clip) {
+							build(cursor, parent, 0, 0, mode, i);
+							break;
+						}
+					}
 					ArcticMC.remove(cursorMc.clip);
 					Reflect.deleteField(clip, "cursor");
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			// We need to construct the cursor lazily because we want it to come on top of everything
-			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, Create, 1);};
+			var cursorMcFn = function(n) { return me.build(cursor, me.parent, 0, 0, Create, n);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
@@ -1462,7 +1470,9 @@ class ArcticView {
 					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 						ArcticMC.showMouse(keep);
 						if (cursorMc == null) {
-							cursorMc = cursorMcFn();
+							// Since we are constructed lazily, we have to find out what child number we are
+							var no = me.parent.numChildren;
+							cursorMc = cursorMcFn(no);
 							cursorMcFn = null;
 							Reflect.setField(clip, "cursor", cursorMc);
 						}
@@ -2223,6 +2233,9 @@ class ArcticView {
 				Reflect.setField(p, "c" + childNo, clip);
 			#else (flash9 || neko)
 				var clip = new MovieClip();
+				if (p.numChildren > childNo) {
+					trace("p already has " + p.numChildren + " children, so adding as " + childNo + " makes no sense");
+				}
 				p.addChild(clip);
 				if (p != parent) {
 					Reflect.setField(p, "c" + childNo, clip);
@@ -2242,7 +2255,7 @@ class ArcticView {
 					return Reflect.field(p, "c" + childNo);
 				}
 #if debug
-				trace("getOrMakeClip() unexpected fallback 1.");
+				trace("getOrMakeClip() unexpected fallback 1." + buildMode);
 #end
 				return getOrMakeClip(p, Create, childNo);
 			}
