@@ -1440,16 +1440,19 @@ class ArcticView {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			var me = this;
-			var cursorMc = null;
+			var cursorMc = Reflect.field(clip, "cursor");
+			
 			if (mode == Destroy) {
+				removeStageEventListeners(clip);
 				if (cursorMc != null) {
 					build(cursor, parent, 0, 0, mode, 1);
+					ArcticMC.remove(cursorMc.clip);
+					Reflect.deleteField(clip, "cursor");
 				}
-				removeStageEventListeners(clip);
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			// We need to construct the cursor lazily because we want it to come on top of everything
-			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, mode, 1);};
+			var cursorMcFn = function() { return me.build(cursor, me.parent, 0, 0, Create, 1);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
@@ -1461,6 +1464,7 @@ class ArcticView {
 						if (cursorMc == null) {
 							cursorMc = cursorMcFn();
 							cursorMcFn = null;
+							Reflect.setField(clip, "cursor", cursorMc);
 						}
 						if (cursorMc.clip == null) {
 							return;
@@ -2237,7 +2241,6 @@ class ArcticView {
 				if (Reflect.hasField(p, "c" + childNo)) {
 					return Reflect.field(p, "c" + childNo);
 				}
-				// Fallback - should never happen
 #if debug
 				trace("getOrMakeClip() unexpected fallback 1.");
 #end
