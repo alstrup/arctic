@@ -2233,9 +2233,11 @@ class ArcticView {
 				Reflect.setField(p, "c" + childNo, clip);
 			#else (flash9 || neko)
 				var clip = new MovieClip();
+				#if debug
 				if (p.numChildren > childNo) {
 					trace("p already has " + p.numChildren + " children, so adding as " + childNo + " makes no sense");
 				}
+				#end
 				p.addChild(clip);
 				if (p != parent) {
 					Reflect.setField(p, "c" + childNo, clip);
