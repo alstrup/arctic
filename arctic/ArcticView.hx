@@ -1469,6 +1469,7 @@ class ArcticView {
 					}
 					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 						ArcticMC.showMouse(keep);
+						cursorMc = Reflect.field(clip, "cursor");
 						if (cursorMc == null) {
 							// Since we are constructed lazily, we have to find out what child number we are
 							var no = me.parent.numChildren;
