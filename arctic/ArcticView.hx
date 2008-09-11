@@ -1584,7 +1584,7 @@ class ArcticView {
 				}
 				var r = buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
 				if (r == null) {
-					return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false }:
+					return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 				}
 				return r;
 			} else {
