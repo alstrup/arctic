@@ -1582,7 +1582,11 @@ class ArcticView {
 				if (mode == Destroy) {
 					Reflect.deleteField(clip, "customClip");
 				}
-				return buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
+				var r = buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
+				if (r == null) {
+					return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false }:
+				}
+				return r;
 			} else {
 				return buildFun(data, mode, null, availableWidth, availableHeight, null);
 			}
