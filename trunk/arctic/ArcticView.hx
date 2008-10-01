@@ -1323,7 +1323,7 @@ class ArcticView {
 			m.height = y - yspacing;
 			return m;
 		
-		case Grid(cells, disableScrollbar, oddRowColor, evenRowColor):
+		case Grid(cells, disableScrollbar, oddRowColor, evenRowColor, borderSize, borderColor):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			var child = getOrMakeClip(clip, mode, 0);
 
@@ -1395,6 +1395,33 @@ class ArcticView {
 			for (h in lineHeights) {
 				height += h;
 			}
+			
+			#if flash9
+			if ((borderSize != null)&&(borderColor!=null)) {
+				if ((mode == Create) || (mode == Reuse)) {
+					var g:flash.display.Graphics = child.graphics;
+					g.clear();
+					g.lineStyle(borderSize, borderColor, 1.0);
+					var x = 0.0;
+					var y = 0.0;
+					for (w in columnWidths) {
+						g.moveTo(x, 0);
+						g.lineTo(x, height);
+						x += w;
+					}
+					g.moveTo(x, 0);
+					g.lineTo(x, height);
+					
+					for (h in lineHeights) {
+						g.moveTo(0, y);
+						g.lineTo(width, y);
+						y += h;
+					}
+					g.moveTo(0, y);
+					g.lineTo(width, y);
+				}
+			}
+			#end
 			
 			if (disableScrollbar != true) {
 				// TODO: draw horizontal scrollbar if (width > availableHeight) 
