@@ -1,6 +1,8 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
+import flash.geom.Matrix;
+import flash.geom.Point;
 
 #if flash9
 import flash.display.MovieClip;
@@ -1720,6 +1722,63 @@ class ArcticView {
 				ArcticMC.setScaleXY(child.clip, scale, scale);
 			}
 			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: growWidth, growHeight: growHeight };
+		#if flash9
+		case Rotate(block, angle):
+			var childW:Float = 0;
+			var childH:Float = 0;
+			var minx:Float = 0;
+			var miny:Float = 0;
+			var maxx:Float = 0;
+			var maxy:Float = 0;
+			var ca:Float = 0;
+			var sa:Float = 0;
+			
+			if (mode != Destroy) {
+				ca = Math.cos(angle*Math.PI/180.0);
+				sa = Math.sin(angle*Math.PI/180.0);
+				var d:Float = 1.0/(ca * ca - sa * sa); 
+				childW = d * (Math.abs(ca * availableWidth) - Math.abs(sa * availableHeight));
+				childH = d * (Math.abs(ca * availableHeight) - Math.abs(sa * availableWidth));
+			}
+			
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, childW, childH, mode, 0);
+		
+			if (mode != Destroy) {
+				var w:Float = child.width;
+				var h:Float = child.height;
+				if ((ca >= 0) && (sa >= 0)) {
+					minx = -h * sa;
+					miny = 0;
+					maxx = w * ca;
+					maxy = w * sa + h * ca;
+				}
+				else if ((ca <= 0) && (sa >= 0)) {
+					minx = w * ca - h * sa;
+					miny = h * ca;
+					maxx = 0;
+					maxy = w * sa;
+				}
+				else if ((ca <= 0) && (sa <= 0)) {
+					minx = w * ca;
+					miny = w * sa + h * ca;
+					maxx = -h * sa;
+					maxy = 0;
+				}
+				else if ((ca >= 0) && (sa <= 0)) {
+					minx = 0;
+					miny = w * sa;
+					maxx = w * ca - h * sa;
+					maxy = h * ca;
+				}
+				if (child.clip != null) {
+					child.clip.rotation = angle;
+					child.clip.x = -minx;
+					child.clip.y = -miny;
+				}
+			}
+		return { clip: clip, width: maxx - minx, height: maxy-miny, growWidth: child.growWidth, growHeight: child.growHeight};
+		#end
 		
 		case DebugBlock(id, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
