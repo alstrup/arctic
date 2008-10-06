@@ -424,6 +424,97 @@ class Arctic {
 		}
 		return { blocks:toggleButtons, selectFn : onSelectHandler };
 	}
+	#if flash9
+	static public function makeAutoCompleteInput(html : String, autos:Array < String > , width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
+		var autoCompleteBlock = new MutableBlock(Fixed(0, 0));
+		var contentFn :	TextInputModel->TextInputModel = null;
+				
+		//content iface getter
+		var myonInit = function (contentIface : TextInputModel->TextInputModel) {
+			contentFn = contentIface;
+		}
+		
+		//events iface getter
+		var myonInitEvents = function (eventIface: TextInputEvents->Void) {
+			var onTextChanged = function (notify:Dynamic, text:String) {
+				var variants:Array<String> = [];
+				if (text.length > 0) {
+					for (w in autos) {
+						if (w.length >= text.length && w.substr(0, text.length) == text) {
+							variants.push(w);
+						}
+					}
+				}
+				if (variants.length <= 1) {
+					autoCompleteBlock.block = Fixed(0, 0);
+				}
+				else {
+					var buttonArr = [];
+					var buttonHeight = 20;
+					var makeACButton = function (w:String):ArcticBlock {
+						return 
+						Button(
+							ConstrainHeight(buttonHeight, buttonHeight, Border(5, 0, Text(w))),
+							ConstrainHeight(buttonHeight, buttonHeight, Border(5, 0, Text(w))),
+							function () {
+								if (contentFn != null) {
+									var ti:TextInputModel = {
+										html: w,
+										text: w,
+										focus: true,
+										selStart: text.length,
+										selEnd: w.length,
+										cursorPos: text.length,
+										disabled: false
+									}
+									contentFn(ti);
+									if (notify != null)
+										notify(w);
+								}
+							}
+						);
+					}
+					
+					for (w in variants) {
+						buttonArr.push([makeACButton(w)]);
+					}
+					
+					autoCompleteBlock.block = Offset(0, -buttonArr.length*buttonHeight, Background(0xffffff, Grid(buttonArr, null, null, null, 1, 0x8b8b8b)));
+				}
+			}
+			
+			var eventListeners = {
+				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
+				onSetFocus: null,
+				onKillFocus: null,
+				onPress: null,
+				onRelease: null
+			}
+			eventIface(eventListeners);
+		}
+		
+		var makeproxy = function  (a, b, c) { 
+			if (a != null) 
+				a(c); 
+			if (b != null) 
+				b(c);
+		}
+		
+		var makeproxyEvents = function  (a, b, c) { 
+			if (a != null) 
+				a(c); 
+			if (b != null) 
+				b(c);
+		}
+		
+		return 
+			OnTop(
+				TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, callback(makeproxy, myonInit, onInit), callback(makeproxyEvents, myonInitEvents, onInitEvents)),
+				Mutable(autoCompleteBlock)
+			);
+	}
+	#end
+	
 
 	static public function wrapWithDefaultFont(text : String, ?size : Float, ?color : String, ?font : String) : String {
 		return "<font face='" + (if (font == null) defaultFont else font) + "'" + (if (size != null) { " size='" + size + "'"; } else "" ) + 
