@@ -12,6 +12,7 @@ class Animation {
 			animation = [ Alpha( line(0.0, 1.0) ) ];
 		}
 		var animator = new Animator( block );
+		// We use a trick to know when the block is displayed: Use a CustomBlock for this
 		var build = function(data : Int, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			if (mode == Create) {
 				animator.animate(time, animation );
@@ -25,7 +26,7 @@ class Animation {
 	static public function grow(block : ArcticBlock, centerX : Float, centerY : Float, ?time : Float) {
 		return appear(block, time, [ ScaleX(line(0.0, 1.0)), ScaleY(line(0.0, 1.0)), X(line(centerX, 0)), Y(line(centerY, 0))]);
 	}
-
+	
 	/// A function for the animator that goes linearly
 	static public function line(from : Float, to : Float) {
 		var d = to - from;
