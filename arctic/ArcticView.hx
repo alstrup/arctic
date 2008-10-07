@@ -1752,20 +1752,17 @@ class ArcticView {
 					miny = 0;
 					maxx = w * ca;
 					maxy = w * sa + h * ca;
-				}
-				else if ((ca <= 0) && (sa >= 0)) {
+				} else if ((ca <= 0) && (sa >= 0)) {
 					minx = w * ca - h * sa;
 					miny = h * ca;
 					maxx = 0;
 					maxy = w * sa;
-				}
-				else if ((ca <= 0) && (sa <= 0)) {
+				} else if ((ca <= 0) && (sa <= 0)) {
 					minx = w * ca;
 					miny = w * sa + h * ca;
 					maxx = -h * sa;
 					maxy = 0;
-				}
-				else if ((ca >= 0) && (sa <= 0)) {
+				} else if ((ca >= 0) && (sa <= 0)) {
 					minx = 0;
 					miny = w * sa;
 					maxx = w * ca - h * sa;
