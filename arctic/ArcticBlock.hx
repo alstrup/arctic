@@ -286,6 +286,9 @@ enum ArcticBlock {
 	Rotate(block : ArcticBlock, ?angle : Float);
 	#end
 
+	/// An animation block
+	Animate(animator : Animator);
+	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);
 }
@@ -413,3 +416,90 @@ class MutableBlock {
 	public var availableWidth(null, default) : Float;
 	public var availableHeight(null, default) : Float;
 }	
+
+/**
+ * Example of creating an animation in Arctic:
+ *   var animator = new Animator( arctic.Text("Test") );
+ *   var gui = LineStack( Animate(animator) );
+ *   ...
+ *   // To start an animation that takes 5 seconds:
+ *   animator.animate(5.0, [ Alpha(Animators.line( 0.0, 1.0 )), ScaleX(Animators.line(10.0, 0.0)) ] );
+ */
+class Animator {
+	public function new(block0 : ArcticBlock) {
+		block = block0;
+		startTime = 0.0;
+	}
+	
+	/// External interface used to start an animation
+	public function animate(duration0 : Float, animations0 : Array<AnimateComponent>) {
+	#if flash9
+		if (startTime != 0.0) {
+			clearHandler();
+		}
+		reciprocDuration = 0.001 / duration0;
+		animations = animations0;
+		startTime = flash.Lib.getTimer();
+		endTime = startTime + duration0;
+		clip.addEventListener(flash.events.Event.ENTER_FRAME, enterFrame);
+	#end
+	}
+
+	private function enterFrame( e ) : Void {
+		#if flash9
+		var t = flash.Lib.getTimer() - startTime;
+		t = t * reciprocDuration;
+		if (t >= 1.0) {
+			clearHandler();
+			t = 1.0;
+		}
+		for (a in animations) {
+			switch (a) {
+				/// Hm, this should be recursive
+				case Alpha( f ): var a = f(t); if (a != clip.alpha) clip.alpha = a;
+				case X( f ): var x = f(t); if (x != clip.x) clip.x = x;
+				case Y( f ): var y = f(t); if (y != clip.y) clip.y = y;
+				case ScaleX( f ): var sx = f(t); if (sx != clip.scaleX) clip.scaleX = sx;
+				case ScaleY( f ): var sy = f(t); if (sy != clip.scaleY) clip.scaleY = sy;
+				case Rotation( f ): var r = f(t); if (r != clip.rotation) clip.rotation = r;
+			}
+		}
+		#end
+	}
+	
+	/// Called by ArcticView.build
+	public function registerClip(clip0 : ArcticMovieClip) {
+		clip = clip0;
+	}
+	
+	private function clearHandler() {
+		if (clip != null) {
+			#if flash9
+				clip.removeEventListener(flash.events.Event.ENTER_FRAME, enterFrame);
+			#end
+		}
+	}
+	
+	/// Called by ArcticView.build on destroy phase
+	public function destroy() {
+		clearHandler();
+		clip = null;
+	}
+	
+	public var block : ArcticBlock;
+	private var clip : ArcticMovieClip;
+	private var startTime : Float;
+	private var endTime : Float;
+	private var reciprocDuration : Float;
+	private var animations : Array<AnimateComponent>;
+}
+
+enum AnimateComponent {
+	Alpha( f : Float -> Float);
+	X( f : Float -> Float);
+	Y( f : Float -> Float);
+	ScaleX( f : Float -> Float);
+	ScaleY( f : Float -> Float);
+	Rotation( f : Float -> Float);
+}
+

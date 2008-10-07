@@ -1,10 +1,10 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
-import flash.geom.Matrix;
-import flash.geom.Point;
 
 #if flash9
+import flash.geom.Matrix;
+import flash.geom.Point;
 import flash.display.MovieClip;
 import flash.display.DisplayObjectContainer;
 import flash.events.Event;
@@ -1474,6 +1474,7 @@ class ArcticView {
 			if (mode == Destroy) {
 				removeStageEventListeners(clip);
 				if (cursorMc != null) {
+					#if flash9
 					// Since cursors are constructed lazily, we have to search for our child 
 					// because other Cursors might have gone before us changing the child numbering
 					for (i in 0...parent.numChildren) {
@@ -1483,6 +1484,7 @@ class ArcticView {
 							break;
 						}
 					}
+					#end
 					ArcticMC.remove(cursorMc.clip);
 					Reflect.deleteField(clip, "cursor");
 				}
@@ -1539,7 +1541,7 @@ class ArcticView {
 							}
 							if (child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse)) {
 								if (cursorMc == null) {
-									cursorMc = cursorMcFn();
+									cursorMc = cursorMcFn(childNo);
 									cursorMcFn = null;
 								}
 								cursorMc.clip._visible = true;
@@ -1777,6 +1779,16 @@ class ArcticView {
 		return { clip: clip, width: maxx - minx, height: maxy-miny, growWidth: child.growWidth, growHeight: child.growHeight};
 		#end
 		
+		case Animate(animator):
+			var clip = getOrMakeClip(p, mode, childNo);
+			var child = build(animator.block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
+				animator.registerClip(clip);
+			} else if (mode == Destroy) {
+				animator.destroy();
+			}
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+
 		case DebugBlock(id, block):
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
 			trace("Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ id);
