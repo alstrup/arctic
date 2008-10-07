@@ -153,8 +153,7 @@ class ArcticTest {
 		// A custom block needs a function which can tell Arctic the size and desired resizing behaviour,
 		// and paint & construct the block when ready
 		var build = function(data : Int, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
-			if (mode != Metrics) {
-				// This is used both for creation and update
+			if (mode == Create) {
 				var g = ArcticMC.getGraphics(parentMc);
 				g.clear();
 				g.beginFill(data);
