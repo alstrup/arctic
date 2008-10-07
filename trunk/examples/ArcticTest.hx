@@ -17,15 +17,45 @@ class ArcticTest {
 	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 
-		showHelloWorld1();
+		showAnimation();
 		//nextWorld();
 		//draggable();
 		//wideText();
 		//wrappingLayout();
 		//maskBlock();
 	}
+	
+	public function showAnimation() {
+		#if flash9
+		var text = Arctic.fixSize(100.0, 100.0, Align(0.5, 0.5, Arctic.makeText("Text", 30) ) );
+		
+		var animator = new Animator( Background(0xff0000, text) );
+		var gui = LineStack([
+			Animate( animator ),
+			Fixed(0, 10),
+			arctic.Animation.grow( Background(0x00ff00, text), 50.0, 50.0, 0.5 ),
+			Fixed(0, 10),
+			arctic.Animation.appear( Background(0x0000ff, text), 2.5 ),
+			
+			Arctic.makeSimpleButton("Animate", function () {
+					animator.animate(0.3, [ Alpha( function(t) { return 1.0 - t; }),
+						X(function(t) { return t * 100.0; }) ]);
+			}),
+			Arctic.makeSimpleButton("Next", showHelloWorld1)
+		]);
+		// Then construct the arctic object
+		arcticView = new ArcticView( gui, parent );
+		// And display on the given movieclip
+		var root = arcticView.display(true);
+		#else true
+		showHelloWorld1();
+		#end
+	}
 
 	public function showHelloWorld1() {
+		// Clear out the old screen
+		if (arcticView != null) { arcticView.destroy(); }
+
 		// To make a screen, first build the data structure representing the contents
 		var helloWorld = Arctic.makeSimpleButton("Hello world", showHelloWorld2, 50);
 		// Then construct the arctic object
