@@ -21,6 +21,7 @@ class Animation {
 		return OnTop(Animate(animator), CustomBlock(null, build));
 	}
 	
+	/// Make this block appear by growing from a point
 	static public function grow(block : ArcticBlock, centerX : Float, centerY : Float, ?time : Float) {
 		return appear(block, time, [ ScaleX(line(0.0, 1.0)), ScaleY(line(0.0, 1.0)), X(line(centerX, 0)), Y(line(centerY, 0))]);
 	}
