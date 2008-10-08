@@ -1589,8 +1589,48 @@ class ArcticView {
 			var child = build(base, clip, availableWidth, availableHeight, mode, 0);
 			var over = build(overlay, clip, availableWidth, availableHeight, mode, 1);
 			return { clip: clip, width: Math.max(child.width, over.width), height: Math.max(child.height, over.height),
-					growWidth: child.growWidth || over.growWidth, growHeight: child.growHeight || over.growHeight};
-		 
+					growWidth: child.growWidth || over.growWidth, growHeight: child.growHeight || over.growHeight };
+		#if flash9
+		case OnTopView(base, overlay) :
+			var clip : MovieClip = getOrMakeClip(p, mode, childNo);
+			var child = build(base, clip, availableWidth, availableHeight, mode, 0);
+			
+			if (mode == Metrics) {
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+			
+			if (mode == Destroy) {
+				var overlayMc = Reflect.field(clip, "overlay");
+				if (overlayMc != null) {
+					for (i in 0...parent.numChildren) {
+						var c : Dynamic = this.parent.getChildAt(i);
+						if (c == overlayMc.clip) {
+							build(overlay, this.parent, 0, 0, mode, i);
+							break;
+						}
+					}
+					ArcticMC.remove(overlayMc.clip);
+					Reflect.deleteField(clip, "overlay");
+				}
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+			var me = this;
+			var register = function (e:Dynamic) {
+				var overlayMc = me.build(overlay, me.parent, 0, 0, mode, 0);
+				Reflect.setField(clip, "overlay", overlayMc);
+				var r = child.clip.getBounds(me.parent);
+				overlayMc.clip.x = r.left;
+				overlayMc.clip.y = r.top;
+				clip.removeEventListener(Event.ENTER_FRAME, Reflect.field(clip, "onframe"));
+			}
+			Reflect.setField(clip, "onframe", register);
+						
+			clip.addEventListener(Event.ENTER_FRAME, register);
+			
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+
+		#end
+				 
 		case Id(id, block) :
 			// ToDo: This does not work for Destroy, as we do not have a handle to the old block to be destroyed.
 			var clip : MovieClip = getOrMakeClip(p, mode, childNo);

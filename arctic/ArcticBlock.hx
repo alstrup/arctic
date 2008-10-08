@@ -201,6 +201,10 @@ enum ArcticBlock {
 	 * two blocks in each dimension.
 	 */
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
+	
+	#if flash9
+	OnTopView(base : ArcticBlock, overlay : ArcticBlock);
+	#end
 
 	/// A state-full block which can be updated from the outside with a new block. See MutableBlock below for more info
 	Mutable( state : MutableBlock );
