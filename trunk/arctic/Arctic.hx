@@ -437,6 +437,7 @@ class Arctic {
 		//events iface getter
 		var myonInitEvents = function (eventIface: TextInputEvents->Void) {
 			var onTextChanged = function (notify:Dynamic, text:String) {
+				text = StringTools.trim(text);
 				var variants:Array<String> = [];
 				if (text.length > 0) {
 					for (w in autos) {
@@ -508,7 +509,7 @@ class Arctic {
 		}
 		
 		return 
-			OnTop(
+		OnTopView(
 				TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, callback(makeproxy, myonInit, onInit), callback(makeproxyEvents, myonInitEvents, onInitEvents)),
 				Mutable(autoCompleteBlock)
 			);
