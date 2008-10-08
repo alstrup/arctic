@@ -1,6 +1,8 @@
 package arctic;
 
 import arctic.ArcticBlock;
+import flash.Lib;
+import haxe.Timer;
 
 /**
  * This file contains "high-level" interface to Arctic. It contains a range of
@@ -453,10 +455,12 @@ class Arctic {
 					var buttonArr = [];
 					var buttonHeight = 20;
 					var makeACButton = function (w:String):ArcticBlock {
+						var normalw = wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
+						var hoverw = wrapWithDefaultFont(w, null, "#ffffff");
 						return 
 						Button(
-							ConstrainHeight(buttonHeight, buttonHeight, Border(5, 0, Text(w))),
-							ConstrainHeight(buttonHeight, buttonHeight, Border(5, 0, Text(w))),
+						ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(normalw)), Filler])),
+							Background(0x308dff,ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(hoverw)), Filler]))),
 							function () {
 								if (contentFn != null) {
 									var ti:TextInputModel = {
@@ -480,14 +484,36 @@ class Arctic {
 						buttonArr.push([makeACButton(w)]);
 					}
 					
-					autoCompleteBlock.block = Offset(0, -buttonArr.length*buttonHeight, Background(0xffffff, Grid(buttonArr, null, null, null, 1, 0x8b8b8b)));
+					autoCompleteBlock.block = 
+						Offset(0, -buttonArr.length * buttonHeight, 
+							Filter( 
+								DropShadow(1.0, 2.0 , 0x000000, 0.5),
+								Background(0xfffece,
+									Grid(buttonArr)
+								)
+							)
+						);
 				}
+			}
+			
+			var delayframe = function (foo, frameCount) {
+				var eventContainer = [];
+				var curFrame = frameCount;
+				var onframe = function(e) { 
+					curFrame--;
+					if (curFrame == 0) {
+						foo();
+						Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
+					}
+				}
+				eventContainer.push(onframe);
+				Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
 			}
 			
 			var eventListeners = {
 				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
 				onSetFocus: null,
-				onKillFocus: null,
+				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
 				onRelease: null
 			}
