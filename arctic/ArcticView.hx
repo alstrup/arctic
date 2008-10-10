@@ -1,7 +1,6 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
-import flash.events.KeyboardEvent;
 
 #if flash9
 import flash.geom.Matrix;
@@ -2076,10 +2075,10 @@ class ArcticView {
 				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
 					events.onRelease();
 				});
-				addOptionalEventListener(txtInput, KeyboardEvent.KEY_DOWN, events.onKeyDown, function (e) {
+				addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_DOWN, events.onKeyDown, function (e) {
 					events.onKeyDown(e.charCode);
 				});
-				addOptionalEventListener(txtInput, KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
+				addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
 					events.onKeyUp(e.charCode);
 				});
 				

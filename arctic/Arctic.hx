@@ -1,7 +1,6 @@
 package arctic;
 
 import arctic.ArcticBlock;
-import flash.Lib;
 import haxe.Timer;
 
 /**
@@ -439,11 +438,11 @@ class Arctic {
 				curFrame--;
 				if (curFrame == 0) {
 					foo();
-					Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
+					flash.Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
 				}
 			}
 			eventContainer.push(onframe);
-			Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
+			flash.Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
 		}
 
 				
