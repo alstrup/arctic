@@ -426,7 +426,7 @@ class Arctic {
 		return { blocks:toggleButtons, selectFn : onSelectHandler };
 	}
 	#if flash9
-	static public function makeAutoCompleteInput(html : String, autos:Array < String > , width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
+	static public function makeAutoCompleteInput(html : String, autos:Array < String >, useOnlyAutos:Bool, width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
 		var autoCompleteBlock = new MutableBlock(Fixed(0, 0));
 		var contentFn :	TextInputModel->TextInputModel = null;
 		var quickKeys : Array<Dynamic> = [];
@@ -451,10 +451,8 @@ class Arctic {
 			contentFn = contentIface;
 		}
 		
-		var handleQuickKey = function (id:Int) {
-			if ((id >= 0) && (quickKeys.length > id)) {
-				if (contentFn != null) {
-					var val = quickKeys[id];
+		var safeSetText = function (val, delay) {
+			if (contentFn != null) {
 					delayframe(
 						function() {
 							var ti:TextInputModel = {
@@ -467,11 +465,17 @@ class Arctic {
 								disabled: false
 							};
 							contentFn(ti);
-						}, 2);
+							}, delay);
 				}
+		}
+		
+		var handleQuickKey = function (id:Int) {
+			if ((id >= 0) && (quickKeys.length > id)) {
+				safeSetText(quickKeys[id], 2);
 			}
 		}
 		
+				
 		//events iface getter
 		var myonInitEvents = function (eventIface: TextInputEvents->Void) {
 			var onTextChanged = function (notify:Dynamic, text:String) {
@@ -486,30 +490,25 @@ class Arctic {
 					}
 				}
 				if (variants.length == 0) {
+					if (useOnlyAutos) {
+						safeSetText(html, 1);
+						if (notify != null) {
+							notify(html);
+						}
+					}
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
 				else {
+					html = text;
 					var buttonArr = [];
 					var buttonHeight = 20;
 					var makeACButton = function (w:String, id:Int):ArcticBlock {
 						var normalw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
 						var hoverw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
 						var clickFn = function () {
-							trace("clickFn:" + w, 0);
-							if (contentFn != null) {
-								var ti:TextInputModel = {
-									html: "<font face=\"_sans\">" + w + "</font>",
-									text: null,
-									focus: true,
-									selStart: text.length,
-									selEnd: w.length,
-									cursorPos: text.length,
-									disabled: false
-								}
-								contentFn(ti);
-								if (notify != null)
-									notify(w);
-								trace("set:" + w, 0);
+							safeSetText(w, 1);
+							if (notify != null) {
+								notify(w);
 							}
 						}
 						quickKeys.push(w);
@@ -541,7 +540,7 @@ class Arctic {
 			}
 			
 			var eventListeners = {
-				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); trace("ontextchanged:" + contentFn(null).text, 0); },
+				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
 				onSetFocus: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
 				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
