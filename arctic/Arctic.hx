@@ -430,15 +430,53 @@ class Arctic {
 	static public function makeAutoCompleteInput(html : String, autos:Array < String > , width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
 		var autoCompleteBlock = new MutableBlock(Fixed(0, 0));
 		var contentFn :	TextInputModel->TextInputModel = null;
+		var quickKeys : Array<Dynamic> = [];
+		
+		var delayframe = function (foo, frameCount) {
+			var eventContainer = [];
+			var curFrame = frameCount;
+			var onframe = function(e) { 
+				curFrame--;
+				if (curFrame == 0) {
+					foo();
+					Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
+				}
+			}
+			eventContainer.push(onframe);
+			Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
+		}
+
 				
 		//content iface getter
 		var myonInit = function (contentIface : TextInputModel->TextInputModel) {
 			contentFn = contentIface;
 		}
 		
+		var handleQuickKey = function (id:Int) {
+			if ((id >= 0) && (quickKeys.length > id)) {
+				if (contentFn != null) {
+					var val = quickKeys[id];
+					delayframe(
+						function() {
+							var ti:TextInputModel = {
+								html: "<font face=\"_sans\">" + val + "</font>",
+								text: null,
+								focus: true,
+								selStart: 0,
+								selEnd: 0,
+								cursorPos: 0,
+								disabled: false
+							};
+							contentFn(ti);
+						}, 2);
+				}
+			}
+		}
+		
 		//events iface getter
 		var myonInitEvents = function (eventIface: TextInputEvents->Void) {
 			var onTextChanged = function (notify:Dynamic, text:String) {
+				quickKeys = [];
 				text = StringTools.trim(text);
 				var variants:Array<String> = [];
 				if (text.length > 0) {
@@ -448,40 +486,47 @@ class Arctic {
 						}
 					}
 				}
-				if (variants.length <= 1) {
+				if (variants.length == 0) {
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
 				else {
 					var buttonArr = [];
 					var buttonHeight = 20;
-					var makeACButton = function (w:String):ArcticBlock {
-						var normalw = wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
-						var hoverw = wrapWithDefaultFont(w, null, "#ffffff");
+					var makeACButton = function (w:String, id:Int):ArcticBlock {
+						var normalw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
+						var hoverw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
+						var clickFn = function () {
+							trace("clickFn:" + w, 0);
+							if (contentFn != null) {
+								var ti:TextInputModel = {
+									html: "<font face=\"_sans\">" + w + "</font>",
+									text: null,
+									focus: true,
+									selStart: text.length,
+									selEnd: w.length,
+									cursorPos: text.length,
+									disabled: false
+								}
+								contentFn(ti);
+								if (notify != null)
+									notify(w);
+								trace("set:" + w, 0);
+							}
+						}
+						quickKeys.push(w);
 						return 
 						Button(
-						ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(normalw)), Filler])),
-							Background(0x308dff,ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(hoverw)), Filler]))),
-							function () {
-								if (contentFn != null) {
-									var ti:TextInputModel = {
-										html: w,
-										text: w,
-										focus: true,
-										selStart: text.length,
-										selEnd: w.length,
-										cursorPos: text.length,
-										disabled: false
-									}
-									contentFn(ti);
-									if (notify != null)
-										notify(w);
-								}
-							}
+						ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(normalw, isDefaultFontEmbedded)), Filler])),
+							Background(0x308dff,ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(hoverw, isDefaultFontEmbedded)), Filler]))),
+							clickFn
 						);
 					}
-					
+					var id = 1;
 					for (w in variants) {
-						buttonArr.push([makeACButton(w)]);
+						if (id < 10) {
+							buttonArr.push([makeACButton(w, id)]);
+							id++;
+						}
 					}
 					
 					autoCompleteBlock.block = 
@@ -496,26 +541,14 @@ class Arctic {
 				}
 			}
 			
-			var delayframe = function (foo, frameCount) {
-				var eventContainer = [];
-				var curFrame = frameCount;
-				var onframe = function(e) { 
-					curFrame--;
-					if (curFrame == 0) {
-						foo();
-						Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
-					}
-				}
-				eventContainer.push(onframe);
-				Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
-			}
-			
 			var eventListeners = {
-				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
-				onSetFocus: null,
+				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); trace("ontextchanged:" + contentFn(null).text, 0); },
+				onSetFocus: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
 				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
-				onRelease: null
+				onRelease: null,
+				onKeyDown: function(code:UInt) { var id:Int = code - "1".charCodeAt(0);  if ((id >= 0) && (id < 9)) {handleQuickKey(id); } },
+				onKeyUp: null
 			}
 			eventIface(eventListeners);
 		}
@@ -536,7 +569,7 @@ class Arctic {
 		
 		return 
 		OnTopView(
-				TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, callback(makeproxy, myonInit, onInit), callback(makeproxyEvents, myonInitEvents, onInitEvents)),
+		TextInput("<font face=\"_sans\">"+html+"</font>", width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, callback(makeproxy, myonInit, onInit), callback(makeproxyEvents, myonInitEvents, onInitEvents)),
 				Mutable(autoCompleteBlock)
 			);
 	}

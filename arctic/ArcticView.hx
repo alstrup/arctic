@@ -1,6 +1,7 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
+import flash.events.KeyboardEvent;
 
 #if flash9
 import flash.geom.Matrix;
@@ -2075,6 +2076,13 @@ class ArcticView {
 				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
 					events.onRelease();
 				});
+				addOptionalEventListener(txtInput, KeyboardEvent.KEY_DOWN, events.onKeyDown, function (e) {
+					events.onKeyDown(e.charCode);
+				});
+				addOptionalEventListener(txtInput, KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
+					events.onKeyUp(e.charCode);
+				});
+				
 				#else neko
 				addOptionalEventListener(txtInput, neash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
 				addOptionalEventListener(txtInput, neash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
@@ -2423,7 +2431,7 @@ class ArcticView {
 	#if flash9
 	/// A nice helper function to initialize optional event handlers
 	private static function addOptionalEventListener<Handler>(target: EventDispatcher, type: String, handler: Handler, 
-		flashHandler: flash.events.Event -> Void) {
+		flashHandler: /*flash.events.Event*/Dynamic -> Void) {
 		if (null != handler) {
 			target.addEventListener(type, flashHandler);
 		}
