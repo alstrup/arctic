@@ -27,6 +27,11 @@ class Animation {
 		return appear(block, time, [ ScaleX(line(0.0, 1.0)), ScaleY(line(0.0, 1.0)), X(line(centerX, 0)), Y(line(centerY, 0))]);
 	}
 	
+	/// Makes this block disappear - by default it takes 1 second, and it fades alpha down
+	static public function disappear(block : ArcticBlock, ?time : Float) {
+		return appear(block, time, [ Alpha( line(1.0, 0.0) ) ] );
+	}
+	
 	/// A function for the animator that goes linearly
 	static public function line(from : Float, to : Float) {
 		var d = to - from;
