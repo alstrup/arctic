@@ -432,17 +432,21 @@ class Arctic {
 		var quickKeys : Array<Dynamic> = [];
 		
 		var delayframe = function (foo, frameCount) {
-			var eventContainer = [];
-			var curFrame = frameCount;
-			var onframe = function(e) { 
-				curFrame--;
-				if (curFrame == 0) {
-					foo();
-					flash.Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
+			if (frameCount == 0)
+				foo();
+			else {
+				var eventContainer = [];
+				var curFrame = frameCount;
+				var onframe = function(e) { 
+					curFrame--;
+					if (curFrame == 0) {
+						foo();
+						flash.Lib.current.stage.removeEventListener(flash.events.Event.ENTER_FRAME, eventContainer[0]);
+					}
 				}
+				eventContainer.push(onframe);
+				flash.Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
 			}
-			eventContainer.push(onframe);
-			flash.Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, onframe);
 		}
 
 				
@@ -451,17 +455,18 @@ class Arctic {
 			contentFn = contentIface;
 		}
 		
-		var safeSetText = function (val, delay) {
+		var safeSetText = function (val, col, delay) {
 			if (contentFn != null) {
+				var d = contentFn(null);
 					delayframe(
 						function() {
 							var ti:TextInputModel = {
-								html: "<font face=\"_sans\">" + val + "</font>",
+								html: "<font face=\"_sans\" color='" + col +"'>" + val + "</font>",
 								text: null,
 								focus: true,
-								selStart: 0,
-								selEnd: 0,
-								cursorPos: 0,
+								selStart: d.cursorPos,
+								selEnd: d.cursorPos,
+								cursorPos: d.cursorPos,
 								disabled: false
 							};
 							contentFn(ti);
@@ -471,7 +476,7 @@ class Arctic {
 		
 		var handleQuickKey = function (id:Int) {
 			if ((id >= 0) && (quickKeys.length > id)) {
-				safeSetText(quickKeys[id], 2);
+				safeSetText(quickKeys[id], "#000000", 2);
 			}
 		}
 		
@@ -491,22 +496,20 @@ class Arctic {
 				}
 				if (variants.length == 0) {
 					if (useOnlyAutos) {
-						safeSetText(html, 1);
-						if (notify != null) {
-							notify(html);
-						}
+						trace("redify:" + text);
+						safeSetText(text, "#ff0000", 0);
 					}
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
 				else {
-					html = text;
+					safeSetText(text, "#000000", 0);
 					var buttonArr = [];
 					var buttonHeight = 20;
 					var makeACButton = function (w:String, id:Int):ArcticBlock {
 						var normalw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
 						var hoverw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
 						var clickFn = function () {
-							safeSetText(w, 1);
+							safeSetText(w, "#000000", 1);
 							if (notify != null) {
 								notify(w);
 							}
