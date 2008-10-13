@@ -455,28 +455,31 @@ class Arctic {
 			contentFn = contentIface;
 		}
 		
-		var safeSetText = function (val, col, delay) {
+		var safeSetText = function (val, col, pos, delay) {
 			if (contentFn != null) {
 				var d = contentFn(null);
-					delayframe(
-						function() {
-							var ti:TextInputModel = {
-								html: "<font face=\"_sans\" color='" + col +"'>" + val + "</font>",
-								text: null,
-								focus: true,
-								selStart: d.cursorPos,
-								selEnd: d.cursorPos,
-								cursorPos: d.cursorPos,
-								disabled: false
-							};
-							contentFn(ti);
-							}, delay);
-				}
+				if (pos == null)
+					pos = d.cursorPos;
+					
+				delayframe(
+					function() {
+						var ti:TextInputModel = {
+							html: "<font face=\"_sans\" color='" + col +"'>" + val + "</font>",
+							text: null,
+							focus: true,
+							selStart: pos,
+							selEnd: pos,
+							cursorPos: pos,
+							disabled: false
+						};
+						contentFn(ti);
+						}, delay);
+			}
 		}
 		
 		var handleQuickKey = function (id:Int) {
 			if ((id >= 0) && (quickKeys.length > id)) {
-				safeSetText(quickKeys[id], "#000000", 2);
+				safeSetText(quickKeys[id], "#000000", quickKeys[id].length, 2);
 			}
 		}
 		
@@ -497,19 +500,19 @@ class Arctic {
 				if (variants.length == 0) {
 					if (useOnlyAutos) {
 						trace("redify:" + text);
-						safeSetText(text, "#ff0000", 0);
+						safeSetText(text, "#ff0000", null, 0);
 					}
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
 				else {
-					safeSetText(text, "#000000", 0);
+					safeSetText(text, "#000000", null, 0);
 					var buttonArr = [];
 					var buttonHeight = 20;
 					var makeACButton = function (w:String, id:Int):ArcticBlock {
 						var normalw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
 						var hoverw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
 						var clickFn = function () {
-							safeSetText(w, "#000000", 1);
+							safeSetText(w, "#000000", w.length, 1);
 							if (notify != null) {
 								notify(w);
 							}
