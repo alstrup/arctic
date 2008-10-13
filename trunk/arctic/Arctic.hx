@@ -426,7 +426,7 @@ class Arctic {
 		return { blocks:toggleButtons, selectFn : onSelectHandler };
 	}
 	#if flash9
-	static public function makeAutoCompleteInput(html : String, autos:Array < String >, useOnlyAutos:Bool, width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
+	static public function makeAutoCompleteInput(html : String, autos:Array < String >, useOnlyAutos:Bool, multipleWords:Bool, width : Null < Float > , height : Null < Float > , ?validator : String -> Bool, ?style : Dynamic, ?maxChars : Null < Int > , ?numeric : Null < Bool > , ?bgColor : Null < Int > , ?focus : Null < Bool > , ?embeddedFont : Null < Bool > , ?onInit : (TextInputModel -> TextInputModel) -> Void, ?onInitEvents: (TextInputEvents -> Void) -> Void) {
 		var autoCompleteBlock = new MutableBlock(Fixed(0, 0));
 		var contentFn :	TextInputModel->TextInputModel = null;
 		var quickKeys : Array<Dynamic> = [];
@@ -477,18 +477,231 @@ class Arctic {
 			}
 		}
 		
-		var handleQuickKey = function (id:Int) {
-			if ((id >= 0) && (quickKeys.length > id)) {
-				safeSetText(quickKeys[id], "#000000", quickKeys[id].length, 2);
+		var safeSetHTML = function (val, pos, delay) {
+			if (contentFn != null) {
+				var d = contentFn(null);
+				if (pos == null)
+					pos = d.cursorPos;
+					
+				delayframe(
+					function() {
+						var ti:TextInputModel = {
+							html: val,
+							text: null,
+							focus: true,
+							selStart: pos,
+							selEnd: pos,
+							cursorPos: pos,
+							disabled: false
+						};
+						contentFn(ti);
+						}, delay);
 			}
 		}
 		
+		var handleQuickKey = function (id:Int) {
+			if ((id >= 0) && (quickKeys.length > id)) {
+				quickKeys[id]();
+			}
+		}
+		
+		var getWords = function(text:String) {
+			var wrds:Array < String > = text.split(" ");
+			var res:Array<String> = [];
+			
+			for (w in wrds) {
+				if (w != "") {
+					res.push(w);
+				}
+			}
+			
+			return res;
+		}
+		
+		var getCurWordId = function(srcText:String, srcPos:Int) {
+			/*
+			var resId:Int = 0;
+			var resOffset:Int = 0;
+			var gp:Int = 0;
+			var inSpace:Bool = (srcText.charAt(0) == " ");
+			for (i in 0...srcPos) {
+				if (srcText.charAt(i) == " ") {
+					if (!inSpace) {
+						resOffset = 0;
+						resId++;
+						gp++;
+					}
+					inSpace = true;
+				}
+				else {
+					inSpace = false;
+					resOffset++;
+					gp++;
+				}
+			}
+			return {id:resId, offset:resOffset, globalPos:gp};
+			*/
+			var res = 0;
+			var inSpace:Bool = (srcText.charAt(0) == " ");
+			for (i in 0...srcPos) {
+				if (srcText.charAt(i) == " ") {
+					if (!inSpace) {
+						res++;
+					}
+					inSpace = true;
+				}
+				else {
+					inSpace = false;
+				}
+			}
+			return res;
+		}
+		
+		var inVariants = function (w:String) {
+			for (v in autos) {
+				if (v == w)
+					return true;
+			}
+			return false;
+		}
+		
+		var makeHTML = function (srcText:String) {
+			trace("makeHTML:" + srcText);
+			var html = "";
+			var word = "";
+			var variant = "";
+			var state = 0;
+			for (i in 0... srcText.length) {
+				var c = srcText.charAt(i);
+				if (state == 0) {
+					word += c;
+					if (c != " ") {
+						state = 1;
+						variant += c;
+					}
+				}
+				else if (state == 1) {
+					word += c;
+					if (c == " ")
+						state = 2;
+					else
+						variant += c;
+				}
+				else if (state == 2) {
+					if (c == " ") {
+						word += c;
+					}
+					else {
+						state = 0;
+						trace("variant:" + variant + ":");
+						if (inVariants(variant)) 
+							html += "<font face=\"_sans\" color='#000000'>" + word + "</font>";
+						else
+							html += "<font face=\"_sans\" color='#ff0000'>" + word + "</font>";
+						
+						word = c;
+						variant = c;
+						state = 1;
+					}
+				}
+			}
+			
+			if (word.length != 0) {
+				trace("variant:" + variant + ":");
+				if (inVariants(variant)) 
+					html += "<font face=\"_sans\" color='#000000'>" + word + "</font>";
+				else
+					html += "<font face=\"_sans\" color='#ff0000'>" + word + "</font>";
+			}
+			
+			trace("makeHTML returns:" + html);
+			return html;
+		}
+		
+		var changeWord = function(text:String, wid:Int, repl:String) {
+			trace("changeWord:" + text + " " + wid + " " + repl);
+			
+			var state = 0;
+			var word = "";
+			var cwid = 0;
+			for (i in 0...text.length) {
+				var c = text.charAt(i);
+				if (state == 0) {
+					if (c == " ") {
+						word += c;
+					}
+					else {
+						state = 1;
+						if (cwid == wid) {
+							word += repl;
+						}
+						else
+						word += c;
+					}
+				}
+				else if (state == 1) {
+					if (c == " ") {
+						state = 2;
+						word += c;
+					}
+					else if (cwid != wid )
+						word += c;
+				}
+				else if (state == 2) {
+					if (c == " ") {
+						word += c;
+					}
+					else {
+						state = 1;
+						cwid++;
+						if (cwid == wid) {
+							word += repl;
+						}
+						else
+							word += c;
+					}
+				}
+			}
+			return word;
+		}
+		
+		var getWordEnd = function(text:String, wid:Int):Dynamic {
+			var state:Int = 0;
+			var cwid:Int = 0;
+			for (i in 0...text.length) {
+				var c = text.charAt(i);
+				if (state == 0) {
+					if (c != " ") {
+						state = 1;
+					}
+				}
+				else if (state == 1) {
+					if (c == " ") {
+						state = 2;
+						if (cwid == wid)
+							return i;
+					}
+				}
+				else if (state == 2) {
+					if (c != " ") {
+						state = 1;
+						cwid++;
+					}
+				}
+			}
+			return text.length;
+		}
 				
+						
 		//events iface getter
 		var myonInitEvents = function (eventIface: TextInputEvents->Void) {
-			var onTextChanged = function (notify:Dynamic, text:String) {
+			var onTextChanged = function (notify:Dynamic, _text:String, pos:Int) {
+				var words = getWords(_text);
+				var wordsPos = getCurWordId(_text, pos);
+				var text = "";
+				if ((words.length != 0)&&(words.length > wordsPos))
+					text = words[wordsPos];
 				quickKeys = [];
-				text = StringTools.trim(text);
 				var variants:Array<String> = [];
 				if (text.length > 0) {
 					for (w in autos) {
@@ -497,26 +710,27 @@ class Arctic {
 						}
 					}
 				}
+				safeSetHTML(makeHTML(_text), pos, 0);
 				if (variants.length == 0) {
-					if (useOnlyAutos) {
-						safeSetText(text, "#ff0000", null, 0);
-					}
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
 				else {
-					safeSetText(text, "#000000", null, 0);
+					//safeSetText(_text, "#000000", null, 0);
 					var buttonArr = [];
 					var buttonHeight = 20;
 					var makeACButton = function (w:String, id:Int):ArcticBlock {
 						var normalw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(text, null, "#ff0000") + wrapWithDefaultFont(w.substr(text.length), null, "#000000");
-						var hoverw = wrapWithDefaultFont(""+id+". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
+						var hoverw = wrapWithDefaultFont("" + id + ". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
 						var clickFn = function () {
-							safeSetText(w, "#000000", w.length, 1);
-							if (notify != null) {
-								notify(w);
-							}
+							var newStr:String = changeWord(_text, wordsPos, w);
+							var newHTML:String = makeHTML(newStr);
+							var wordEnd:Dynamic = getWordEnd(newStr, wordsPos);
+							safeSetHTML(newHTML, wordEnd, 3);
+							//if (notify != null) {
+								//notify(w);
+							//}
 						}
-						quickKeys.push(w);
+						quickKeys.push(clickFn);
 						return 
 						Button(
 						ConstrainHeight(buttonHeight, buttonHeight, ColumnStack([Border(5, 0, Text(normalw, isDefaultFontEmbedded)), Filler])),
@@ -545,8 +759,8 @@ class Arctic {
 			}
 			
 			var eventListeners = {
-				onChange: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
-				onSetFocus: function() { if (contentFn != null) onTextChanged(callback(onTextChanged, null), contentFn(null).text); },
+				onChange: function() { if (contentFn != null) { var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} },
+				onSetFocus: function() { if (contentFn != null){ var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} },
 				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
 				onRelease: null,
