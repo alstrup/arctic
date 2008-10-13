@@ -499,7 +499,6 @@ class Arctic {
 				}
 				if (variants.length == 0) {
 					if (useOnlyAutos) {
-						trace("redify:" + text);
 						safeSetText(text, "#ff0000", null, 0);
 					}
 					autoCompleteBlock.block = Fixed(0, 0);
