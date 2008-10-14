@@ -352,8 +352,10 @@ typedef TextInputEvents = {
 	var onKillFocus: Void -> Void;
 	var onPress: Void -> Void;
 	var onRelease: Void -> Void;
+	#if flash9
 	var onKeyDown: UInt -> Void;
 	var onKeyUp: UInt -> Void;
+	#end
 	var onCaretPosChanged: Void -> Void;
 }
 

@@ -52,12 +52,13 @@
 
 --next
 # DynamicExample flash9
--swf9 dynamicexample9.swf
+-swf dynamicexample9.swf
 -main DynamicExample
 -debug
 -swf-header 800:600:50
 -cp ..
 --flash-strict
+-swf-version 9
 
 
 --next
@@ -78,10 +79,11 @@
 
 --next
 # HelloWorld flash9
--swf9 HelloWorld9.swf
+-swf HelloWorld9.swf
 -main HelloWorld
 -debug
 -cp ..
+-swf-version 9
 
 --next
 # ComponentTour flash7
@@ -102,8 +104,9 @@
 
 --next
 # ComponentTour flash9
--swf9 ComponentTour9.swf
+-swf ComponentTour9.swf
 -main ComponentTour
 -debug
 -swf-header 800:600:50
 -cp ..
+-swf-version 9
