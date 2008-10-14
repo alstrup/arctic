@@ -338,6 +338,9 @@ typedef TextInputModel = {
 	var selEnd: Null<Int>;
 	var cursorPos: Null<Int>;
 	var disabled: Null<Bool>;
+#if flash9
+	var cursorX: Null<Float>;
+#end
 }
 
 /**

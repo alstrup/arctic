@@ -2046,8 +2046,18 @@ class ArcticView {
 					var selStart: Null<Int> = txtInput.selectionBeginIndex;
 					var selEnd: Null<Int> = txtInput.selectionEndIndex;
 					var cursorPos: Null<Int> = txtInput.caretIndex;
+					
+					var cursorX:Null<Float> = 0;
+					var bounds = txtInput.getCharBoundaries(txtInput.caretIndex);
+					if (bounds != null)
+						cursorX = bounds.left;
+					else { 
+						bounds = txtInput.getCharBoundaries(txtInput.caretIndex - 1);
+						if (bounds != null)
+							cursorX = bounds.left;
+					}
 					return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
-							 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT }
+							 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT, cursorX: cursorX }
 				#else flash
 					var hasFocus = flash.Selection.getFocus() == txtInput._target;
 					return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
