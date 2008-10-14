@@ -354,6 +354,7 @@ typedef TextInputEvents = {
 	var onRelease: Void -> Void;
 	var onKeyDown: UInt -> Void;
 	var onKeyUp: UInt -> Void;
+	var onCaretPosChanged: Void -> Void;
 }
 
 enum Filter {

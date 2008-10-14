@@ -2091,6 +2091,14 @@ class ArcticView {
 				addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
 					events.onKeyUp(e.charCode);
 				});
+				var prevCaretPos = [txtInput.caretIndex];
+				addOptionalEventListener(txtInput, Event.ENTER_FRAME, events.onCaretPosChanged, function (e) {
+					if (prevCaretPos[0] != txtInput.caretIndex) {
+						prevCaretPos[0] = txtInput.caretIndex;
+						events.onCaretPosChanged();
+					}
+				});
+				
 				
 				#else neko
 				addOptionalEventListener(txtInput, neash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
