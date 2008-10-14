@@ -1934,7 +1934,10 @@ class ArcticView {
 			}
 			txtInput.htmlText = html;
 			// Retreive the format of the initial text
-			var txtFormat = txtInput.getTextFormat();
+			var txtFormat;
+			if (txtInput.text.length > 0) {
+				txtFormat = txtInput.getTextFormat(0,1);
+			}
 			if (null != numeric && numeric) {
 				txtInput.restrict = "0-9\\-\\.";
 				txtFormat.align = "right";
@@ -1954,8 +1957,12 @@ class ArcticView {
 			}
 			#if flash9
 				txtInput.defaultTextFormat = txtFormat;
-				// Set the text again to enforce the formatting
-				txtInput.htmlText = html;
+				if (txtInput.text == " ") {
+					txtInput.text = "";
+				} else {
+					// Set the text again to enforce the formatting
+					txtInput.htmlText = html;
+				}
 				var me = this;
 				var listener = (null != width && null != height) ? function (e) { validate(); }
 					: function (e) { if (sizeChanged()) me.refresh(false); validate(); };
