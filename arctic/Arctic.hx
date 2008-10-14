@@ -567,12 +567,13 @@ class Arctic {
 			return false;
 		}
 		
-		var makeHTML = function (srcText:String) {
+		var makeHTML = function (srcText:String, hoverWord:Int) {
 			trace("makeHTML:" + srcText);
 			var html = "";
 			var word = "";
 			var variant = "";
 			var state = 0;
+			var wid = 0;
 			for (i in 0... srcText.length) {
 				var c = srcText.charAt(i);
 				if (state == 0) {
@@ -584,7 +585,7 @@ class Arctic {
 				}
 				else if (state == 1) {
 					word += c;
-					if (c == " ")
+					if (c == " ") 
 						state = 2;
 					else
 						variant += c;
@@ -596,24 +597,37 @@ class Arctic {
 					else {
 						state = 0;
 						trace("variant:" + variant + ":");
+						var stylebeg = "";
+						var styleend = "";
+						if (wid == hoverWord) {
+							stylebeg = "<b>";
+							styleend = "</b>";
+						}
 						if (inVariants(variant)) 
-							html += "<font face=\"_sans\" color='#000000'>" + word + "</font>";
+							html += stylebeg+"<font face=\"_sans\" color='#000000'>" + word + "</font>"+styleend;
 						else
-							html += "<font face=\"_sans\" color='#ff0000'>" + word + "</font>";
+							html += stylebeg+"<font face=\"_sans\" color='#ff0000'>" + word + "</font>"+styleend;
 						
 						word = c;
 						variant = c;
 						state = 1;
+						wid++;
 					}
 				}
 			}
 			
 			if (word.length != 0) {
+				var stylebeg = "";
+				var styleend = "";
+				if (wid == hoverWord) {
+					stylebeg = "<b>";
+					styleend = "</b>";
+				}
 				trace("variant:" + variant + ":");
 				if (inVariants(variant)) 
-					html += "<font face=\"_sans\" color='#000000'>" + word + "</font>";
+					html += stylebeg + "<font face=\"_sans\" color='#000000'>" + word + "</font>" + styleend;				
 				else
-					html += "<font face=\"_sans\" color='#ff0000'>" + word + "</font>";
+					html += stylebeg+"<font face=\"_sans\" color='#ff0000'>" + word + "</font>"+styleend;
 			}
 			
 			trace("makeHTML returns:" + html);
@@ -712,7 +726,7 @@ class Arctic {
 						}
 					}
 				}
-				safeSetHTML(makeHTML(_text), pos, 0);
+				safeSetHTML(makeHTML(_text, wordsPos), pos, 0);
 				if (variants.length == 0) {
 					autoCompleteBlock.block = Fixed(0, 0);
 				}
@@ -725,7 +739,7 @@ class Arctic {
 						var hoverw = wrapWithDefaultFont("" + id + ". ", null, "#000000") + wrapWithDefaultFont(w, null, "#ffffff");
 						var clickFn = function () {
 							var newStr:String = changeWord(_text, wordsPos, w);
-							var newHTML:String = makeHTML(newStr);
+							var newHTML:String = makeHTML(newStr, wordsPos);
 							var wordEnd:Dynamic = getWordEnd(newStr, wordsPos);
 							safeSetHTML(newHTML, wordEnd, 3);
 							//if (notify != null) {
@@ -771,7 +785,8 @@ class Arctic {
 				onPress: null,
 				onRelease: null,
 				onKeyDown: function(code:UInt) { var id:Int = code - "1".charCodeAt(0);  if ((id >= 0) && (id < 9)) {handleQuickKey(id); } },
-				onKeyUp: null
+				onKeyUp: null,
+				onCaretPosChanged : function() { if (contentFn != null) { var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} }
 			}
 			eventIface(eventListeners);
 		}
