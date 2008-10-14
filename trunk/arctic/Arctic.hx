@@ -470,7 +470,8 @@ class Arctic {
 							selStart: pos,
 							selEnd: pos,
 							cursorPos: pos,
-							disabled: false
+							disabled: false,
+							cursorX:null
 						};
 						contentFn(ti);
 						}, delay);
@@ -492,7 +493,8 @@ class Arctic {
 							selStart: pos,
 							selEnd: pos,
 							cursorPos: pos,
-							disabled: false
+							disabled: false,
+							cursorX: null
 						};
 						contentFn(ti);
 						}, delay);
@@ -745,9 +747,13 @@ class Arctic {
 							id++;
 						}
 					}
-					
+					var cursorX:Float = 0;
+					if (contentFn != null) {
+						var ti = contentFn(null);
+						cursorX = ti.cursorX;
+					}
 					autoCompleteBlock.block = 
-						Offset(0, -buttonArr.length * buttonHeight, 
+					Offset(cursorX, -buttonArr.length * buttonHeight, 
 							Filter( 
 								DropShadow(1.0, 2.0 , 0x000000, 0.5),
 								Background(0xfffece,
