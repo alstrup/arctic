@@ -1956,7 +1956,9 @@ class ArcticView {
 				return false;
 			}
 			#if flash9
-				txtInput.defaultTextFormat = txtFormat;
+				if (txtFormat != null) {
+					txtInput.defaultTextFormat = txtFormat;
+				}
 				if (txtInput.text == " ") {
 					txtInput.text = "";
 				} else {
