@@ -1,7 +1,6 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
-import flash.display.DisplayObject;
 import haxe.Timer;
 
 #if flash9
@@ -15,6 +14,7 @@ import flash.events.FocusEvent;
 import flash.events.MouseEvent;
 import flash.text.TextField;
 import flash.text.TextFieldType;
+import flash.display.DisplayObject;
 #else flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
@@ -70,8 +70,10 @@ class ArcticView {
 		#if (flash9||neko)
 			stageEventHandlers = [];
 		#end
-		
+
+		#if flash9
 		pictureCache = new Hash();
+		#end
 	}
 
 	/// This is the block this view presents
@@ -155,6 +157,10 @@ class ArcticView {
 				flash.Stage.removeListener(this);
 			#end
 		}
+		
+		#if flash9
+		pictureCache = null;
+		#end
 	}
 	
 	/// Our resize handler is called by Flash when the Flash movie is resized
@@ -2525,8 +2531,10 @@ class ArcticView {
 	}
 	#end
 
+	#if flash9
 	// Hash of all pictures
-	private var pictureCache: Hash<DisplayObject>;	
+	private var pictureCache: Hash<DisplayObject>;
+	#end
 }
 
 class ActiveClips {
@@ -2700,6 +2708,6 @@ class ActiveClips {
 	}
 	*/
 
-	/// Here, we record all MovieClips that compete for mouse drags
-	private var activeClips : Array<ArcticMovieClip>;	
+	// Here, we record all MovieClips that compete for mouse drags
+	private var activeClips : Array<ArcticMovieClip>;
 }
