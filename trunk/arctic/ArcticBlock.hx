@@ -514,4 +514,3 @@ enum AnimateComponent {
 	ScaleY( f : Float -> Float);
 	Rotation( f : Float -> Float);
 }
-
