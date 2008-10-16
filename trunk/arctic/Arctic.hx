@@ -2,6 +2,10 @@ package arctic;
 
 import arctic.ArcticBlock;
 import haxe.Timer;
+#if flash9
+import flash.text.TextField;
+import flash.Lib;
+#end
 
 /**
  * This file contains "high-level" interface to Arctic. It contains a range of
@@ -25,6 +29,22 @@ class Arctic {
 	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>) {
 		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap, selectable);
 	}
+	#if flash9
+	static public function getStringWidth(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null < Bool > , ?selectable: Null < Bool > ) {
+		var tf:TextField = new TextField();
+		tf.visible = false;
+		Lib.current.addChild(tf);
+		tf.htmlText = wrapWithDefaultFont(text, size, color, font);
+		tf.embedFonts = if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded;
+		tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
+		tf.multiline = true;
+		tf.htmlText = wrapWithDefaultFont(text, size, color, font);
+		var res = tf.width;
+		Lib.current.removeChild(tf);
+		return res;
+	}
+	#end
+
 	
 	/// A text button
 	static public function makeSimpleButton(text : String, onClick : Void -> Void, ?fontsize : Float) : ArcticBlock {
@@ -334,6 +354,8 @@ class Arctic {
 		var group = makeTextChoiceBlocks(texts, onSelect, defaultSelected, textSize);
 		return { block: LineStack(group.blocks), selectFn : group.selectFn };
 	}
+	
+	
 	
 	/**
 	 * Make a radio-group to choose between the given texts.
