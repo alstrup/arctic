@@ -529,6 +529,11 @@ class Arctic {
 			}
 		}
 		
+		var handleEsc = function () {
+			quickKeys = [];
+			autoCompleteBlock.block = Fixed(0, 0);
+		}
+		
 		var getWords = function(text:String) {
 			var wrds:Array < String > = text.split(" ");
 			var res:Array<String> = [];
@@ -806,7 +811,7 @@ class Arctic {
 				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
 				onRelease: null,
-				onKeyDown: function(code:UInt) { var id:Int = code - "1".charCodeAt(0);  if ((id >= 0) && (id < 9)) {handleQuickKey(id); } },
+				onKeyDown: function(code:UInt) { if (code == 27) { handleEsc(); return;} if (quickKeys.length != 0) {var id:Int = code - "1".charCodeAt(0);  if ((id >= 0) && (id < 9)) { handleQuickKey(id); }} },
 				onKeyUp: null,
 				onCaretPosChanged : function() { if (contentFn != null) { var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} }
 			}
