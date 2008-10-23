@@ -607,11 +607,11 @@ class ArcticView {
 									if (me.pictureLoadedFn != null) {
 										me.pictureLoadedFn(--me.pendingPictureRequests);
 									}
+									me.pictureCache.set(url, loader.content);
 								} catch (e : Dynamic) {
 									// When running locally, security errors can be called when we access the content
 									// of loaded files, so in that case, we have lost, and can not use nice smoothing
 								}
-								me.pictureCache.set(url, loader.content);
 							}
 							);
 							
