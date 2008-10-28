@@ -1,6 +1,8 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
+import flash.display.Bitmap;
+import flash.display.Loader;
 import haxe.Timer;
 
 #if flash9
@@ -574,50 +576,56 @@ class ArcticView {
 						var loader = flash.Lib.attach(url);
 						clip.addChild(loader);
 					} else {
-						if (pictureCache.exists(url)) {	// Lucky case, all we need is to get ready result from the cache
-							clip.addChild(pictureCache.get(url));
-						} else {
-							// Count how many pictures we are loading
-							pendingPictureRequests++;
-							
-							var loader = new flash.display.Loader();
-							var dis = loader.contentLoaderInfo;
-							var request = new flash.net.URLRequest(Arctic.baseurl + url);
-							
-							dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
-								trace("[ERROR] IO Error with " + url + ": " + event.text);
-							});
-							dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
-								trace("[ERROR] Security Error with " + url + ": " + event.text);						
-							});
-							var me = this;
-													
-							dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
-								try {
-									var loader : flash.display.Loader = event.target.loader;
-									if (Std.is(loader.content, flash.display.Bitmap)) {
-										// Bitmaps are not smoothed per default when loading. We take care of that here
-										var image : flash.display.Bitmap = cast loader.content;
-										image.smoothing = true;
-									}
-									if (crop != null) {
-										// Crop our clip in attempt to avoid spurious lines
-										loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
-									}
-									if (me.pictureLoadedFn != null) {
-										me.pictureLoadedFn(--me.pendingPictureRequests);
-									}
-									me.pictureCache.set(url, loader.content);
-								} catch (e : Dynamic) {
-									// When running locally, security errors can be called when we access the content
-									// of loaded files, so in that case, we have lost, and can not use nice smoothing
-								}
-							}
-							);
-							
-							loader.load(request);
-							clip.addChild(loader);
+						var cachedPicture = pictureCache.get(url);
+						if (cachedPicture != null) {
+							clip.addChild(cachedPicture);	// Let's add it until loader loads a good one - prevents blinking
 						}
+							
+						// Count how many pictures we are loading
+						pendingPictureRequests++;
+						
+						var loader = new flash.display.Loader();
+						var dis = loader.contentLoaderInfo;
+						var request = new flash.net.URLRequest(Arctic.baseurl + url);
+						
+						dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
+							trace("[ERROR] IO Error with " + url + ": " + event.text);
+						});
+						dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
+							trace("[ERROR] Security Error with " + url + ": " + event.text);						
+						});
+						var me = this;
+												
+						dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
+							try {
+								var loader : flash.display.Loader = event.target.loader;
+								if (Std.is(loader.content, flash.display.Bitmap)) {
+									// Bitmaps are not smoothed per default when loading. We take care of that here
+									var image : flash.display.Bitmap = cast loader.content;
+									image.smoothing = true;
+								}
+								if (crop != null) {
+									// Crop our clip in attempt to avoid spurious lines
+									loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
+								}
+								if (me.pictureLoadedFn != null) {
+									me.pictureLoadedFn(--me.pendingPictureRequests);
+								}
+								
+								if (cachedPicture != null) {
+									clip.removeChild(cachedPicture);	// remove obsolete picture from the cache
+								} else {
+									me.pictureCache.set(url, loader.content);
+								}
+							} catch (e : Dynamic) {
+								// When running locally, security errors can be called when we access the content
+								// of loaded files, so in that case, we have lost, and can not use nice smoothing
+							}
+						}
+						);
+						
+						loader.load(request);						
+						clip.addChild(loader);
 					}
 				}
 				var s = scaling;
