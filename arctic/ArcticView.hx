@@ -615,8 +615,12 @@ class ArcticView {
 								}
 								
 								if (cachedPicture != null) {
+									clip.removeChild(cachedPicture);
 									cachedPictureParent.addChild(cachedPicture); // This removes obsolete cached picture from our new clip, and returns it back
+									clip.addChild(loader.content);
 								} else {
+									clip.removeChild(loader);
+									clip.addChild(loader.content);
 									me.pictureCache.set(url, loader.content);
 								}
 							} catch (e : Dynamic) {
@@ -627,7 +631,9 @@ class ArcticView {
 						);
 						
 						loader.load(request);						
-						clip.addChild(loader);
+						if (cachedPicture == null) {
+							clip.addChild(loader);
+						}
 					}
 				}
 				var s = scaling;
