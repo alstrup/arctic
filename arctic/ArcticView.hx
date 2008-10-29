@@ -577,8 +577,10 @@ class ArcticView {
 						clip.addChild(loader);
 					} else {
 						var cachedPicture = pictureCache.get(url);
+						var cachedPictureParent: DisplayObjectContainer = null;
 						if (cachedPicture != null) {
-							clip.addChild(cachedPicture);	// Let's add it until loader loads a good one - prevents blinking
+							cachedPictureParent = cachedPicture.parent;
+							clip.addChild(cachedPicture);	// Let's add it until loader loads a good one - prevents blinking							
 						}
 							
 						// Count how many pictures we are loading
@@ -613,7 +615,7 @@ class ArcticView {
 								}
 								
 								if (cachedPicture != null) {
-									clip.removeChild(cachedPicture);	// remove obsolete picture from the cache
+									cachedPictureParent.addChild(cachedPicture); // This removes obsolete cached picture from our new clip, and returns it back
 								} else {
 									me.pictureCache.set(url, loader.content);
 								}
