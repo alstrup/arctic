@@ -441,13 +441,11 @@ class Animator {
 	public function new(block0 : ArcticBlock, ?doneFn0 : Void -> Void) {
 		block = block0;
 		doneFn = doneFn0;
-		doneFnCalled = true;
 		startTime = 0.0;
 	}
 	
 	/// External interface used to start an animation
 	public function animate(duration0 : Float, animations0 : Array<AnimateComponent>) {
-		doneFnCalled = false;
 	#if flash9
 		if (startTime != 0.0) {
 			clearHandler();
@@ -479,9 +477,8 @@ class Animator {
 				case Rotation( f ): var r = f(t); if (r != clip.rotation) clip.rotation = r;
 			}
 		}
-		if (t >= 1.0 && doneFn != null && !doneFnCalled) {
+		if (t >= 1.0 && doneFn != null) {
 			doneFn();
-			doneFnCalled = true;
 		}
 		#end
 	}
@@ -507,7 +504,6 @@ class Animator {
 	
 	public var block : ArcticBlock;
 	private var doneFn : Void -> Void;
-	private var doneFnCalled : Bool;
 	private var clip : ArcticMovieClip;
 	private var startTime : Float;
 	private var endTime : Float;
