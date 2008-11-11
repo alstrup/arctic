@@ -6,7 +6,6 @@ import haxe.Timer;
 #if flash9
 import flash.geom.Matrix;
 import flash.geom.Point;
-import flash.display.MovieClip;
 import flash.display.DisplayObjectContainer;
 import flash.events.Event;
 import flash.events.EventDispatcher;
@@ -58,7 +57,7 @@ class ArcticView {
 	 * This prepares a user interface view of the given block on the given movieclip.
 	 * Nothing is displayed. Call display() to make the user interface visible.
 	 */ 
-	public function new(gui0 : ArcticBlock, parent0 : MovieClip) {
+	public function new(gui0 : ArcticBlock, parent0 : ArcticMovieClip) {
 		gui = gui0;
 		parent = parent0;
 		base = null;
@@ -465,10 +464,10 @@ class ArcticView {
 				if (mode == Create || mode == Metrics) {
 					tf = new flash.text.TextField();
 					if (mode == Create) {
-						Reflect.setField(clip, "tf", tf);
+						ArcticMC.set(clip, "tf", tf);
 					}
 				} else if (mode == Reuse) {
-					tf = Reflect.field(clip, "tf");
+					tf = ArcticMC.get(clip, "tf");
 					if (tf == null) {
 						return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };						
 					}
@@ -494,9 +493,9 @@ class ArcticView {
 				var tf : flash.TextField;
 				if (mode == Create || mode == Metrics) {
 					tf = ArcticMC.createTextField(clip, 0, 0, if (wordWrap) availableWidth else 0, 100);
-					Reflect.setField(clip, "tf", tf);
+					ArcticMC.set(clip, "tf", tf);
 				} else {
-					tf = Reflect.field(clip, "tf");
+					tf = ArcticMC.get(clip, "tf");
 					if (wordWrap) {
 						tf._width = availableWidth;
 					}
@@ -646,9 +645,9 @@ class ArcticView {
 					if (mode == Create) {
 						var d = ArcticMC.getNextHighestDepth(clip);
 						child = clip.attachMovie(Arctic.baseurl + url, "picture", d);
-						Reflect.setField(clip, "picture", child);
+						ArcticMC.set(clip, "picture", child);
 					} else {
-						child = Reflect.field(clip, "picture");
+						child = ArcticMC.get(clip, "picture");
 					}
 					child._xscale = s;
 					child._yscale = s;
@@ -898,7 +897,7 @@ class ArcticView {
  						me.build(oldBlock, oldClip, w, h, Destroy, 0);
  					}
 					ArcticMC.remove(oldClip);
-					Reflect.setField(clip, "c0", null);
+					ArcticMC.set(clip, "c0", null);
 					var childClip : ArcticMovieClip = me.getOrMakeClip(clip, Create, 0);
 					return me.build(mutableBlock.block, childClip, w, h, Create, 0);
 				};
@@ -913,9 +912,9 @@ class ArcticView {
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Create) {
 				cur = current;
-				Reflect.setField(clip, "current", cur);
+				ArcticMC.set(clip, "current", cur);
 			} else if (mode == Reuse) {
-				cur = Reflect.field(clip, "current");
+				cur = ArcticMC.get(clip, "current");
 			}
 			var width = 0.0;
 			var height = 0.0;
@@ -941,7 +940,7 @@ class ArcticView {
 						ArcticMC.setVisible(children[cur].clip, false);
 						ArcticMC.setVisible(children[current].clip, true);
 						cur = current;
-						Reflect.setField(clip, "current", cur);
+						ArcticMC.set(clip, "current", cur);
 					}
 				}
 				onInit(switchFn);
@@ -1346,8 +1345,8 @@ class ArcticView {
 			
 			if (mode == Reuse) {
 				// Find and hide any left over fillers from earlier
-				while (Reflect.hasField(clip, "c" + i)) {
-					ArcticMC.setVisible(Reflect.field(clip, "c" + i), false);
+				while (ArcticMC.has(clip, "c" + i)) {
+					ArcticMC.setVisible(ArcticMC.get(clip, "c" + i), false);
 					++i;
 				}
 			}
@@ -1500,7 +1499,7 @@ class ArcticView {
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
 			var me = this;
-			var cursorMc = Reflect.field(clip, "cursor");
+			var cursorMc = ArcticMC.get(clip, "cursor");
 			
 			if (mode == Destroy) {
 				removeStageEventListeners(clip);
@@ -1531,13 +1530,13 @@ class ArcticView {
 					}
 					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
 						ArcticMC.showMouse(keep);
-						cursorMc = Reflect.field(clip, "cursor");
+						cursorMc = ArcticMC.get(clip, "cursor");
 						if (cursorMc == null) {
 							// Since we are constructed lazily, we have to find out what child number we are
 							var no = me.parent.numChildren;
 							cursorMc = cursorMcFn(no);
 							cursorMcFn = null;
-							Reflect.setField(clip, "cursor", cursorMc);
+							ArcticMC.set(clip, "cursor", cursorMc);
 						}
 						if (cursorMc.clip == null) {
 							return;
@@ -1631,7 +1630,7 @@ class ArcticView {
 			}
 			
 			if (mode == Destroy) {
-				var overlayMc = Reflect.field(clip, "overlay");
+				var overlayMc = ArcticMC.get(clip, "overlay");
 				if (overlayMc != null) {
 					for (i in 0...parent.numChildren) {
 						var c : Dynamic = this.parent.getChildAt(i);
@@ -1648,13 +1647,13 @@ class ArcticView {
 			var me = this;
 			var register = function (e:Dynamic) {
 				var overlayMc = me.build(overlay, me.parent, 0, 0, mode, 0);
-				Reflect.setField(clip, "overlay", overlayMc);
+				ArcticMC.set(clip, "overlay", overlayMc);
 				var r = child.clip.getBounds(me.parent);
 				overlayMc.clip.x = r.left;
 				overlayMc.clip.y = r.top;
-				clip.removeEventListener(Event.ENTER_FRAME, Reflect.field(clip, "onframe"));
+				clip.removeEventListener(Event.ENTER_FRAME, ArcticMC.get(clip, "onframe"));
 			}
-			Reflect.setField(clip, "onframe", register);
+			ArcticMC.set(clip, "onframe", register);
 						
 			clip.addEventListener(Event.ENTER_FRAME, register);
 			
@@ -1677,10 +1676,10 @@ class ArcticView {
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Create) {
 				var result = buildFun(data, mode, clip, availableWidth, availableHeight, null);
-				Reflect.setField(clip, "customClip", result.clip);
+				ArcticMC.set(clip, "customClip", result.clip);
 				return result;
 			} else if (mode == Reuse || mode == Destroy) {
-				var dclip = Reflect.field(clip, "customClip");
+				var dclip = ArcticMC.get(clip, "customClip");
 				if (mode == Destroy) {
 					Reflect.deleteField(clip, "customClip");
 				}
@@ -1902,9 +1901,9 @@ class ArcticView {
 			var txtInput : flash.TextField;
 			if (mode == Create) {
 				txtInput = ArcticMC.createTextField(clip, 0, 0, width, height);
-				Reflect.setField(clip, "ti", txtInput);
+				ArcticMC.set(clip, "ti", txtInput);
 			} else {
-				txtInput = Reflect.field(clip, "ti");
+				txtInput = ArcticMC.get(clip, "ti");
 			}
 			txtInput.html = true;
 		#else neko
@@ -2427,15 +2426,15 @@ class ArcticView {
 				var d = ArcticMC.getNextHighestDepth(p);
 				p.createEmptyMovieClip("c" + childNo, d);
 				var clip = Reflect.field(p, "c" + childNo);
-				Reflect.setField(p, "c" + childNo, clip);
+				ArcticMC.set(p, "c" + childNo, clip);
 			#else flash7
 				var d = p.getNextHighestDepth();
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
-				Reflect.setField(p, "c" + childNo, clip);
+				ArcticMC.set(p, "c" + childNo, clip);
 			#else flash8
 				var d = p.getNextHighestDepth();
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
-				Reflect.setField(p, "c" + childNo, clip);
+				ArcticMC.set(p, "c" + childNo, clip);
 			#else (flash9 || neko)
 				var clip = new ArcticMovieClip();
 				#if debug
@@ -2445,7 +2444,7 @@ class ArcticView {
 				#end
 				p.addChild(clip);
 				if (p != parent) {
-					Reflect.setField(p, "c" + childNo, clip);
+					ArcticMC.set(p, "c" + childNo, clip);
 				} else {
 					// For the parent, we use movieclip child numbers, 
 					// because we can not add properties to things
@@ -2458,8 +2457,8 @@ class ArcticView {
 		// Reuse/Destroy case
 		#if (flash9 || neko)
 			if (p != parent) {
-				if (Reflect.hasField(p, "c" + childNo)) {
-					return Reflect.field(p, "c" + childNo);
+				if (ArcticMC.has(p, "c" + childNo)) {
+					return ArcticMC.get(p, "c" + childNo);
 				}
 #if debug
 				trace("getOrMakeClip() unexpected fallback 1." + buildMode);
@@ -2477,8 +2476,8 @@ class ArcticView {
 				return d;
 			}
 		#else flash
-			if (Reflect.hasField(p, "c" + childNo)) {
-				return Reflect.field(p, "c" + childNo);
+			if (ArcticMC.has(p, "c" + childNo)) {
+				return ArcticMC.get(p, "c" + childNo);
 			}
 			// Fallback - should never happen
 			return getOrMakeClip(p, Create, childNo);
@@ -2506,12 +2505,12 @@ class ArcticView {
 
 	/// Get to the book keeping details of the given clip
 	private function getBlockInfo(clip : ArcticMovieClip) : BlockInfo {
-		return Reflect.field(clip, "arcticInfo");
+		return ArcticMC.get(clip, "arcticInfo");
 	}
 	
 	/// Set the book keeping details for this clip
 	private function setBlockInfo(clip : ArcticMovieClip, info : BlockInfo) {
-		Reflect.setField(clip, "arcticInfo", info);
+		ArcticMC.set(clip, "arcticInfo", info);
 	}
 	
 	#if (flash9||neko)

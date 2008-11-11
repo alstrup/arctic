@@ -641,4 +641,16 @@ class ArcticMC {
 		return mc.swapDepths(getNextHighestDepth(mc._parent) - 1);
 		#end
 	}
+
+	static public inline function set(mc: ArcticMovieClip, name: String, value: Dynamic) {
+		Reflect.setField(mc, name, value);
+	}
+
+	static public inline function get(mc: ArcticMovieClip, name: String): Dynamic {
+		return Reflect.field(mc, name);
+	}
+
+	static public inline function has(mc: ArcticMovieClip, name: String): Bool {
+		return Reflect.hasField(mc, name);
+	}
 }
