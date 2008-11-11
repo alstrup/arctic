@@ -111,8 +111,20 @@ typedef ArcticSprite = neash.display.Sprite;
  * A class which makes it simpler to make Flash 8 / 9 compatible code.
  */
 class ArcticMC {
+	#if flash9
+	private static var arcticCurrent = initCurrent();
+
+	private static function initCurrent(): ArcticMovieClip {
+		var crnt = new ArcticMovieClip();
+		flash.Lib.current.addChild(crnt);
+		return crnt;
+	}
+	#end
+
 	static public function getCurrentClip() : ArcticMovieClip {
-		#if flash
+		#if flash9
+		return arcticCurrent;
+		#else flash
 		return flash.Lib.current;
 		#else neko
 		return neash.Lib.current;
@@ -439,12 +451,18 @@ class ArcticMC {
 	 */
 	static public function getMouseXY(?m : ArcticMovieClip) : { x: Float, y : Float } {
 		#if flash
-			if (m == null) {
-				m = flash.Lib.current;
-			}
 			#if flash9
-				return { x: m.mouseX, y: m.mouseY };
+				if (null != m) {
+					return { x: m.mouseX, y: m.mouseY };
+				} else {
+					var stage = flash.Lib.current.stage;
+					return { x: stage.mouseX, y: stage.mouseY };
+				}
 			#else flash
+				if (m == null) {
+					m = flash.Lib.current;
+				}
+
 				return { x: m._xmouse, y: m._ymouse };
 			#end
 		#else neko
@@ -480,7 +498,7 @@ class ArcticMC {
 		
 		var active = true;
 		#if flash9
-			active = clip.visible && clip.enabled;
+			active = clip.visible && clip.mouseEnabled;
 			var parent = clip.parent;
 			while (null != parent && active) {
 				active = active && parent.visible && parent.mouseEnabled;
@@ -638,14 +656,34 @@ class ArcticMC {
 	}
 
 	static public inline function set(mc: ArcticMovieClip, name: String, value: Dynamic) {
+		#if flash9
+		mc.set(name, value);
+		#else true
 		Reflect.setField(mc, name, value);
+		#end
 	}
 
 	static public inline function get(mc: ArcticMovieClip, name: String): Dynamic {
+		#if flash9
+		return mc.get(name);
+		#else true
 		return Reflect.field(mc, name);
+		#end
 	}
 
 	static public inline function has(mc: ArcticMovieClip, name: String): Bool {
+		#if flash9
+		return mc.has(name);
+		#else true
 		return Reflect.hasField(mc, name);
+		#end
+	}
+
+	static public inline function delete(mc: ArcticMovieClip, name: String) {
+		#if flash9
+		mc.remove(name);
+		#else true
+		Reflect.deleteField(mc, name);
+		#end
 	}
 }

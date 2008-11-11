@@ -244,7 +244,7 @@ class ArcticView {
 		ArcticMC.remove(base);
 		#if flash9
 		#else flash
-		Reflect.deleteField(parent, "c" + firstChild);
+		ArcticMC.delete(parent, "c" + firstChild);
 		#end
 		idMovieClip = new Hash<ArcticMovieClip>();
 		base = null;
@@ -1516,7 +1516,7 @@ class ArcticView {
 					}
 					#end
 					ArcticMC.remove(cursorMc.clip);
-					Reflect.deleteField(clip, "cursor");
+					ArcticMC.delete(clip, "cursor");
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
@@ -1640,7 +1640,7 @@ class ArcticView {
 						}
 					}
 					ArcticMC.remove(overlayMc.clip);
-					Reflect.deleteField(clip, "overlay");
+					ArcticMC.delete(clip, "overlay");
 				}
 				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 			}
@@ -1681,7 +1681,7 @@ class ArcticView {
 			} else if (mode == Reuse || mode == Destroy) {
 				var dclip = ArcticMC.get(clip, "customClip");
 				if (mode == Destroy) {
-					Reflect.deleteField(clip, "customClip");
+					ArcticMC.delete(clip, "customClip");
 				}
 				var r = buildFun(data, mode, clip, availableWidth, availableHeight, dclip);
 				if (r == null) {
