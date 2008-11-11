@@ -1,13 +1,6 @@
 package arctic;
 
-// We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
-#if flash9
-	typedef ArcticMovieClip = flash.display.MovieClip
-#else flash
-	typedef ArcticMovieClip = flash.MovieClip
-#else neko
-	typedef ArcticMovieClip = neash.display.MovieClip
-#end
+import arctic.ArcticMC;
 
 /**
  * Arctic is an embedded Domain Specific Language for making user interfaces.

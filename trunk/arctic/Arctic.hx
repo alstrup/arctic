@@ -1,5 +1,6 @@
 package arctic;
 
+import arctic.ArcticMC;
 import arctic.ArcticBlock;
 import haxe.Timer;
 #if flash9
