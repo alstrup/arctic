@@ -17,6 +17,7 @@ typedef ArcticPoint = Point
 typedef ArcticTextField = flash.text.TextField
 typedef ArcticTextFormat = flash.text.TextFormat
 typedef ArcticDisplayObjectContainer = flash.display.DisplayObjectContainer
+typedef ArcticSprite = flash.display.Sprite
 #else flash8
 import flash.geom.Rectangle;
 import flash.geom.Point;
@@ -25,7 +26,7 @@ typedef ArcticPoint = Point<Float>
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
 typedef ArcticDisplayObjectContainer = ArcticMovieClip
-
+typedef ArcticSprite = ArcticMovieClip
 import flash.Mouse;
 
 #else flash7
@@ -97,6 +98,7 @@ class ArcticPoint {
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
 typedef ArcticDisplayObjectContainer = ArcticMovieClip
+typedef ArcticSprite = ArcticMovieClip
 
 import flash.Mouse;
 
@@ -109,7 +111,7 @@ typedef ArcticPoint = Point
 typedef ArcticTextField = neash.text.TextField
 typedef ArcticTextFormat = neash.text.TextFormat
 typedef ArcticDisplayObjectContainer = neash.display.DisplayObjectContainer
-
+typedef ArcticSprite = neash.display.Sprite;
 #end
 
 /**
@@ -230,7 +232,7 @@ class ArcticMC {
 	 * I.e. clear(), moveTo(x,y), lineTo(x,y) and so on are
 	 * done on this object.
 	 */
-	static public function getGraphics(m : ArcticMovieClip) {
+	static public function getGraphics(m : ArcticSprite) {
 		#if (flash9 || neko)
 			return m.graphics;
 		#else flash
