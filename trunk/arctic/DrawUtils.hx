@@ -8,7 +8,7 @@ import arctic.ArcticMC;
 class DrawUtils {
 
 	/// Contributed by Zjnue Brzavi <zjnue.brzavi@googlemail.com>
-	static public function drawRect(mc : ArcticMovieClip, x : Float, y : Float, w : Float, h : Float, ?cornerRadius : Float) {
+	static public function drawRect(mc : ArcticSprite, x : Float, y : Float, w : Float, h : Float, ?cornerRadius : Float) {
 		var g = ArcticMC.getGraphics(mc);
 		#if flash9
 		if (cornerRadius != null && cornerRadius > 0) {
@@ -56,7 +56,7 @@ class DrawUtils {
 	}
 
 // Draws a circle with optional filling
-static public function drawCircle(mc : ArcticMovieClip, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float, ?lineThick : Null<Float>)
+static public function drawCircle(mc : ArcticSprite, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float, ?lineThick : Null<Float>)
 {
 	var g = ArcticMC.getGraphics(mc);
 	g.lineStyle((if (lineThick == null) 1 else lineThick), color);
@@ -73,7 +73,7 @@ static public function drawCircle(mc : ArcticMovieClip, x : Float, y : Float, ra
 	}
 }
 
-static public function drawRectangle(mc : ArcticMovieClip, x : Float, y : Float, w : Float, h : Float, cornerRadius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float) {
+static public function drawRectangle(mc : ArcticSprite, x : Float, y : Float, w : Float, h : Float, cornerRadius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float) {
 	var g = ArcticMC.getGraphics(mc);
 	g.lineStyle(1, color);
 	if (null != fillColor) {
