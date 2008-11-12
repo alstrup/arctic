@@ -1,8 +1,7 @@
 <project name="arctic" url="http://code.google.com/p/arctic/" license="BSD">
     <user name="asgeralstrup"/>
     <description>Lightweight GUI framework for haXe targetting Flash 7, 8 and Flash 9</description>
-    <version name="0.10.0">
-	   - autocompletion support
-	   - Arctic is now Sprite-based, not MovieClip-based on Flash9
+    <version name="0.10.1">
+	   - flash 6-8 compiles again
 	</version>
 </project>
