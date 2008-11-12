@@ -2,31 +2,7 @@ package arctic;
 
 // We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
-	//typedef ArcticMovieClip = flash.display.MovieClip;
-	class ArcticMovieClip extends flash.display.Sprite {
-		private var hash: Hash<Dynamic>;
-
-		public function new() {
-			super();
-			hash = new Hash();
-		}
-
-		public inline function set(name: String, value: Dynamic) {
-			hash.set(name, value);
-		}
-
-		public inline function get(name): Dynamic {
-			return hash.get(name);
-		}
-
-		public inline function has(name): Bool {
-			return hash.exists(name);
-		}
-
-		public inline function remove(name) {
-			hash.remove(name);
-		}
-	}
+	typedef ArcticMovieClip = flash.display.MovieClip;
 #else flash
 	typedef ArcticMovieClip = flash.MovieClip
 #else neko
