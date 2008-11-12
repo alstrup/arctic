@@ -293,11 +293,7 @@ class ArcticTest {
 					Arctic.makeSimpleButton("Focus & select", function () {
 						var status = controlFun(null);
 						var quarter = Math.floor(status.text.length / 4);
-						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null, disabled: false 
-						#if flash9
-							,cursorX: null
-						#end
-						} );
+						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null, disabled: false,cursorX: null } );
 					}, 25), 
 					Arctic.makeSimpleButton("Continue", nextWorld, 25),
 					Filler
@@ -314,6 +310,9 @@ class ArcticTest {
 			#if flash9
 			,onKeyDown: function(k : UInt) { trace("Key down " + k); },
 			onKeyUp: function(k : UInt) { trace("Key up " + k); }
+			#else true
+			,onKeyDown: function(k : Int) { trace("Key down " + k); },
+			onKeyUp: function(k : Int) { trace("Key up " + k); }
 			#end
 			});
 	}

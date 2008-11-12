@@ -338,9 +338,7 @@ typedef TextInputModel = {
 	var selEnd: Null<Int>;
 	var cursorPos: Null<Int>;
 	var disabled: Null<Bool>;
-#if flash9
 	var cursorX: Null<Float>;
-#end
 }
 
 /**
@@ -355,6 +353,9 @@ typedef TextInputEvents = {
 	#if flash9
 	var onKeyDown: UInt -> Void;
 	var onKeyUp: UInt -> Void;
+	#else true
+	var onKeyDown: Int -> Void;
+	var onKeyUp: Int -> Void;
 	#end
 	var onCaretPosChanged: Void -> Void;
 }

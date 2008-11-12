@@ -2101,7 +2101,7 @@ class ArcticView {
 					var hasFocus = flash.Selection.getFocus() == txtInput._target;
 					return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
 							 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
-							 disabled: txtInput.type != "input" }
+							 disabled: txtInput.type != "input", cursorX: null }
 				#end
 
 			}
