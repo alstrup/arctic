@@ -2,7 +2,7 @@ package arctic;
 
 // We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
-	typedef ArcticMovieClip = flash.display.MovieClip;
+	typedef ArcticMovieClip = flash.display.Sprite;
 #else flash
 	typedef ArcticMovieClip = flash.MovieClip
 #else neko
