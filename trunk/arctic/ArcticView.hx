@@ -1859,6 +1859,27 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
+		case Cached(block):
+			var clip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			#if flash9
+			if (mode == Create) {
+				var visitor:Array<ArcticMovieClip->Void> = [];
+				var visit = function (mc:Dynamic) { mc.cacheAsBitmap = true; if (Reflect.hasField(mc, "numChildren") && (ArcticMC.get(mc, "nocache") == null))for (i in 0...mc.numChildren) visitor[0](mc.getChildAt(i)); }
+				visitor.push(visit);
+				visit(clip);
+			} 
+			#end
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+
+		case UnCached(block):
+			var clip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
+				ArcticMC.set(clip, "nocache", true);
+			} 
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		
 		case DebugBlock(id, block):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			trace("Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ id);
