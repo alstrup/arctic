@@ -293,6 +293,9 @@ enum ArcticBlock {
 	/// An animation block
 	Animate(animator : Animator);
 	
+	Cached(block : ArcticBlock);
+	UnCached(block : ArcticBlock);
+	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);
 }
