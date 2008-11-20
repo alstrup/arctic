@@ -73,7 +73,9 @@ class ArcticView {
 		#end
 
 		#if flash9
-		pictureCache = new Hash();
+		if (pictureCache == null) {
+			pictureCache = new Hash();
+		}
 		#end
 	}
 
@@ -158,10 +160,6 @@ class ArcticView {
 				flash.Stage.removeListener(this);
 			#end
 		}
-		
-		#if flash9
-		pictureCache = null;
-		#end
 	}
 	
 	/// Our resize handler is called by Flash when the Flash movie is resized
@@ -620,7 +618,7 @@ class ArcticView {
 								} else {
 									clip.removeChild(loader);
 									clip.addChild(loader.content);
-									me.pictureCache.set(url, loader.content);
+									pictureCache.set(url, loader.content);
 								}
 							} catch (e : Dynamic) {
 								// When running locally, security errors can be called when we access the content
@@ -2569,7 +2567,7 @@ class ArcticView {
 
 	#if flash9
 	// Hash of all pictures
-	private var pictureCache: Hash<DisplayObject>;
+	private static var pictureCache: Hash<DisplayObject>;
 	#end
 }
 
