@@ -155,11 +155,14 @@ class ArcticMC {
 	}
 	
 	#if (flash9 || neko)
-	static public function removeProperties(m : ArcticMovieClip) {
+	static public function removeProperties(m : flash.display.DisplayObjectContainer) {
 		hash.remove(m.name);
 		for (i in 0...m.numChildren) {
-			var c : ArcticMovieClip = cast(m.getChildAt(i), ArcticMovieClip);
-			removeProperties(c);
+			var obj = m.getChildAt(i);
+			if (Std.is(obj, ArcticMovieClip)){
+				var mc : ArcticMovieClip= cast(obj, ArcticMovieClip);
+				removeProperties(mc);
+			}
 		}
 	}
 	#end
