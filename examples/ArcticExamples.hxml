@@ -6,7 +6,8 @@
 
 --next
 # ArcticTest flash9
--swf9 ArcticTest9.swf
+-swf ArcticTest9.swf
+-swf-version 9
 -main ArcticTest
 -swf-header 800:600:50
 -lib arctic
@@ -19,7 +20,8 @@
 
 --next
 # DynamicExample flash9
--swf9 DynamicExample9.swf
+-swf DynamicExample9.swf
+-swf-version 9
 -main DynamicExample
 -lib arctic
 
@@ -31,6 +33,7 @@
 
 --next
 # HelloWorld flash9
--swf9 HelloWorld9.swf
+-swf HelloWorld9.swf
+-swf-version 9
 -main HelloWorld
 -lib arctic

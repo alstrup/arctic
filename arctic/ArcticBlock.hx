@@ -2,7 +2,7 @@ package arctic;
 
 // We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
-	typedef ArcticMovieClip = flash.display.Sprite;
+	typedef ArcticMovieClip = flash.display.MovieClip
 #else flash
 	typedef ArcticMovieClip = flash.MovieClip
 #else neko
@@ -201,10 +201,6 @@ enum ArcticBlock {
 	 * two blocks in each dimension.
 	 */
 	OnTop(base : ArcticBlock, overlay : ArcticBlock);
-	
-	#if flash9
-	OnTopView(base : ArcticBlock, overlay : ArcticBlock);
-	#end
 
 	/// A state-full block which can be updated from the outside with a new block. See MutableBlock below for more info
 	Mutable( state : MutableBlock );
@@ -285,17 +281,6 @@ enum ArcticBlock {
 	 */
 	Scale(block : ArcticBlock, ? maxScale : Float);
 	
-	#if flash9
-	/// Rotates a block. The angle is in degrees
-	Rotate(block : ArcticBlock, ?angle : Float);
-	#end
-
-	/// An animation block
-	Animate(animator : Animator);
-	
-	Cached(block : ArcticBlock);
-	UnCached(block : ArcticBlock);
-	
 	/// Special block which is useful for debugging
 	DebugBlock(id : String, block : ArcticBlock);
 }
@@ -341,7 +326,6 @@ typedef TextInputModel = {
 	var selEnd: Null<Int>;
 	var cursorPos: Null<Int>;
 	var disabled: Null<Bool>;
-	var cursorX: Null<Float>;
 }
 
 /**
@@ -353,14 +337,6 @@ typedef TextInputEvents = {
 	var onKillFocus: Void -> Void;
 	var onPress: Void -> Void;
 	var onRelease: Void -> Void;
-	#if flash9
-	var onKeyDown: UInt -> Void;
-	var onKeyUp: UInt -> Void;
-	#else true
-	var onKeyDown: Int -> Void;
-	var onKeyUp: Int -> Void;
-	#end
-	var onCaretPosChanged: Void -> Void;
 }
 
 enum Filter {
@@ -432,94 +408,3 @@ class MutableBlock {
 	public var availableWidth(null, default) : Float;
 	public var availableHeight(null, default) : Float;
 }	
-
-/**
- * Example of creating an animation in Arctic:
- *   var animator = new Animator( arctic.Text("Test") );
- *   var gui = LineStack( Animate(animator) );
- *   ...
- *   // To start an animation that takes 5 seconds:
- *   animator.animate(5.0, [ Alpha(Animators.line( 0.0, 1.0 )), ScaleX(Animators.line(10.0, 0.0)) ] );
- */
-class Animator {
-	public function new(block0 : ArcticBlock, ?doneFn0 : Void -> Void) {
-		block = block0;
-		doneFn = doneFn0;
-		startTime = 0.0;
-	}
-	
-	/// External interface used to start an animation
-	public function animate(duration0 : Float, animations0 : Array<AnimateComponent>) {
-	#if flash9
-		if (startTime != 0.0) {
-			clearHandler();
-		}
-		reciprocDuration = 0.001 / duration0;
-		animations = animations0;
-		startTime = flash.Lib.getTimer();
-		endTime = startTime + duration0;
-		clip.addEventListener(flash.events.Event.ENTER_FRAME, enterFrame);
-	#end
-	}
-
-	private function enterFrame( e ) : Void {
-		#if flash9
-		var t = flash.Lib.getTimer() - startTime;
-		t = t * reciprocDuration;
-		if (t >= 1.0) {
-			clearHandler();
-			t = 1.0;
-		}
-		for (a in animations) {
-			switch (a) {
-				/// Hm, this should be recursive
-				case Alpha( f ): var a = f(t); if (a != clip.alpha) clip.alpha = a;
-				case X( f ): var x = f(t); if (x != clip.x) clip.x = x;
-				case Y( f ): var y = f(t); if (y != clip.y) clip.y = y;
-				case ScaleX( f ): var sx = f(t); if (sx != clip.scaleX) clip.scaleX = sx;
-				case ScaleY( f ): var sy = f(t); if (sy != clip.scaleY) clip.scaleY = sy;
-				case Rotation( f ): var r = f(t); if (r != clip.rotation) clip.rotation = r;
-			}
-		}
-		if (t >= 1.0 && doneFn != null) {
-			doneFn();
-		}
-		#end
-	}
-	
-	/// Called by ArcticView.build
-	public function registerClip(clip0 : ArcticMovieClip) {
-		clip = clip0;
-	}
-	
-	private function clearHandler() {
-		if (clip != null) {
-			#if flash9
-				clip.removeEventListener(flash.events.Event.ENTER_FRAME, enterFrame);
-			#end
-		}
-	}
-	
-	/// Called by ArcticView.build on destroy phase
-	public function destroy() {
-		clearHandler();
-		clip = null;
-	}
-	
-	public var block : ArcticBlock;
-	private var doneFn : Void -> Void;
-	private var clip : ArcticMovieClip;
-	private var startTime : Float;
-	private var endTime : Float;
-	private var reciprocDuration : Float;
-	private var animations : Array<AnimateComponent>;
-}
-
-enum AnimateComponent {
-	Alpha( f : Float -> Float);
-	X( f : Float -> Float);
-	Y( f : Float -> Float);
-	ScaleX( f : Float -> Float);
-	ScaleY( f : Float -> Float);
-	Rotation( f : Float -> Float);
-}

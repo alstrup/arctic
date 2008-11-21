@@ -8,8 +8,7 @@
 -cp ..
 --flash-strict
 </output>
-  <output name="ArcticTest flash9" mode="swf" out="arctictest9.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-version 9
--swf-header 800:600:50
+  <output name="ArcticTest flash9" mode="swf9" out="arctictest9.swf" class="ArcticTest" lib="" cmd="" main="True" debug="True">-swf-header 800:600:50
 -cp ..
 --flash-strict
 </output>

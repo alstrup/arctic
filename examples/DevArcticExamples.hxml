@@ -21,9 +21,9 @@
 --next
 # ArcticTest flash9
 -swf arctictest9.swf
+-swf-version 9
 -main ArcticTest
 -debug
--swf-version 9
 -swf-header 800:600:50
 -cp ..
 --flash-strict
@@ -53,12 +53,12 @@
 --next
 # DynamicExample flash9
 -swf dynamicexample9.swf
+-swf-version 9
 -main DynamicExample
 -debug
 -swf-header 800:600:50
 -cp ..
 --flash-strict
--swf-version 9
 
 
 --next
@@ -80,10 +80,10 @@
 --next
 # HelloWorld flash9
 -swf HelloWorld9.swf
+-swf-version 9
 -main HelloWorld
 -debug
 -cp ..
--swf-version 9
 
 --next
 # ComponentTour flash7
@@ -105,8 +105,8 @@
 --next
 # ComponentTour flash9
 -swf ComponentTour9.swf
+-swf-version 9
 -main ComponentTour
 -debug
 -swf-header 800:600:50
 -cp ..
--swf-version 9

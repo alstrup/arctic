@@ -17,45 +17,15 @@ class ArcticTest {
 	public function new(parent_ : ArcticMovieClip) {
 		parent = parent_;
 
-		showAnimation();
+		showHelloWorld1();
 		//nextWorld();
 		//draggable();
 		//wideText();
 		//wrappingLayout();
 		//maskBlock();
 	}
-	
-	public function showAnimation() {
-		#if flash9
-		var text = Arctic.fixSize(100.0, 100.0, Align(0.5, 0.5, Arctic.makeText("Text", 30) ) );
-		
-		var animator = new Animator( Background(0xff0000, text) );
-		var gui = LineStack([
-			Animate( animator ),
-			Fixed(0, 10),
-			arctic.Animation.grow( Background(0x00ff00, text), 50.0, 50.0, 0.5 ),
-			Fixed(0, 10),
-			arctic.Animation.appear( Background(0x0000ff, text), 2.5 ),
-			
-			Arctic.makeSimpleButton("Animate", function () {
-					animator.animate(0.3, [ Alpha( function(t) { return 1.0 - t; }),
-						X(function(t) { return t * 100.0; }) ]);
-			}),
-			Arctic.makeSimpleButton("Next", showHelloWorld1)
-		]);
-		// Then construct the arctic object
-		arcticView = new ArcticView( gui, parent );
-		// And display on the given movieclip
-		var root = arcticView.display(true);
-		#else true
-		showHelloWorld1();
-		#end
-	}
 
 	public function showHelloWorld1() {
-		// Clear out the old screen
-		if (arcticView != null) { arcticView.destroy(); }
-
 		// To make a screen, first build the data structure representing the contents
 		var helloWorld = Arctic.makeSimpleButton("Hello world", showHelloWorld2, 50);
 		// Then construct the arctic object
@@ -183,7 +153,8 @@ class ArcticTest {
 		// A custom block needs a function which can tell Arctic the size and desired resizing behaviour,
 		// and paint & construct the block when ready
 		var build = function(data : Int, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
-			if (mode == Create) {
+			if (mode != Metrics) {
+				// This is used both for creation and update
 				var g = ArcticMC.getGraphics(parentMc);
 				g.clear();
 				g.beginFill(data);
@@ -293,7 +264,7 @@ class ArcticTest {
 					Arctic.makeSimpleButton("Focus & select", function () {
 						var status = controlFun(null);
 						var quarter = Math.floor(status.text.length / 4);
-						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null, disabled: false,cursorX: null } );
+						controlFun( { html: null, text: null, focus: true, selStart: quarter, selEnd: quarter * 3, cursorPos: null, disabled: false } );
 					}, 25), 
 					Arctic.makeSimpleButton("Continue", nextWorld, 25),
 					Filler
@@ -305,16 +276,7 @@ class ArcticTest {
 		arcticView.display(true);
 		eventsFun({onPress: function () { trace("press!"); }, onRelease: function () { trace("Release!"); },
 			onChange: function () { trace("Change!"); }, onSetFocus: function () { trace("Focus!"); }, 
-			onKillFocus: function () { trace("Kill!"); },
-			onCaretPosChanged: function() { trace("Caret pos changed;"); }
-			#if flash9
-			,onKeyDown: function(k : UInt) { trace("Key down " + k); },
-			onKeyUp: function(k : UInt) { trace("Key up " + k); }
-			#else true
-			,onKeyDown: function(k : Int) { trace("Key down " + k); },
-			onKeyUp: function(k : Int) { trace("Key up " + k); }
-			#end
-			});
+			onKillFocus: function () { trace("Kill!"); } });
 	}
 	
 	public function maskBlock() {

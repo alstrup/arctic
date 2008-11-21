@@ -10,7 +10,6 @@ typedef ArcticPoint = Point
 typedef ArcticTextField = flash.text.TextField
 typedef ArcticTextFormat = flash.text.TextFormat
 typedef ArcticDisplayObjectContainer = flash.display.DisplayObjectContainer
-typedef ArcticSprite = flash.display.Sprite
 #else flash8
 import flash.geom.Rectangle;
 import flash.geom.Point;
@@ -19,7 +18,7 @@ typedef ArcticPoint = Point<Float>
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
 typedef ArcticDisplayObjectContainer = ArcticMovieClip
-typedef ArcticSprite = ArcticMovieClip
+
 import flash.Mouse;
 
 #else flash7
@@ -91,7 +90,6 @@ class ArcticPoint {
 typedef ArcticTextField = flash.TextField
 typedef ArcticTextFormat = flash.TextFormat
 typedef ArcticDisplayObjectContainer = ArcticMovieClip
-typedef ArcticSprite = ArcticMovieClip
 
 import flash.Mouse;
 
@@ -104,18 +102,13 @@ typedef ArcticPoint = Point
 typedef ArcticTextField = neash.text.TextField
 typedef ArcticTextFormat = neash.text.TextFormat
 typedef ArcticDisplayObjectContainer = neash.display.DisplayObjectContainer
-typedef ArcticSprite = neash.display.Sprite;
+
 #end
 
 /**
  * A class which makes it simpler to make Flash 8 / 9 compatible code.
  */
 class ArcticMC {
-	// counter to assign unique names to mc's
-	private static var name_counter = 0;
-	// hash to keep custom properties for sprites in f9
-	private static var hash = new Hash<Hash<Dynamic>>();
-
 	static public function getCurrentClip() : ArcticMovieClip {
 		#if flash
 		return flash.Lib.current;
@@ -125,7 +118,7 @@ class ArcticMC {
 	}
 	
 	/// Create a new clip on the given parent
-	static public function create(parent : ArcticDisplayObjectContainer) : ArcticMovieClip {
+	static public function create(parent : ArcticMovieClip) : ArcticMovieClip {
 		#if (flash9 || neko)
 			var clip = new ArcticMovieClip();
 			parent.addChild(clip);
@@ -230,7 +223,7 @@ class ArcticMC {
 	 * I.e. clear(), moveTo(x,y), lineTo(x,y) and so on are
 	 * done on this object.
 	 */
-	static public function getGraphics(m : ArcticSprite) {
+	static public function getGraphics(m : ArcticMovieClip) {
 		#if (flash9 || neko)
 			return m.graphics;
 		#else flash
@@ -444,18 +437,12 @@ class ArcticMC {
 	 */
 	static public function getMouseXY(?m : ArcticMovieClip) : { x: Float, y : Float } {
 		#if flash
+			if (m == null) {
+				m = flash.Lib.current;
+			}
 			#if flash9
-				if (null != m) {
-					return { x: m.mouseX, y: m.mouseY };
-				} else {
-					var stage = flash.Lib.current.stage;
-					return { x: stage.mouseX, y: stage.mouseY };
-				}
+				return { x: m.mouseX, y: m.mouseY };
 			#else flash
-				if (m == null) {
-					m = flash.Lib.current;
-				}
-
 				return { x: m._xmouse, y: m._ymouse };
 			#end
 		#else neko
@@ -491,7 +478,7 @@ class ArcticMC {
 		
 		var active = true;
 		#if flash9
-			active = clip.visible && clip.mouseEnabled;
+			active = clip.visible && clip.enabled;
 			var parent = clip.parent;
 			while (null != parent && active) {
 				active = active && parent.visible && parent.mouseEnabled;
@@ -572,7 +559,7 @@ class ArcticMC {
 
 	#if flash9
 	#else flash
-	static public function getNextHighestDepth(clip : ArcticDisplayObjectContainer) : Int {
+	static public function getNextHighestDepth(clip : ArcticMovieClip) : Int {
 		#if flash6
 			var depth = 0;
 			for (f in Reflect.fields(clip)) {
@@ -645,71 +632,6 @@ class ArcticMC {
 		return mc.parent.setChildIndex(mc, mc.parent.numChildren - 1);
 		#else flash
 		return mc.swapDepths(getNextHighestDepth(mc._parent) - 1);
-		#end
-	}
-
-	static private function getNextName(): String {
-		return "_arctic_mc_" + (name_counter++);
-	}
-
-	#if flash9
-	static private inline function ensureNamedClip(mc: ArcticMovieClip) {
-		if (StringUtils.emptyString(mc.name)) {
-			mc.name = getNextName();
-		}
-	}
-
-	static private inline function getOrCreateProps(mc: ArcticMovieClip): Hash<Dynamic> {
-		var h = hash.get(mc.name);
-		if (null == h) {
-			h = new Hash<Dynamic>();
-			hash.set(mc.name, h);
-		} 
-
-		return h;
-	}
-
-	static private inline function getProps(mc: ArcticMovieClip): Hash<Dynamic> {
-		return StringUtils.emptyString(mc.name) ? null : hash.get(mc.name);
-	}
-	#end
-
-	static public inline function set(mc: ArcticMovieClip, name: String, value: Dynamic) {
-		#if flash9
-		ensureNamedClip(mc);
-		var props = getOrCreateProps(mc);
-		props.set(name, value);
-		#else true
-		Reflect.setField(mc, name, value);
-		#end
-	}
-
-	static public inline function get(mc: ArcticMovieClip, name: String): Dynamic {
-		#if flash9
-		var props = getProps(mc);
-		return null != props ? props.get(name) : null;
-		#else true
-		return Reflect.field(mc, name);
-		#end
-	}
-
-	static public inline function has(mc: ArcticMovieClip, name: String): Bool {
-		#if flash9
-		var props = getProps(mc);
-		return null != props && props.exists(name);
-		#else true
-		return Reflect.hasField(mc, name);
-		#end
-	}
-
-	static public inline function delete(mc: ArcticMovieClip, name: String) {
-		#if flash9
-		var props = getProps(mc);
-		if (null != props) {
-			props.remove(name);
-		}
-		#else true
-		Reflect.deleteField(mc, name);
 		#end
 	}
 }

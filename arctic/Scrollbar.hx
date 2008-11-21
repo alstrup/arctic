@@ -16,7 +16,7 @@ class Scrollbar {
 		var buttonMovement = 15; // How many pixels we move when a scrollbar button is clicked
 		
 		var currentY = ensureYVisible;
-		if (ArcticMC.has(parent, "scrollbar")) {
+		if (Reflect.hasField(parent, "scrollbar")) {
 			// Reuse is for wimps: We just nuke the old one and recreate
 			
 			// TODO: This breaks the ActiveClips: We should reuse the position of the activeclip
@@ -25,7 +25,7 @@ class Scrollbar {
 			// scrollbars in dialogs can not be dragged.
 
 			// TODO: We should capture the current value of the old scrollbar, and use that as currentY scaled to new coordinate system
-			var scrollView : ArcticView = ArcticMC.get(parent, "scrollbar");
+			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
 		}
 
@@ -133,15 +133,15 @@ class Scrollbar {
 		var view = new ArcticView(scrollbar, parent);
 		view.adjustToFit(0, 0);
 		var mc = view.display(false);
-		ArcticMC.set(parent, "scrollbar", view);
+		Reflect.setField(parent, "scrollbar", view);
 	}
 
 	/// Get rid of the scrollbar
 	static public function removeScrollbar(parent : ArcticMovieClip, clip : ArcticMovieClip) {
-		if (ArcticMC.has(parent, "scrollbar")) {
-			var scrollView : ArcticView = ArcticMC.get(parent, "scrollbar");
+		if (Reflect.hasField(parent, "scrollbar")) {
+			var scrollView : ArcticView = Reflect.field(parent, "scrollbar");
 			scrollView.destroy();
-			ArcticMC.delete(parent, "scrollbar");
+			Reflect.deleteField(parent, "scrollbar");
 		}
 		if (clip != null) {
 			ArcticMC.setScrollRect(clip, null);
