@@ -1,0 +1,112 @@
+# ArcticTest flash7
+-swf arctictest7.swf
+-main ArcticTest
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 7
+
+
+--next
+# ArcticTest flash8
+-swf arctictest8.swf
+-main ArcticTest
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
+
+--next
+# ArcticTest flash9
+-swf arctictest9.swf
+-swf-version 9
+-main ArcticTest
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
+
+--next
+# DynamicExample flash7
+-swf dynamicexample7.swf
+-main DynamicExample
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 7
+
+
+--next
+# DynamicExample flash8
+-swf dynamicexample8.swf
+-main DynamicExample
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
+
+--next
+# DynamicExample flash9
+-swf dynamicexample9.swf
+-swf-version 9
+-main DynamicExample
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
+
+--next
+# HelloWorld flash7
+-swf HelloWorld7.swf
+-main HelloWorld
+-debug
+-cp ..
+-swf-version 7
+
+
+--next
+# HelloWorld flash8
+-swf HelloWorld8.swf
+-main HelloWorld
+-debug
+-cp ..
+
+--next
+# HelloWorld flash9
+-swf HelloWorld9.swf
+-swf-version 9
+-main HelloWorld
+-debug
+-cp ..
+
+--next
+# ComponentTour flash7
+-swf ComponentTour7.swf
+-main ComponentTour
+-debug
+-swf-header 800:600:50
+-swf-version 7
+-cp ..
+
+--next
+# 
+-swf ComponentTour8.swf
+-main ComponentTour
+-debug
+-swf-header 800:600:50
+-cp ..
+
+--next
+# ComponentTour flash9
+-swf ComponentTour9.swf
+-swf-version 9
+-main ComponentTour
+-debug
+-swf-header 800:600:50
+-cp ..

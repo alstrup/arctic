@@ -1,0 +1,39 @@
+# ArcticTest
+-swf ArcticTest.swf
+-main ArcticTest
+-swf-header 800:600:50
+-lib arctic
+
+--next
+# ArcticTest flash9
+-swf ArcticTest9.swf
+-swf-version 9
+-main ArcticTest
+-swf-header 800:600:50
+-lib arctic
+
+--next
+# DynamicExample
+-swf DynamicExample.swf
+-main DynamicExample
+-lib arctic
+
+--next
+# DynamicExample flash9
+-swf DynamicExample9.swf
+-swf-version 9
+-main DynamicExample
+-lib arctic
+
+--next
+# HelloWorld
+-swf HelloWorld.swf
+-main HelloWorld
+-lib arctic
+
+--next
+# HelloWorld flash9
+-swf HelloWorld9.swf
+-swf-version 9
+-main HelloWorld
+-lib arctic

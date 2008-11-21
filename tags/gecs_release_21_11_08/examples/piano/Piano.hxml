@@ -1,0 +1,8 @@
+# Piano.swf
+-swf Piano.swf
+-main Piano
+-swf-header 230:280:31
+#-lib arctic
+-cp ../../
+-swf-version 7
+-D profile
