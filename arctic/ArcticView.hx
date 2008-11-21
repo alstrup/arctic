@@ -902,6 +902,10 @@ class ArcticView {
 			}
 			var childClip : ArcticMovieClip = getOrMakeClip(clip, mode, 0);
 			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
+			if (mode == Destroy) {
+				ArcticMC.delete(clip, "c0");
+				mutableBlock = null;
+			}
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
 		case Switch(blocks, current, onInit):
