@@ -146,11 +146,23 @@ class ArcticMC {
 	/// Remove this clip from it's parent
 	static public function remove(m : ArcticMovieClip) {
 	#if (flash9 || neko)
+		// We have to remove any properties on this clip, to prevent leaks
+		removeProperties(m);
 		m.parent.removeChild(m);
 	#else flash
 		m.removeMovieClip();
 	#end
 	}
+	
+	#if (flash9 || neko)
+	static public function removeProperties(m : ArcticMovieClip) {
+		hash.remove(m.name);
+		for (i in 0...m.numChildren) {
+			var c : ArcticMovieClip = cast(m.getChildAt(i), ArcticMovieClip);
+			removeProperties(c);
+		}
+	}
+	#end
 
 	/// Get position of the clip
 	static public function getXY(m : ArcticMovieClip) : { x : Float, y : Float } {
