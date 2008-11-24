@@ -1,7 +1,6 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
-import flash.display.BitmapData;
 import haxe.Timer;
 
 #if flash9
@@ -17,6 +16,7 @@ import flash.text.TextFieldType;
 import flash.display.DisplayObject;
 import flash.display.Bitmap;
 import flash.display.Loader;
+import flash.display.BitmapData;
 #else flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
@@ -1887,7 +1887,7 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case UnCached(block):
-			trace("uncached met", 0);
+			//trace("uncached met", 0);
 			var clip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Create) {
