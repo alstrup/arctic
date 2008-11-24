@@ -1,0 +1,250 @@
+
+
+<head>
+<style>
+<!--
+body         { font-family: Verdana }
+-->
+</style>
+<title>Arctic - a light-weight user interface library for Flash 8 &amp; 9</title>
+</head>
+
+<h1>Arctic</h1>
+<p>Arctic is a small, simple, light-weight Domain Specific Language for making
+user interfaces in haXe targetting Flash 8 &amp; 9.</p>
+<h2>Installation</h2>
+<p>Run</p>
+<blockquote>
+<pre>haxelib install arctic</pre>
+</blockquote>
+<p>to install the latest version of Arctic.</p>
+<h2>Hello world!</h2>
+<p>Hello world in Arctic looks like this:</p>
+<blockquote>
+<pre>import arctic.Arctic;
+import arctic.ArcticView;
+import arctic.ArcticBlock;
+
+class HelloWorld {
+	static public function main() {
+		new HelloWorld(flash.Lib.current);
+	}
+	
+	public function new(parent : ArcticMovieClip) {
+		// To make a screen, first build the data structure representing the contents
+		<font color="red">var helloWorld = Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50);</font>
+		// Then construct the arctic view object on the given movieclip
+		arcticView = new ArcticView( helloWorld, parent );
+		// And finally display 
+		var root = arcticView.display(true);
+	}
+	public function remove() {
+		// Clear out the screen
+		arcticView.destroy();
+	}
+	public var arcticView : ArcticView;
+}</pre>
+</blockquote>
+
+<p>Save this as <code>HelloWorld.hx</code> (or have a look at
+examples/HelloWorld.hx) and compile with <code>haxe -lib arctic -swf HelloWorld.swf -main HelloWorld</code>.
+The result is a flash movie which has a button in the top-left corner with the
+text &quot;Hello world&quot; 50 pixels high. When you click that, the button is removed, and
+the program ends.</p>
+
+<p>User interfaces in Artic are built from blocks. In the example above, the
+only block used is a button, which is constructed by the <code>Arctic.makeSimpleButton</code>
+function. This is a helper function, which returns an <code>ArcticBlock</code>. This block is
+then given to an <code>ArcticView</code> along with the MovieClip where we want to show the block. 
+The <code>display</code> call renders the view on the MovieClip. Behind the scene, a bunch of MovieClips 
+representing the blocks requested are constructed, and the top-level MovieClip is returned. Normally, you 
+don't need to use that MovieClip for anything.</p>
+
+<p>When the button is clicked, the function given as the second parameter to <code>makeSimpleButton</code>
+is called. This in turns calls the class member <code>remove</code>, which destroys the MovieClips that the <code>ArcticView</code>
+code made, and thus the screen is cleared again.</p>
+
+<p>Notice that we use ArcticMovieClip rather than MovieClip in the code above.
+This is because the MovieClip is different in Flash 8 and 9, so Arctic provides
+an alias to make the code work in both Flash 8 and 9. Try to compile the code
+with <code>-swf-version 9</code> and see yourself.</p>
+
+<h2>Doing layout</h2>
+
+<p>The blocks in Arctic are designed to be combined similar to lego bricks.
+Technically, each block is an entry in a haXe enum. There are a number of
+different blocks available - hopefully enough to build interesting user
+interfaces. Let's center the button horizontally by using a layout block, in
+this case a ColumnStack. Change the red line to</p>
+
+<blockquote>
+
+<pre>var helloWorld = ColumnStack( [ Filler,
+	Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50),
+	Filler ] );</pre>
+
+</blockquote>
+<p>and recompile. Now the button is centered horizontally. Notice that Arctic
+also handles resizing of the canvas for you: Try to resize the Flash window, and
+see how the button is constantly centered. (If you don't want Arctic to handle
+resizing for you, just pass <code>false</code> in the <code>arcticView.display</code> call.)</p>
+
+<p>A ColumnStack takes an array of blocks, and puts them next to each other
+horizontally. In the example above, we use three blocks: A Filler, the button
+like before, and another Filler. A Filler block is a special, empty block that
+stretches itself to take up as much space as is available. By surrounding the
+button with fillers, the effect is that the ColumnStack grows to fill the entire
+width available, such that each filler takes up half the extra space available.
+The result is that the button is centered.</p>
+
+<p>If you want to right align the button, just remove the last Filler.</p>
+
+<p>Besides ColumnStack, Arctic also has LineStack which stacks blocks on top of
+each other vertically. The LineStack will also add a scrollbar in case there is
+not enough room for all blocks. (The ColumnStack does not do that yet, so if
+there is not enough space in the width, the right most blocks will just be
+outside the screen. This might change in a future version of Arctic.)</p>
+<p>So if we change the code to</p>
+<blockquote>
+
+<pre>var helloWorld = 
+		LineStack( [
+			Filler, 
+			ColumnStack( [ 
+				Filler,
+				Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50),
+				Filler ] ),
+			Filler 
+		] );</pre>
+
+</blockquote>
+<p>and recompile, the result is a button which is centered in the middle
+of the screen.</p>
+<h2>Text &amp; backgrounds</h2>
+<p>Let's spice our example up with some more content. We can add some text at
+the top using the Text block:</p>
+<blockquote>
+
+<pre>var helloWorld = LineStack( [
+<font color="#FF0000">	Text(&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;),
+</font>	Filler, 
+	ColumnStack( [ 
+		Filler,
+		Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50),
+		Filler ] ),
+	Filler ] );</pre>
+
+</blockquote>
+<p>Flash only supports a tiny subset of HTML, but it does allow us to choose
+fonts and colors. The default font in Flash is not very nice, so there is a
+helper Arctic.makeText which will wrap a string with an Arial font in
+given size and color - in this case 16 pixels high and blue color:</p>
+<blockquote>
+
+<pre>var helloWorld = LineStack( [
+	<font color="#FF0000">Arctic.makeText(&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;, 16, &quot;#0000ff&quot;),
+</font>	Filler, 
+	ColumnStack( [ 
+		Filler,
+		Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50),
+		Filler ] ),
+	Filler ] );</pre>
+
+</blockquote>
+<p>We can also add a rounded background color using the Background element:</p>
+<blockquote>
+
+<pre>var helloWorld = <font color="#FF0000">Background(0xdddddd,</font>
+	LineStack( [
+		Arctic.makeText(&quot;Some text in &lt;b&gt;HTML&lt;/b&gt; is nice&quot;, 16, &quot;#0000ff&quot;),
+		Filler, 
+		ColumnStack( [ 
+			Filler,
+			Arctic.makeSimpleButton(&quot;Hello world&quot;, remove, 50),
+			Filler ] ),
+		Filler ] )
+	<font color="#FF0000">, 100.0, 20)</font>;</pre>
+
+</blockquote>
+
+<p>The 100.0 value in the last line means that the background is fully opaque,
+and the 20 value means that the background is rounded 20 pixels.</p>
+
+<h2>TextInput</h2>
+
+The TextInput block provides a way for the user to type text.
+
+A small example:
+
+<blockquote>
+
+<pre>
+  var value = "";
+  var gui = LineStack( [ Filler, TextInput("Write something here", 400, 20, function (s) { value = s; return true; }),
+                    Arctic.makeSimpleButton( "Click me!", function () { trace(value); } ) ] );
+
+  var arcticView = new ArcticView( gui, flash.Lib.current);
+  arcticView.display(true);
+</pre>
+</blockquote>
+
+The function parameter is a function which serves two purposes: First, it provides a way to get the
+contents of the input box, which is illustrated above. Secondly, it also serves as a
+validator function, which can be used to check that the contents typed conform 
+to some syntax. If the contents are not as required, return false, and the user is notified by
+a red color.
+
+<h2>Controlling &amp; debugging layout</h2>
+
+<p>Doing layout in Arctic can sometimes be tricky - especially in nested
+layouts. To help you learn do layout using Arctic, it is good to know how it
+works behind the scenes: First, Arctic figures out how much space to use for the
+layout by asking the size of the parent MovieClip. That's why it is sometimes a
+good idea to use adjustSize or setSize on that clip first, in case there is nothing 
+in it.</p>
+
+<p>Next, Arctic recursively builds the blocks from the top downwards, passing
+the size of the rectangle for that block along. Each time it encounters a layout
+block, such as a ColumnStack, a LineStack or a Grid, it does a two-pass
+algorithm. First, the minimum size and resizing behaviour of each block in the
+stack or grid are determined. This is used to determine how much free space is
+available to distribute to each column and/or row. In the next phase, Arctic
+will spread the available surplus space to the blocks that resize evenly.</p>
+
+<p>So, Arctic does layout on rectangles only. Each block has a corresponding
+minimum rectangle size, and might resize horizontally or vertically or both, in
+terms of layout. Fillers resize in the direction of their nearest containing
+block, such as a LineStack or ColumnStack. Dragable resize in the directions
+their flags dictate. Border, Background, GradientBackground, Button, and similar
+elements inherit their nested block's resizing behaviour. ConstrainHeight and
+ConstrainWidth never resize in the corresponding direction, even if they contain
+a resizing element.</p>
+
+<p>To debug layout trouble, try wrapping the problematic blocks and their
+parents with Background() elements in various colors. If something is resizing
+too much, you can try to use a ConstrainHeight or ConstrainWidth to make it
+better. If alignment is off, you might need something like a LineStack([Filler,
+block]) wrapper to position things correctly.</p>
+
+<p>If you need to align blocks to a baseline of a font, or something like that,
+you'll have to do a CustomBlock, or use Fixed and Border elements with exact
+pixel offsets to do the trick.</p>
+
+<h2>What now?</h2>
+
+Next, read the <code>arctic/ArcticBlock.hx</code> file, which lists and documents all
+available blocks in Arctic. Be sure to also have a look at <code>arctic/Arctic.hx</code>
+to see which helpers are available. These also serve as great examples of
+how to use Arctic.
+
+<p>
+To see more examples of how to do more advanced things, be sure to read
+the code of the examples in the <code>examples</code> directory.
+</p>
+
+<p>
+To make user interfaces work in both Flash 8 and 9 can be cumbersome, because of the
+slight API changes between these two versions. Arctic provides a helper class,
+<code>ArcticMC</code>, which can help avoid a lot of <code>#if flash9 ... #else flash ... #end</code>
+blocks in your code.
+</p>

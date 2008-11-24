@@ -1,0 +1,34 @@
+Bugs
+----
+
+Scrollbar bugs:
+- Resizing should preserve scrollbar position
+- Button arrows should be 90 degrees - they are a little too narrow now
+
+- Button hover effect does not automatically trigger on refresh (see dynamic example)
+
+New features to consider
+------------------------
+
+- Resizable dialog
+
+- Consider changing ToggleButton to be a MutableBlock(Button( ) ) instead
+
+- Make tooltip have a delay, and make sure they do not go outside the stage
+
+- Add filling behaviour to grid
+
+- Ability to grey-out Button, ToggleButton, Dragable (slider), TextInput, Scrollbar, etc. Can be implemented using 
+  ArcticState, and probably a Color filter of some kind
+
+- Combo-box
+
+- Progress-bar
+
+- Nice default, light-weight look for widgets
+
+- Add horizontal scrollbar (and extend columnstack to add one if needed)
+
+- Calendar widget
+
+- Simple audio/video player

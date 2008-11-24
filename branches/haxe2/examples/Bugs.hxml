@@ -1,0 +1,23 @@
+# bugs8.swf
+-swf bugs8.swf
+-main Bugs
+-cp ..
+#-swf-header 800:400:50
+
+
+--next
+# bugs9.swf
+-swf bugs9.swf
+-swf-version 9
+-main Bugs
+-debug
+-cp ..
+
+--next
+# bugs7.swf
+-swf bugs7.swf
+-main Bugs
+-debug
+-cp ..
+-swf-version 7
+--flash-strict
