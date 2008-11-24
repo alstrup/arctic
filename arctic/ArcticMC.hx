@@ -11,7 +11,7 @@ typedef ArcticTextField = flash.text.TextField
 typedef ArcticTextFormat = flash.text.TextFormat
 typedef ArcticDisplayObjectContainer = flash.display.DisplayObjectContainer
 typedef ArcticSprite = flash.display.Sprite
-#else flash8
+#elseif flash8
 import flash.geom.Rectangle;
 import flash.geom.Point;
 typedef ArcticRectangle = Rectangle<Float>
@@ -22,7 +22,7 @@ typedef ArcticDisplayObjectContainer = ArcticMovieClip
 typedef ArcticSprite = ArcticMovieClip
 import flash.Mouse;
 
-#else flash7
+#elseif flash7
 
 class ArcticRectangle {
 	public function new(left0 : Float, top0 : Float, width0 : Float, height0 : Float) {
@@ -95,7 +95,7 @@ typedef ArcticSprite = ArcticMovieClip
 
 import flash.Mouse;
 
-#else neko
+#elseif neko
 
 import neash.geom.Rectangle;
 import neash.geom.Point;
@@ -119,7 +119,7 @@ class ArcticMC {
 	static public function getCurrentClip() : ArcticMovieClip {
 		#if flash
 		return flash.Lib.current;
-		#else neko
+		#elseif neko
 		return neash.Lib.current;
 		#end
 	}
@@ -130,14 +130,14 @@ class ArcticMC {
 			var clip = new ArcticMovieClip();
 			parent.addChild(clip);
 			return clip;
-		#else flash6
+		#elseif flash6
 			var d = ArcticMC.getNextHighestDepth(parent);
 			parent.createEmptyMovieClip("c" + d, d);
 			return Reflect.field(parent, "c" + d);
-		#else flash7
+		#elseif flash7
 			var d = parent.getNextHighestDepth();
 			return parent.createEmptyMovieClip("c" + d, d);
-		#else flash8
+		#elseif flash8
 			var d = parent.getNextHighestDepth();
 			return parent.createEmptyMovieClip("c" + d, d);
 		#end
@@ -149,7 +149,7 @@ class ArcticMC {
 		// We have to remove any properties on this clip, to prevent leaks
 		removeProperties(m);
 		m.parent.removeChild(m);
-	#else flash
+	#elseif flash
 		m.removeMovieClip();
 	#end
 	}
@@ -171,7 +171,7 @@ class ArcticMC {
 	static public function getXY(m : ArcticMovieClip) : { x : Float, y : Float } {
 		#if (flash9 || neko)
 			return { x: m.x, y: m.y };
-		#else flash
+		#elseif flash
 			return { x: m._x, y: m._y };
 		#end
 	}
@@ -184,14 +184,14 @@ class ArcticMC {
 		if (x != null) {
 			#if (flash9 || neko)
 				m.x = x;
-			#else flash
+			#elseif flash
 				m._x = x;
 			#end
 		}
 		if (y != null) {
 			#if (flash9 || neko)
 				m.y = y;
-			#else flash
+			#elseif flash
 				m._y = y;
 			#end
 		}
@@ -201,7 +201,7 @@ class ArcticMC {
 	static public function getScaleXY(m : ArcticMovieClip) : { x : Float, y : Float } {
 		#if (flash9 || neko)
 			return { x: m.scaleX, y: m.scaleY };
-		#else flash
+		#elseif flash
 			return { x: m._xscale / 100.0, y: m._yscale / 100.0 };
 		#end
 	}
@@ -214,14 +214,14 @@ class ArcticMC {
 		if (x != null) {
 			#if (flash9 || neko)
 				m.scaleX = x;
-			#else flash
+			#elseif flash
 				m._xscale = x * 100.0;
 			#end
 		}
 		if (y != null) {
 			#if (flash9 || neko)
 				m.scaleY = y;
-			#else flash
+			#elseif flash
 				m._yscale = y * 100.0;
 			#end
 		}
@@ -235,7 +235,7 @@ class ArcticMC {
 	static public function hitTest(m : ArcticMovieClip, x : Float, y : Float) {
 		#if (flash9 || neko)
 			return m.hitTestPoint(x, y, true);
-		#else flash
+		#elseif flash
 			return m.hitTest(x, y, true);
 		#end
 	}
@@ -248,7 +248,7 @@ class ArcticMC {
 	static public function getGraphics(m : ArcticSprite) {
 		#if (flash9 || neko)
 			return m.graphics;
-		#else flash
+		#elseif flash
 			return m;
 		#end
 	}
@@ -256,7 +256,7 @@ class ArcticMC {
 	static public function getVisible(m : ArcticMovieClip) : Bool {
 		#if (flash9 || neko)
 			return m.visible;
-		#else flash
+		#elseif flash
 			return m._visible;
 		#end
 	}
@@ -270,7 +270,7 @@ class ArcticMC {
 			if (m.visible != v) {
 				m.visible = v;
 			}
-		#else flash
+		#elseif flash
 			if (m._visible != v) {
 				m._visible = v;
 			}
@@ -280,7 +280,7 @@ class ArcticMC {
 	static public function isEnabled(m : ArcticMovieClip) : Bool {
 		#if (flash9 || neko)
 			return m.mouseEnabled;
-		#else flash
+		#elseif flash
 			return m.enabled;
 		#end
 	}
@@ -290,7 +290,7 @@ class ArcticMC {
 			if (m.mouseEnabled != v) {
 				m.mouseEnabled = v;
 			}
-		#else flash
+		#elseif flash
 			if (m.enabled != v) {
 				m.enabled = v;
 			}
@@ -301,7 +301,7 @@ class ArcticMC {
 	static public function getAlpha(m : ArcticMovieClip) : Float {
 		#if (flash9 || neko)
 			return m.alpha * 100.0;
-		#else flash
+		#elseif flash
 			return m._alpha;
 		#end
 	}
@@ -310,7 +310,7 @@ class ArcticMC {
 	static public function setAlpha(m : ArcticMovieClip, alpha : Float) {
 		#if (flash9 || neko)
 			m.alpha = convertAlpha(alpha);
-		#else flash
+		#elseif flash
 			m._alpha = convertAlpha(alpha);
 		#end
 	}
@@ -321,7 +321,7 @@ class ArcticMC {
 			if (a == null) 
 				return 1.0;
 			return a / 100.0;
-		#else flash
+		#elseif flash
 			if (a == null)
 				return 100.0;
 			return a;
@@ -343,7 +343,7 @@ class ArcticMC {
 			clip.graphics.clear();
 			clip.graphics.moveTo(0,0);
 			clip.graphics.lineTo(width, height);
-		#else flash
+		#elseif flash
 			// Set the size
 			clip.clear();
 			clip.moveTo(0,0);
@@ -373,7 +373,7 @@ class ArcticMC {
 		}
 		#if (flash9 || neko)
 			return { width: clip.width, height : clip.height };
-		#else flash
+		#elseif flash
 			return { width: clip._width, height : clip._height };
 		#end
 	}
@@ -381,7 +381,7 @@ class ArcticMC {
 	static public function setScrollRect(clip : ArcticMovieClip, rect : ArcticRectangle) {
 		#if flash6
 		// TODO: Use setMask
-		#else flash7
+		#elseif flash7
 		Reflect.setField(clip, "scrollRect", rect);
 		var maskClip = Reflect.field(clip, "scrollMask");
 		if (rect == null) {
@@ -404,9 +404,9 @@ class ArcticMC {
 		clip.setMask(maskClip);
 		ArcticMC.setXY(clip, -rect.left, -rect.top);
 		
-		#else flash8
+		#elseif flash8
 		clip.scrollRect = rect;
-		#else (flash9 || neko)
+		#elseif (flash9 || neko)
 		clip.scrollRect = rect;
 		#end
 	}
@@ -415,11 +415,11 @@ class ArcticMC {
 		#if flash6
 		// TODO: Scrollrect for Flash 6
 		return null;
-		#else flash7
+		#elseif flash7
 		return Reflect.field(clip, "scrollRect");
-		#else flash8
+		#elseif flash8
 		return clip.scrollRect;
-		#else (flash9 || neko)
+		#elseif (flash9 || neko)
 		return clip.scrollRect;
 		#end
 	}
@@ -428,7 +428,7 @@ class ArcticMC {
 	static public function stageSize(clip : ArcticMovieClip) {
 		#if (flash9 || neko)
 			setSize(clip, clip.stage.stageWidth, clip.stage.stageHeight);
-		#else flash
+		#elseif flash
 			setSize(clip, flash.Stage.width, flash.Stage.height);
 		#end
 	}
@@ -437,7 +437,7 @@ class ArcticMC {
 	static public function getStageSize(clip : ArcticMovieClip) : { width : Float, height : Float } {
 		#if (flash9 || neko)
 			return { width: cast(clip.stage.stageWidth, Float), height: cast(clip.stage.stageHeight, Float) };
-		#else flash
+		#elseif flash
 			return { width: flash.Stage.width, height: flash.Stage.height };
 		#end
 	}
@@ -447,7 +447,7 @@ class ArcticMC {
 		#if (flash9 || neko)
 			clip.x += dx;
 			clip.y += dy;
-		#else flash
+		#elseif flash
 			clip._x += dx;
 			clip._y += dy;
 		#end
@@ -466,14 +466,14 @@ class ArcticMC {
 					var stage = flash.Lib.current.stage;
 					return { x: stage.mouseX, y: stage.mouseY };
 				}
-			#else flash
+			#elseif flash
 				if (m == null) {
 					m = flash.Lib.current;
 				}
 
 				return { x: m._xmouse, y: m._ymouse };
 			#end
-		#else neko
+		#elseif neko
 			if (m == null) {
 				m = neash.Lib.current;
 			}
@@ -489,7 +489,7 @@ class ArcticMC {
 			} else {
 				flash.ui.Mouse.hide();
 			}
-		#else flash
+		#elseif flash
 			if (show == null || show) {
 				flash.Mouse.show();
 			} else {
@@ -512,7 +512,7 @@ class ArcticMC {
 				active = active && parent.visible && parent.mouseEnabled;
 				parent = parent.parent;
 			}
-		#else flash
+		#elseif flash
 			var parent = clip;
 			while (null != parent && active) {
 				active = active && parent._visible && parent.enabled;
@@ -537,7 +537,7 @@ class ArcticMC {
 	static public function setBitmapCache(mc : ArcticMovieClip, cacheAsBitmap : Bool) {
 		#if flash8
 		mc.cacheAsBitmap = cacheAsBitmap;
-		#else flash9
+		#elseif flash9
 		mc.cacheAsBitmap = cacheAsBitmap;
 		#end
 	}
@@ -547,14 +547,14 @@ class ArcticMC {
 		var d = ArcticMC.getNextHighestDepth(parent);
 		parent.createTextField("tf" + d, d, x, y, width, height);
 		return Reflect.field(parent, "tf" + d);
-		#else flash7
+		#elseif flash7
 		var d = parent.getNextHighestDepth();
 		parent.createTextField("tf" + d, d, x, y, width, height);
 		return Reflect.field(parent, "tf" + d);
-		#else flash8
+		#elseif flash8
 		var d = parent.getNextHighestDepth();
 		return parent.createTextField("tf" + d, d, x, y, width, height);
-		#else (flash9 || neko)
+		#elseif (flash9 || neko)
 		var tf = new ArcticTextField();
 		tf.x = x;
 		tf.y = y;
@@ -575,7 +575,7 @@ class ArcticMC {
 		} else {
 			tf.antiAliasType = "normal";
 		}
-		#else flash9
+		#elseif flash9
 		if (sharpness != null) {
 			tf.sharpness = sharpness;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
@@ -586,7 +586,7 @@ class ArcticMC {
 	}
 
 	#if flash9
-	#else flash
+	#elseif flash
 	static public function getNextHighestDepth(clip : ArcticDisplayObjectContainer) : Int {
 		#if flash6
 			var depth = 0;
@@ -600,7 +600,7 @@ class ArcticMC {
 				}
 			}
 			return depth+1;
-		#else flash
+		#elseif flash
 			return clip.getNextHighestDepth();
 		#end
 	}
@@ -609,7 +609,7 @@ class ArcticMC {
 	static public function getTextFieldWidth(field: ArcticTextField): Float {
 		#if (flash9 || neko)
 		return field.width;
-		#else flash
+		#elseif flash
 		return field._width;
 		#end
 	}
@@ -617,7 +617,7 @@ class ArcticMC {
 	static public function getTextFieldHeight(field: ArcticTextField): Float {
 		#if (flash9 || neko)
 		return field.height;
-		#else flash
+		#elseif flash
 		return field._height;
 		#end
 	}
@@ -625,7 +625,7 @@ class ArcticMC {
 	static public function setDefaultTextFormat(tf : ArcticTextField, textFormat: ArcticTextFormat) {
 		#if (flash9 || neko)
 		return tf.defaultTextFormat = textFormat;
-		#else flash
+		#elseif flash
 		return tf.setNewTextFormat(textFormat);
 		#end
 	}
@@ -634,14 +634,14 @@ class ArcticMC {
 		if (width != null) {
 			#if (flash9 || neko)
 				tf.width = width;
-			#else flash
+			#elseif flash
 				tf._width = width;
 			#end
 		}
 		if (height != null) {
 			#if (flash9 || neko)
 				tf.height = height;
-			#else flash
+			#elseif flash
 				tf._height = height;
 			#end
 		}
@@ -650,7 +650,7 @@ class ArcticMC {
 	static public function getParent(mc : ArcticMovieClip): ArcticDisplayObjectContainer {
 		#if (flash9 || neko)
 		return mc.parent;
-		#else flash
+		#elseif flash
 		return mc._parent;
 		#end
 	}
@@ -658,7 +658,7 @@ class ArcticMC {
 	static public function bringToFront(mc : ArcticMovieClip) {
 		#if flash9
 		return mc.parent.setChildIndex(mc, mc.parent.numChildren - 1);
-		#else flash
+		#elseif flash
 		return mc.swapDepths(getNextHighestDepth(mc._parent) - 1);
 		#end
 	}
@@ -694,7 +694,7 @@ class ArcticMC {
 		ensureNamedClip(mc);
 		var props = getOrCreateProps(mc);
 		props.set(name, value);
-		#else true
+		#else
 		Reflect.setField(mc, name, value);
 		#end
 	}
@@ -703,7 +703,7 @@ class ArcticMC {
 		#if flash9
 		var props = getProps(mc);
 		return null != props ? props.get(name) : null;
-		#else true
+		#else
 		return Reflect.field(mc, name);
 		#end
 	}
@@ -712,7 +712,7 @@ class ArcticMC {
 		#if flash9
 		var props = getProps(mc);
 		return null != props && props.exists(name);
-		#else true
+		#else
 		return Reflect.hasField(mc, name);
 		#end
 	}
@@ -723,7 +723,7 @@ class ArcticMC {
 		if (null != props) {
 			props.remove(name);
 		}
-		#else true
+		#else
 		Reflect.deleteField(mc, name);
 		#end
 	}

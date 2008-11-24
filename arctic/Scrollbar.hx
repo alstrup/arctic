@@ -27,6 +27,8 @@ class Scrollbar {
 			// TODO: We should capture the current value of the old scrollbar, and use that as currentY scaled to new coordinate system
 			var scrollView : ArcticView = ArcticMC.get(parent, "scrollbar");
 			scrollView.destroy();
+			scrollView = null;
+			ArcticMC.delete(parent, "scrollbar");
 		}
 
 		// This updates the scroll-rect to show what we need
@@ -42,7 +44,7 @@ class Scrollbar {
 			update();
 		};
 
-		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
+		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void } = null;
 		// Called when up is clicked
 		var onUp = function() {
 			currentY -= buttonMovement;
@@ -74,6 +76,7 @@ class Scrollbar {
 			var b = buttonHeight * 0.3;
 			var handleBlock =
 				Filter(
+
 					Bevel(1, 45, 0xe6eefc, 100, 0xb0c4f2, 100, 2, 2, 1, 1, "inner", false),
 					GradientBackground("linear", [0xc8d6fb, 0xb9cbf3], 0, 0, 
 						Offset(b, 0,
