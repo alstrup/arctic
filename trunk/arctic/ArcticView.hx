@@ -1,6 +1,7 @@
 package arctic;
 import arctic.ArcticBlock;
 import arctic.ArcticMC;
+import flash.display.BitmapData;
 import haxe.Timer;
 
 #if flash9
@@ -185,6 +186,7 @@ class ArcticView {
 	* from scratch.
 	*/ 
 	public function refresh(rebuild : Bool): {width: Float, height: Float, base: ArcticMovieClip} {
+//		trace("refresh");
 		if (rebuild && base != null) {
 			remove();
 		}
@@ -573,63 +575,72 @@ class ArcticView {
 						var loader = flash.Lib.attach(url);
 						clip.addChild(loader);
 					} else {
-						var cachedPicture = pictureCache.get(url);
-						var cachedPictureParent: DisplayObjectContainer = null;
+						var cachedPicture:Dynamic = pictureCache.get(url);
 						if (cachedPicture != null) {
-							cachedPictureParent = cachedPicture.parent;
-							clip.addChild(cachedPicture);	// Let's add it until loader loads a good one - prevents blinking							
-						}
+							//trace("in cache:" + url, 0);
+							var clone:BitmapData = cachedPicture.clone(); 
+							var bmp:Bitmap = new Bitmap(clone);
+							bmp.smoothing = true;
 							
-						// Count how many pictures we are loading
-						pendingPictureRequests++;
-						
-						var loader = new flash.display.Loader();
-						var dis = loader.contentLoaderInfo;
-						var request = new flash.net.URLRequest(Arctic.baseurl + url);
-						
-						dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
-							trace("[ERROR] IO Error with " + url + ": " + event.text);
-						});
-						dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
-							trace("[ERROR] Security Error with " + url + ": " + event.text);						
-						});
-						var me = this;
-												
-						dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
-							try {
-								var loader : flash.display.Loader = event.target.loader;
-								if (Std.is(loader.content, flash.display.Bitmap)) {
-									// Bitmaps are not smoothed per default when loading. We take care of that here
-									var image : flash.display.Bitmap = cast loader.content;
-									image.smoothing = true;
-								}
-								if (crop != null) {
-									// Crop our clip in attempt to avoid spurious lines
-									loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
-								}
-								if (me.pictureLoadedFn != null) {
-									me.pictureLoadedFn(--me.pendingPictureRequests);
-								}
-								
-								if (cachedPicture != null) {
-									clip.removeChild(cachedPicture);
-									cachedPictureParent.addChild(cachedPicture); // This removes obsolete cached picture from our new clip, and returns it back
-									clip.addChild(loader.content);
-								} else {
-									clip.removeChild(loader);
-									clip.addChild(loader.content);
-									pictureCache.set(url, loader.content);
-								}
-							} catch (e : Dynamic) {
-								// When running locally, security errors can be called when we access the content
-								// of loaded files, so in that case, we have lost, and can not use nice smoothing
-							}
+							clip.addChild(bmp);
 						}
-						);
-						
-						loader.load(request);						
-						if (cachedPicture == null) {
+						else {
+							// Count how many pictures we are loading
+							pendingPictureRequests++;
+							var loader = new flash.display.Loader();
 							clip.addChild(loader);
+							var dis = loader.contentLoaderInfo;
+							var request = new flash.net.URLRequest(Arctic.baseurl + url);
+						
+							dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
+								trace("[ERROR] IO Error with " + url + ": " + event.text);
+							});
+							dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
+								trace("[ERROR] Security Error with " + url + ": " + event.text);						
+							});
+							var me = this;
+												
+							dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
+								try {
+									var loader : flash.display.Loader = event.target.loader;
+									var content:Dynamic = loader.content;
+									//trace(loader.content);
+									if (Std.is(content, flash.display.Bitmap)) {
+										//trace("isbmp", 0);
+										// Bitmaps are not smoothed per default when loading. We take care of that here
+										var image : flash.display.Bitmap = cast loader.content;
+										image.smoothing = true;
+										pictureCache.set(url, image.bitmapData);
+									}
+									else {
+										var className:String = untyped __global__["flash.utils.getQualifiedClassName"](content);
+										if (className == "flash.display::AVM1Movie") {
+											//trace("url:" + url + " is AVM1. Caching", 0);
+											var width = content.width;
+											var height = content.height;
+											var transparent = true;
+											var bmpData:BitmapData = new BitmapData(width, height, transparent, 0);
+											bmpData.draw(content); 
+											pictureCache.set(url, bmpData);
+										}
+										//else {
+											//trace("url:" + url + " is:" + className + " ignore", 0);
+										//}
+									}
+									if (crop != null) {
+										// Crop our clip in attempt to avoid spurious lines
+										loader.scrollRect = new ArcticRectangle(crop, crop, loader.width - 2 * crop, loader.height - 2 * crop);
+									}
+									if (me.pictureLoadedFn != null) {
+										me.pictureLoadedFn(--me.pendingPictureRequests);
+									}
+								} catch (e : Dynamic) {
+									// When running locally, security errors can be called when we access the content
+									// of loaded files, so in that case, we have lost, and can not use nice smoothing
+								}
+							}
+							);
+							loader.load(request);						
 						}
 					}
 				}
@@ -1526,6 +1537,7 @@ class ArcticView {
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
 			#if flash9
 				var onMove = function (s) {
+					//trace("on move");
 					if (!ArcticMC.isActive(child.clip)) {
 						return;
 					}
@@ -1563,6 +1575,7 @@ class ArcticView {
 						}
 					);
 				}
+				//trace("explicit call");
 				onMove(null);
 			#else flash
 				
@@ -1874,6 +1887,7 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case UnCached(block):
+			trace("uncached met", 0);
 			var clip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Create) {
@@ -2570,7 +2584,7 @@ class ArcticView {
 
 	#if flash9
 	// Hash of all pictures
-	private static var pictureCache: Hash<DisplayObject>;
+	private static var pictureCache: Hash<BitmapData>;
 	#end
 }
 
