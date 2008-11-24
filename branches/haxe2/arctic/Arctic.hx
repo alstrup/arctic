@@ -61,7 +61,7 @@ class Arctic {
 	static public function makeRepeatingButton(base : ArcticBlock, hover : ArcticBlock, action : Void -> Void, interval : Int) : ArcticBlock {
 		#if neko
 		var timer : neash.Timer = null;
-		#else flash
+		#elseif flash
 		var timer : haxe.Timer = null;
 		#end
 		var ourHandler = function (x : Float, y : Float, down, inside : Bool) {
@@ -82,7 +82,7 @@ class Arctic {
 			}
 			#if neko
 			timer = new neash.Timer(interval);
-			#else flash
+			#elseif flash
 			timer = new haxe.Timer(interval);
 			#end
 			timer.run = function() { 
@@ -110,7 +110,7 @@ class Arctic {
 	
 	/// Make a button with a pressed state
 	static public function makePressButton(normal : ArcticBlock, hover : ArcticBlock, pressed : ArcticBlock, onClick : Void -> Void) : ArcticBlock {
-		var switchFn : Int -> Void;
+		var switchFn : Int -> Void = null;
 		var captureSwitchFn : ( Int -> Void ) -> Void = function ( fn : Int -> Void) : Void {
 			switchFn = fn;
 		}
@@ -160,7 +160,7 @@ class Arctic {
 		var dragX = if (initialXOffset == null || !sideMotionAllowed) 0.0 else initialXOffset;
 		var dragY = if (initialYOffset == null || !upDownMotionAllowed) 0.0 else initialYOffset;
 		// When onInit is called on construction time, we capture the DragInfo and move function in this local variable...
-		var dragInfo : { di : DragInfo, setPositionFn : Float -> Float -> Void };
+		var dragInfo : { di : DragInfo, setPositionFn : Float -> Float -> Void } = null;
 		var ourOnInit = function (di : DragInfo, onDragFun) {
 			dragInfo = { di: di, setPositionFn: onDragFun };
 			onDragFun(dragX, dragY);
@@ -200,7 +200,7 @@ class Arctic {
 		var currentY = if (initialY == null) minimumY else initialY;
 		
 		/// When onInit is called on construction time, we capture the DragInfo and move function in this local variable...
-		var moverInfo : { di: DragInfo, setPositionFn : Float -> Float -> Void };
+		var moverInfo : { di: DragInfo, setPositionFn : Float -> Float -> Void } = null;
 
 		/// Converts current slider coordinates to pixel coordinates
 		var convertToPixels = function () : { x : Float, y : Float } {
