@@ -283,7 +283,7 @@ enum ArcticBlock {
 	/**
 	 * Scale a block - original size is 1.0. The scaling can be constrained to maxScale.
 	 */
-	Scale(block : ArcticBlock, ? maxScale : Float);
+	Scale(block : ArcticBlock, ? maxScale : Float, ? alignX : Float, ? alignY : Float);
 	
 	#if flash9
 	/// Rotates a block. The angle is in degrees
