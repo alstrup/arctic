@@ -1754,7 +1754,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Scale(block, maxScale):
+		case Scale(block, maxScale, alignX, alignY):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			
 			var metricsChild = build(block, clip, 0, 0, Metrics, 0);
@@ -1805,6 +1805,17 @@ class ArcticView {
 			var child = build(block, clip, excessWidth, excessHeight, mode, 0);
 			if (mode != Metrics && mode != Destroy) {
 				ArcticMC.setScaleXY(child.clip, scale, scale);
+				if ((alignX != null && alignX != -1.0) || (alignY != null && alignY != -1.0)) {
+					var x = 0.0;
+					var y = 0.0;
+					if (alignX != null && alignX != -1.0 && availableWidth > child.width*scale) {
+						x = (availableWidth - child.width*scale) * alignX;
+					}
+					if (alignY != null && alignY != -1.0 && availableHeight > child.height*scale) {
+						y = (availableHeight - child.height*scale) * alignY;
+					}
+					ArcticMC.setXY(child.clip, x, y);
+				}
 			}
 			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: growWidth, growHeight: growHeight };
 		#if flash9
