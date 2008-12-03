@@ -1676,12 +1676,11 @@ class ArcticView {
 		#end
 				 
 		case Id(id, block) :
-			// ToDo: This does not work for Destroy, as we do not have a handle to the old block to be destroyed.
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Destroy) {
 				idMovieClip.remove(id);
-			} else if (mode != Metrics) {
+			} else if (mode == Create) {
 				idMovieClip.set(id, child.clip);
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
