@@ -170,7 +170,7 @@ class Scrollbar {
 	static private function makeArrow(size : Float, up : Bool, colour : Int) : ArcticBlock {
 		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
-			if (mode != Metrics) {
+			if (mode == Create) {
 				var b = size * 0.35;
 				var g = ArcticMC.getGraphics(parentMc);
 				g.lineStyle(2, colour);
