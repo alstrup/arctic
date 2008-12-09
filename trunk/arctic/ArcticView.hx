@@ -2061,7 +2061,7 @@ class ArcticView {
 				txtInput.type = "input";
 			#end
 		}
-		if (onInit != null && mode == Create /*!= Metrics && mode != Destroy*/) {
+		if (mode == Create) {
 			// Setting focus on txtInput 
 			#if (flash9 || neko)
 				if (focus != null && focus) {
@@ -2078,81 +2078,82 @@ class ArcticView {
 				}
 			#end
 
-			var textFn = function(status: TextInputModel) : TextInputModel {
-				if (null != status) {
-					if (status.html != null) {
-						txtInput.htmlText = status.html;
-					} else if (status.text != null) {
-						txtInput.text = status.text;
+			if (onInit != null) {
+				var textFn = function(status: TextInputModel) : TextInputModel {
+					if (null != status) {
+						if (status.html != null) {
+							txtInput.htmlText = status.html;
+						} else if (status.text != null) {
+							txtInput.text = status.text;
+						}
+						if (status.focus == true) {
+							#if (flash9 || neko)
+								clip.stage.focus = txtInput;
+								if (null == status.selStart || null == status.selEnd) {
+									txtInput.setSelection(0, txtInput.length);
+								}
+							#else flash
+								flash.Selection.setFocus(txtInput);
+							#end
+						}
+						if (null != status.selStart && null != status.selEnd) {
+							#if (flash9 || neko)
+							txtInput.setSelection(status.selStart, status.selEnd);
+							#else flash
+							flash.Selection.setSelection(status.selStart, status.selEnd);
+							#end
+						} else if (null != status.cursorPos) {
+							#if (flash9 || neko)
+							txtInput.setSelection(status.cursorPos, status.cursorPos);
+							#else flash
+							flash.Selection.setSelection(status.cursorPos, status.cursorPos);
+							#end
+						}
+						if (status.disabled == true) {
+							#if (flash9 || neko)
+							txtInput.type = TextFieldType.DYNAMIC;
+							#else flash
+							txtInput.type = "dynamic";
+							#end
+						} else {
+							#if (flash9 || neko)
+							txtInput.type = TextFieldType.INPUT;
+							#else flash
+							txtInput.type = "input";
+							#end
+						}
 					}
-					if (status.focus == true) {
-						#if (flash9 || neko)
-							clip.stage.focus = txtInput;
-							if (null == status.selStart || null == status.selEnd) {
-								txtInput.setSelection(0, txtInput.length);
-							}
-						#else flash
-							flash.Selection.setFocus(txtInput);
-						#end
-					}
-					if (null != status.selStart && null != status.selEnd) {
-						#if (flash9 || neko)
-						txtInput.setSelection(status.selStart, status.selEnd);
-						#else flash
-						flash.Selection.setSelection(status.selStart, status.selEnd);
-						#end
-					} else if (null != status.cursorPos) {
-						#if (flash9 || neko)
-						txtInput.setSelection(status.cursorPos, status.cursorPos);
-						#else flash
-						flash.Selection.setSelection(status.cursorPos, status.cursorPos);
-						#end
-					}
-					if (status.disabled == true) {
-						#if (flash9 || neko)
-						txtInput.type = TextFieldType.DYNAMIC;
-						#else flash
-						txtInput.type = "dynamic";
-						#end
-					} else {
-						#if (flash9 || neko)
-						txtInput.type = TextFieldType.INPUT;
-						#else flash
-						txtInput.type = "input";
-						#end
-					}
-				}
-				
-				#if (flash9 || neko)
-					var focus = clip.stage.focus == txtInput;
-					// temp variables to work around bugs in Null<Int> -> Int conversion
-					var selStart: Null<Int> = txtInput.selectionBeginIndex;
-					var selEnd: Null<Int> = txtInput.selectionEndIndex;
-					var cursorPos: Null<Int> = txtInput.caretIndex;
 					
-					var cursorX:Null<Float> = 0;
-					var bounds = txtInput.getCharBoundaries(txtInput.caretIndex);
-					if (bounds != null)
-						cursorX = bounds.left;
-					else { 
-						bounds = txtInput.getCharBoundaries(txtInput.caretIndex - 1);
+					#if (flash9 || neko)
+						var focus = clip.stage.focus == txtInput;
+						// temp variables to work around bugs in Null<Int> -> Int conversion
+						var selStart: Null<Int> = txtInput.selectionBeginIndex;
+						var selEnd: Null<Int> = txtInput.selectionEndIndex;
+						var cursorPos: Null<Int> = txtInput.caretIndex;
+						
+						var cursorX:Null<Float> = 0;
+						var bounds = txtInput.getCharBoundaries(txtInput.caretIndex);
 						if (bounds != null)
 							cursorX = bounds.left;
-					}
-					return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
-							 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT, cursorX: cursorX }
-				#else flash
-					var hasFocus = flash.Selection.getFocus() == txtInput._target;
-					return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
-							 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
-							 disabled: txtInput.type != "input", cursorX: null }
-				#end
+						else { 
+							bounds = txtInput.getCharBoundaries(txtInput.caretIndex - 1);
+							if (bounds != null)
+								cursorX = bounds.left;
+						}
+						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
+								 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT, cursorX: cursorX }
+					#else flash
+						var hasFocus = flash.Selection.getFocus() == txtInput._target;
+						return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
+								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
+								 disabled: txtInput.type != "input", cursorX: null }
+					#end
 
+				}
+				onInit(textFn);
 			}
-			onInit(textFn);
-		}
 		
-		if (onInitEvents != null && mode == Create) {
+			if (onInitEvents != null) {
 			var eventsFn = function (events: TextInputEvents): Void {					
 				#if flash9
 				addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
