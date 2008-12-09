@@ -2061,7 +2061,7 @@ class ArcticView {
 				txtInput.type = "input";
 			#end
 		}
-		if (mode == Create /*!= Metrics && mode != Destroy*/) {
+		if (onInit != null && mode == Create /*!= Metrics && mode != Destroy*/) {
 			// Setting focus on txtInput 
 			#if (flash9 || neko)
 				if (focus != null && focus) {
