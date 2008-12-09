@@ -2061,7 +2061,7 @@ class ArcticView {
 				txtInput.type = "input";
 			#end
 		}
-		if (mode != Metrics && mode != Destroy) {
+		if (mode == Create /*!= Metrics && mode != Destroy*/) {
 			// Setting focus on txtInput 
 			#if (flash9 || neko)
 				if (focus != null && focus) {
@@ -2077,9 +2077,7 @@ class ArcticView {
 					flash.Selection.setFocus(txtInput);
 				}
 			#end
-		}
 
-		if (onInit != null) {
 			var textFn = function(status: TextInputModel) : TextInputModel {
 				if (null != status) {
 					if (status.html != null) {
