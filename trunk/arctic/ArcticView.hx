@@ -2154,69 +2154,55 @@ class ArcticView {
 			}
 		
 			if (onInitEvents != null) {
-			var eventsFn = function (events: TextInputEvents): Void {					
-				#if flash9
-				addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
-				addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
-					if (e.target == txtInput) events.onSetFocus();
-				});
-				addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
-					if (e.target == txtInput) events.onKillFocus();
-				});
-				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
-					events.onPress();
-				});
-				addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
-					events.onRelease();
-				});
-				addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_DOWN, events.onKeyDown, function (e) {
-					events.onKeyDown(e.charCode);
-				});
-				addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
-					events.onKeyUp(e.charCode);
-				});
-				var prevCaretPos = [txtInput.caretIndex];
-				addOptionalEventListener(txtInput, Event.ENTER_FRAME, events.onCaretPosChanged, function (e) {
-					if (prevCaretPos[0] != txtInput.caretIndex) {
-						prevCaretPos[0] = txtInput.caretIndex;
-						events.onCaretPosChanged();
-					}
-				});
-				
-				
-				#else neko
-				addOptionalEventListener(txtInput, neash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
-				addOptionalEventListener(txtInput, neash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
-					if (e.target == txtInput) events.onSetFocus();
-				});
-				addOptionalEventListener(txtInput, neash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
-					if (e.target == txtInput) events.onKillFocus();
-				});
-				addOptionalEventListener(txtInput, neash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
-					events.onPress();
-				});
-				addOptionalEventListener(txtInput, neash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
-					events.onRelease();
-				});
-				#else flash
-				var buildhandler = function (handler: Void -> Void) { 
-					return function () {
-						if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
-							handler();
+				var eventsFn = function (events: TextInputEvents): Void {
+					#if flash9
+					addOptionalEventListener(txtInput, flash.events.Event.CHANGE, events.onChange, function (e) { events.onChange(); });
+					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_IN, events.onSetFocus, function (e) {
+						if (e.target == txtInput) events.onSetFocus();
+					});
+					addOptionalEventListener(txtInput, flash.events.FocusEvent.FOCUS_OUT, events.onKillFocus, function (e) {
+						if (e.target == txtInput) events.onKillFocus();
+					});
+					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_DOWN, events.onPress, function (e) {
+						events.onPress();
+					});
+					addOptionalEventListener(txtInput, flash.events.MouseEvent.MOUSE_UP, events.onRelease, function (e) {
+						events.onRelease();
+					});
+					addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_DOWN, events.onKeyDown, function (e) {
+						events.onKeyDown(e.charCode);
+					});
+					addOptionalEventListener(txtInput, flash.events.KeyboardEvent.KEY_UP, events.onKeyUp, function (e) {
+						events.onKeyUp(e.charCode);
+					});
+					var prevCaretPos = [txtInput.caretIndex];
+					addOptionalEventListener(txtInput, Event.ENTER_FRAME, events.onCaretPosChanged, function (e) {
+						if (prevCaretPos[0] != txtInput.caretIndex) {
+							prevCaretPos[0] = txtInput.caretIndex;
+							events.onCaretPosChanged();
+						}
+					});
+					
+					#else flash
+					var buildhandler = function (handler: Void -> Void) { 
+						return function () {
+							if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
+								handler();
+							}
 						}
 					}
+					
+					txtInput.onChanged = null != events.onChange ? function (tf) { events.onChange(); } : txtInput.onChanged;
+					txtInput.onSetFocus = null != events.onSetFocus ? function (tf) { events.onSetFocus(); } : txtInput.onSetFocus;
+					txtInput.onKillFocus = null != events.onKillFocus ? function (tf) { events.onKillFocus(); } : txtInput.onKillFocus;
+					
+					clip.onMouseDown = null != events.onPress ? buildhandler(events.onPress) : clip.onMouseDown;
+					clip.onMouseUp = null != events.onRelease ? buildhandler(events.onRelease) : clip.onMouseUp;
+					#end
 				}
 				
-				txtInput.onChanged = null != events.onChange ? function (tf) { events.onChange(); } : txtInput.onChanged;
-				txtInput.onSetFocus = null != events.onSetFocus ? function (tf) { events.onSetFocus(); } : txtInput.onSetFocus;
-				txtInput.onKillFocus = null != events.onKillFocus ? function (tf) { events.onKillFocus(); } : txtInput.onKillFocus;
-				
-				clip.onMouseDown = null != events.onPress ? buildhandler(events.onPress) : clip.onMouseDown;
-				clip.onMouseUp = null != events.onRelease ? buildhandler(events.onRelease) : clip.onMouseUp;
-				#end
+				onInitEvents(eventsFn);
 			}
-			
-			onInitEvents(eventsFn);
 		}
 
 		var s = ArcticMC.getSize(clip);
