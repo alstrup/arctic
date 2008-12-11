@@ -413,22 +413,23 @@ class MutableBlock {
 	}
 	private function set(block : ArcticBlock) : ArcticBlock {
 		var oldBlock = myBlock;
+		if (block == oldBlock) {
+			return block;
+		}
 		myBlock = block;
 		update(oldBlock);
 		return myBlock;
 	}
 	
 	/// For safety, provide an explicit way to update the view (should never be necessary)
-	public function update(?oldBlock : ArcticBlock) : Metrics {
+	public function update(?oldBlock : ArcticBlock) {
 		if (arcticUpdater != null) {
-			return arcticUpdater(oldBlock, block, availableWidth, availableHeight);
-		} else {
-			return null;
+			arcticUpdater(oldBlock, block, availableWidth, availableHeight);
 		}
 	}
 
 	/// Updated by ArcticView.build
-	public var arcticUpdater(null, default) : ArcticBlock -> ArcticBlock -> Float -> Float -> Metrics;
+	public var arcticUpdater(null, default) : ArcticBlock -> ArcticBlock -> Float -> Float -> Void;
 	public var availableWidth(null, default) : Float;
 	public var availableHeight(null, default) : Float;
 }	

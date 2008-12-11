@@ -685,7 +685,7 @@ class ArcticMC {
 	}
 
 	static private inline function getProps(mc: ArcticMovieClip): Hash<Dynamic> {
-		return StringUtils.emptyString(mc.name) ? null : hash.get(mc.name);
+		return mc == null ? null : (StringUtils.emptyString(mc.name) ? null : hash.get(mc.name));
 	}
 	#end
 

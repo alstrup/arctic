@@ -59,7 +59,7 @@ class DrawUtils {
 static public function drawCircle(mc : ArcticSprite, x : Float, y : Float, radius : Float, color : Int, ?fillColor : Int, ?fillAlpha : Float, ?lineThick : Null<Float>)
 {
 	var g = ArcticMC.getGraphics(mc);
-	if (lineThick != null && lineThick != 0) {
+	if (lineThick == null || lineThick != 0) {
 		g.lineStyle((if (lineThick == null) 1 else lineThick), color);
 	}
 	if (null != fillColor) {
