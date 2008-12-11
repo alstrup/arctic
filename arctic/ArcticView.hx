@@ -2503,11 +2503,13 @@ class ArcticView {
 					trace("p already has " + p.numChildren + " children, so adding as " + childNo + " makes no sense");
 				}
 				if (trackMemory) {
-				//	MemoryProfiling.track(clip, currentBlockKind);
+					// MemoryProfiling.track(clip, currentBlockKind);
 				}
 				#end
 				p.addChild(clip);
-				ArcticMC.set(p, "c" + childNo, clip);
+				if (p != parent) {
+					ArcticMC.set(p, "c" + childNo, clip);
+				}
 			#end
 			clip.tabEnabled = false;
 			return clip;
