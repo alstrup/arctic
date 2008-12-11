@@ -407,7 +407,7 @@ class ArcticView {
 		
 		case Background(color, block, alpha, roundRadius):
 			if (mode == Metrics || mode == Destroy) {
-				return build(block, null, availableWidth, availableHeight, Metrics, 0);
+				return build(block, null, availableWidth, availableHeight, mode, 0);
 			}
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
