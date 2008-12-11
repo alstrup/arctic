@@ -1925,6 +1925,8 @@ class ArcticView {
 			ActiveClips.get().add(clip);
 		} else if (mode == Destroy) {
 			ActiveClips.get().remove(clip);
+			// Should we clear out event handlers as well?
+			return { clip: clip, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 		}
 		#if flash9
 			var txtInput : flash.text.TextField;
@@ -1952,24 +1954,8 @@ class ArcticView {
 				txtInput = ArcticMC.get(clip, "ti");
 			}
 			txtInput.html = true;
-		#else neko
-			var txtInput : neash.text.TextField;
-			if (mode == Create) {
-				txtInput = new neash.text.TextField();
-			} else {
-				var t : Dynamic = clip.getChildAt(0);
-				txtInput = t;
-			}
-			if (embeddedFont) {
-				txtInput.embedFonts = true;
-			}
-			if (null != width) {
-				txtInput.width = width;
-			}
-			if (null != height) {
-				txtInput.height = height;
-			}
 		#end
+
 		if (embeddedFont) {
 			txtInput.embedFonts = true;
 		}
