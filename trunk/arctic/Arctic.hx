@@ -373,12 +373,10 @@ class Arctic {
 		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var radius = 6;
-			if (mode != Metrics) {
-				if (mode == Create) {
-					DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0, 0);
-					if (state) {
-						DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
-					}
+			if (mode == Create) {
+				DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius, 0x000000, 0xf0f0f0);
+				if (state) {
+					DrawUtils.drawCircle(parentMc, availableWidth/2.0, availableHeight/2.0, radius - 3.0, 0x000000, 0x000000);
 				}
 			}
 			return { clip: parentMc, width: 13.0, height: 13.0, growWidth : false, growHeight : false };

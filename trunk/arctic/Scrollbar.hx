@@ -138,6 +138,9 @@ class Scrollbar {
 
 	/// Get rid of the scrollbar
 	static public function removeScrollbar(parent : ArcticMovieClip, clip : ArcticMovieClip) {
+		if (parent == null) {
+			return;
+		}
 		if (ArcticMC.has(parent, "scrollbar")) {
 			var scrollView : ArcticView = ArcticMC.get(parent, "scrollbar");
 			scrollView.destroy();

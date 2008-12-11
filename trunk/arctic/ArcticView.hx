@@ -78,6 +78,9 @@ class ArcticView {
 			pictureCache = new Hash();
 		}
 		#end
+		#if debug
+		trackMemory = false;
+		#end
 	}
 
 	/// This is the block this view presents
@@ -93,6 +96,10 @@ class ArcticView {
 	
 	/// This resizes the hosting movieclip to make room for our GUI block minimumsize, plus some extra space
 	public function adjustToFit(extraWidth : Float, extraHeight : Float) : { width: Float, height : Float} {
+		#if debug
+		currentPath = "";
+		currentBlockKind = "";
+		#end
 		var w = build(gui, parent, 0, 0, Metrics, 0);
 		ArcticMC.setSize(parent, w.width + extraWidth, w.height + extraHeight);
 		size = { width: w.width + extraWidth, height: w.height + extraHeight };
@@ -168,6 +175,10 @@ class ArcticView {
 		if (true) {
 			/// This is smart refresh, where we reuse MovieClips to reduce flicker
 			size = ArcticMC.getStageSize(parent);
+			#if debug
+			currentPath = "";
+			currentBlockKind = "";
+			#end
 			var result = build(gui, parent, size.width, size.height, Reuse, firstChild);
 			base = result.clip;
 		} else {
@@ -205,6 +216,10 @@ class ArcticView {
 			mouseWheelListeners = new Array<{ clip: ArcticMovieClip, listener: Dynamic } >();
 			#end
 		}
+		#if debug
+		currentPath = "";
+		currentBlockKind = "";
+		#end
 		var result = build(gui, parent, size.width, size.height, if (rebuild) Create else Reuse, firstChild);
 		base = result.clip;
 		return {width: result.width, height: result.height, base: base};
@@ -240,6 +255,10 @@ class ArcticView {
 			}
 			mouseWheelListeners = [];
 		#end
+		#if debug
+		currentPath = "";
+		currentBlockKind = "";
+		#end
 		var result = build(gui, parent, size.width, size.height, Destroy, firstChild);
 		ArcticMC.remove(base);
 		#if flash9
@@ -271,7 +290,7 @@ class ArcticView {
     private function build(gui : ArcticBlock, p : ArcticMovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #if false
-		if (debug) {
+		if (debug && mode == Destroy) {
 			if (nesting == null) {
 				nesting = "";
 			} else {
@@ -280,7 +299,7 @@ class ArcticView {
 			trace(nesting + "Calling build ( " + availableWidth + "," + availableHeight + ", " + mode + ") on "+ gui);
 		}
 		var clip = doBuild(gui, p, availableWidth, availableHeight, mode, childNo);
-		if (debug) {
+		if (debug && mode == Destroy) {
 			trace(nesting + "built (" + availableWidth + "," + availableHeight + ", " + mode + "): (" 
 				+ clip.width + "," + clip.height + " " + clip.growWidth + "," + clip.growHeight + ") on " + gui );
 			if (nesting != null) {
@@ -302,6 +321,14 @@ class ArcticView {
 				// This should not happen, but just to be safe
 				return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 			}
+			if (gui == null) {
+				currentBlockKind = "empty";
+				trace("Empty gui for build(" + mode + "): " + currentPath);
+				return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
+			} else {
+				currentBlockKind = Type.enumConstructor(gui);
+			}
+			currentPath += "/" + currentBlockKind;
 		#end
 		switch (gui) {
 		case Border(x, y, block):
@@ -389,7 +416,7 @@ class ArcticView {
 		
 		case Background(color, block, alpha, roundRadius):
 			if (mode == Metrics || mode == Destroy) {
-				return build(block, null, availableWidth, availableHeight, Metrics, 0);
+				return build(block, null, availableWidth, availableHeight, mode, 0);
 			}
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
@@ -643,10 +670,10 @@ class ArcticView {
 							loader.load(request);						
 						}
 					}
+					var s = scaling;
+					clip.scaleX = s;
+					clip.scaleY = s;
 				}
-				var s = scaling;
-				clip.scaleX = s;
-				clip.scaleY = s;
 			#else flash
 				var s = scaling * 100.0;
 				if (resource) {
@@ -655,18 +682,16 @@ class ArcticView {
 						var d = ArcticMC.getNextHighestDepth(clip);
 						child = clip.attachMovie(Arctic.baseurl + url, "picture", d);
 						ArcticMC.set(clip, "picture", child);
-					} else {
-						child = ArcticMC.get(clip, "picture");
+						child._xscale = s;
+						child._yscale = s;
 					}
-					child._xscale = s;
-					child._yscale = s;
 				} else {
 					if (mode == Create) {
 						var loader = new flash.MovieClipLoader();
 						var r = loader.loadClip(url, clip);
+						clip._xscale = s;
+						clip._yscale = s;
 					}
-					clip._xscale = s;
-					clip._yscale = s;
 				}
 			#end
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
@@ -899,21 +924,33 @@ class ArcticView {
 			}
 			if (mode == Create) {
 				var me = this;
-				mutableBlock.arcticUpdater = function(oldBlock : ArcticBlock, block : ArcticBlock, w, h) : Metrics {
-					if (me.gui == null) return null;
+				mutableBlock.arcticUpdater = function(oldBlock : ArcticBlock, block : ArcticBlock, w, h) : Void {
+					if (me.gui == null) {
+						return;
+					}
 					var oldClip = me.getOrMakeClip(clip, Destroy, 0);
  					if (oldBlock != null) {
  						me.build(oldBlock, oldClip, w, h, Destroy, 0);
  					}
-					ArcticMC.remove(oldClip);
-					ArcticMC.set(clip, "c0", null);
+					if (oldClip != null) {
+						ArcticMC.remove(oldClip);
+					}
+					// Hm, nothing to do
+					if (block == null) {
+						return;
+					}
+					#if debug
+					me.currentBlockKind = "Mutable";
+					#end
 					var childClip : ArcticMovieClip = me.getOrMakeClip(clip, Create, 0);
-					return me.build(mutableBlock.block, childClip, w, h, Create, 0);
+					me.build(mutableBlock.block, childClip, w, h, Create, 0);
 				};
 			}
 			var childClip : ArcticMovieClip = getOrMakeClip(clip, mode, 0);
 			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
 			if (mode == Destroy) {
+				// Ensure that arcticUpdater above is called to destroy what is inside the mutable block! This is required for nested Mutables
+				mutableBlock.block = null;
 				mutableBlock = null;
 			}
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
@@ -2431,11 +2468,18 @@ class ArcticView {
 	/// Callback for when picture is loaded
 	public var pictureLoadedFn : Int -> Void;
 
+	
+	#if debug
+	var currentBlockKind : String;
+	var currentPath : String;
+	public var trackMemory : Bool;
+	#end
+	
 	/**
 	 * Creates a clip (if construct is true) as childNo, otherwise gets existing movieclip at that point.
 	 */ 
 	private function getOrMakeClip(p : ArcticMovieClip, buildMode : BuildMode, childNo : Int) : ArcticMovieClip {
-		if (buildMode == Metrics) {
+		if (buildMode == Metrics || p == null) {
 			return null;
 		}
 		if (buildMode == Create) {
@@ -2458,15 +2502,12 @@ class ArcticView {
 				if (p.numChildren > childNo) {
 					trace("p already has " + p.numChildren + " children, so adding as " + childNo + " makes no sense");
 				}
+				if (trackMemory) {
+				//	MemoryProfiling.track(clip, currentBlockKind);
+				}
 				#end
 				p.addChild(clip);
-				if (p != parent) {
-					ArcticMC.set(p, "c" + childNo, clip);
-				} else {
-					// For the parent, we use movieclip child numbers, 
-					// because we can not add properties to things
-					// like flash.Lib.current in Flash 9
-				}
+				ArcticMC.set(p, "c" + childNo, clip);
 			#end
 			clip.tabEnabled = false;
 			return clip;
@@ -2477,12 +2518,18 @@ class ArcticView {
 				if (ArcticMC.has(p, "c" + childNo)) {
 					return ArcticMC.get(p, "c" + childNo);
 				}
+				if (buildMode == Destroy) {
+					return null;
+				}
 #if debug
 				trace("getOrMakeClip() unexpected fallback 1." + buildMode);
 #end
 				return getOrMakeClip(p, Create, childNo);
 			}
-			if (p.numChildren < childNo) {
+			if (childNo >= p.numChildren) {
+				if (buildMode == Destroy) {
+					return null;
+				}
 				// Fallback - should never happen
 #if debug
 				trace("getOrMakeClip() unexpected fallback 2.");
