@@ -330,6 +330,16 @@ class ArcticView {
 			}
 			currentPath += "/" + currentBlockKind;
 		#end
+
+		if (gui == null) {
+			/* This can happen (at least) because of the call
+			   
+						var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
+
+			   in the case for Mutable.
+			*/
+			return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
+		}
 		switch (gui) {
 		case Border(x, y, block):
 			if (mode != Metrics && mode != Destroy) {
