@@ -315,7 +315,7 @@ class Arctic {
 		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var size = 12;
-			if (mode != Metrics) {
+			if (mode == Create) {
 				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
 				if (state) {
 					size -= 4;
