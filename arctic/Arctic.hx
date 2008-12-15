@@ -304,22 +304,24 @@ class Arctic {
 	 *   myCheckbox.state = true;
 	 * Notice that the boxes in front of the text are fairly slow to draw on the screen!
 	 */
-	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool) : ArcticState<Bool> {
-		
+	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool, ?color : UInt) : ArcticState<Bool> {
 		// Local closured variables to remember state
 		var selected = defaultSelected;
 		if (selected == null) {
 			selected = false;
+		}
+		if (color == null) {
+			color = 0x000000;
 		}
 
 		// Callback fn for the CustomBlock to draw Radio button
 		var build = function(state : Bool, mode : BuildMode, parentMc : ArcticMovieClip, availableWidth : Float, availableHeight : Float, existingMc : ArcticMovieClip) {
 			var size = 12;
 			if (mode == Create) {
-				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0xf0f0f0, 0);
+				DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 0, color, color, 0);
 				if (state) {
 					size -= 4;
-					DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 2, 0x000000, 0x000000);
+					DrawUtils.drawRectangle(parentMc, (availableWidth - size) / 2.0, (availableHeight - size) / 2.0, size, size, 0, color, color);
 				}
 			}
 			return { clip: parentMc, width: 13.0, height: 13.0, growWidth : false, growHeight : false };

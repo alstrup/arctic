@@ -317,14 +317,8 @@ class ArcticView {
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #end
 		#if debug
-			if (this == null) {
-				// This should not happen, but just to be safe
-				return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
-			}
 			if (gui == null) {
 				currentBlockKind = "empty";
-				trace("Empty gui for build(" + mode + "): " + currentPath);
-				return { clip: null, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 			} else {
 				currentBlockKind = Type.enumConstructor(gui);
 			}
