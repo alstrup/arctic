@@ -60,7 +60,7 @@ class ArcticState<T> {
 	private function get() : T {
 		return myState;
 	}
-	private function set(state : T) : T{
+	private function set(state : T) : T {
 		myState = state;
 		update();
 		return myState;

@@ -413,9 +413,11 @@ class MutableBlock {
 	}
 	private function set(block : ArcticBlock) : ArcticBlock {
 		var oldBlock = myBlock;
+		/* Hm, this is not possible, since enums can not be compared
 		if (block == oldBlock) {
 			return block;
 		}
+		*/
 		myBlock = block;
 		update(oldBlock);
 		return myBlock;
