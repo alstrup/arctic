@@ -944,6 +944,7 @@ class ArcticView {
 						return;
 					}
 					#if debug
+					me.currentPath = "update Mutable/";
 					me.currentBlockKind = "Mutable";
 					#end
 					var childClip : ArcticMovieClip = me.getOrMakeClip(clip, Create, 0);
@@ -952,11 +953,6 @@ class ArcticView {
 			}
 			var childClip : ArcticMovieClip = getOrMakeClip(clip, mode, 0);
 			var result = build(mutableBlock.block, childClip, availableWidth, availableHeight, mode, 0);
-			if (mode == Destroy) {
-				// Ensure that arcticUpdater above is called to destroy what is inside the mutable block! This is required for nested Mutables
-				mutableBlock.block = null;
-				mutableBlock = null;
-			}
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
 		case Switch(blocks, current, onInit):
