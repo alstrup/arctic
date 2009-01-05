@@ -12,6 +12,7 @@ class Scrollbar {
 	 */
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
 			 availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
+		//trace("Make scrollbar");
 		var scrollbarWidth = 17; // How wide the scrollbar is
 		var buttonMovement = 15; // How many pixels we move when a scrollbar button is clicked
 		
@@ -23,10 +24,11 @@ class Scrollbar {
 			// we have for the scrollbar when we construct the clip further down in order to
 			// preserve z-ordering. Currently, without that logic, this means that after resizes,
 			// scrollbars in dialogs can not be dragged.
-
+			
 			// TODO: We should capture the current value of the old scrollbar, and use that as currentY scaled to new coordinate system
 			var scrollView : ArcticView = ArcticMC.get(parent, "scrollbar");
 			scrollView.destroy();
+			ArcticMC.delete(parent, "scrollbar");
 		}
 
 		// This updates the scroll-rect to show what we need
@@ -138,6 +140,7 @@ class Scrollbar {
 
 	/// Get rid of the scrollbar
 	static public function removeScrollbar(parent : ArcticMovieClip, clip : ArcticMovieClip) {
+		//trace("Remove scrollbar");
 		if (parent == null) {
 			return;
 		}

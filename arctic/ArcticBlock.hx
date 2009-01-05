@@ -72,7 +72,7 @@ enum ArcticBlock {
 	* Notice that the width & height should be the size of this block, not the original size of the picture. If crop is true,
 	* the picture will be cropped the number of pixels in all edges.
 	*/
-	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>, ?crop : Int);
+	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>, ?crop : Int, ?cache : Bool);
 
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
@@ -427,6 +427,11 @@ class MutableBlock {
 	public function update(?oldBlock : ArcticBlock) {
 		if (arcticUpdater != null) {
 			arcticUpdater(oldBlock, block, availableWidth, availableHeight);
+		}
+	}
+	public function destroy() {
+		if (arcticUpdater != null) {
+			arcticUpdater(myBlock, null, availableWidth, availableHeight);
 		}
 	}
 
