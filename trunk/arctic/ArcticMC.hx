@@ -155,7 +155,7 @@ class ArcticMC {
 	}
 	
 	#if (flash9 || neko)
-	static public function removeProperties(m : flash.display.DisplayObjectContainer) {
+	static public function removeProperties(m : ArcticMovieClip) {
 		hash.remove(m.name);
 		for (i in 0...m.numChildren) {
 			var obj = m.getChildAt(i);
