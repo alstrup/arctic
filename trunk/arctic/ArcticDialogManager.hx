@@ -48,6 +48,19 @@ class ArcticDialogManager {
 		}
 		return false;
 	}
+
+	public function dialogCovers(mc : ArcticMovieClip) : Bool {
+		var mouse = ArcticMC.getMouseXY();
+		for (d in currentDialogs) {
+			if (d.hitTest(mouse.x, mouse.y)) {
+				var delta = ActiveClips.compare(d.baseClip, mc);
+				if (delta > 0) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	// ArcticDialogs register themselves here when they are shown - don't call manually
 	public function add(d : ArcticDialog) {

@@ -1591,7 +1591,11 @@ class ArcticView {
 					if (!ArcticMC.isActive(child.clip)) {
 						return;
 					}
-					if (child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true)) {
+					
+					var hit = child.clip.hitTestPoint(flash.Lib.current.mouseX, flash.Lib.current.mouseY, true);
+					
+					// If we are covered by a dialog, we disable the cursor.
+					if (hit && !ArcticDialogManager.get().dialogCovers(child.clip)) {
 						ArcticMC.showMouse(keep);
 						cursorMc = ArcticMC.get(clip, "cursor");
 						if (cursorMc == null) {
@@ -2732,7 +2736,7 @@ class ActiveClips {
 	}
 	
 	#if (flash9||neko)
-	private function buildPath(mc: ArcticMovieClip): Array<DisplayObjectContainer> {
+	static private function buildPath(mc: ArcticMovieClip): Array<DisplayObjectContainer> {
 		var path = new Array<DisplayObjectContainer>();
 		var parent: DisplayObjectContainer = mc;
 		while (parent != null) {
@@ -2743,7 +2747,7 @@ class ActiveClips {
 	}
 	#end
 	
-	private function compare(mc1: ArcticMovieClip, mc2: ArcticMovieClip): Int {
+	public static function compare(mc1: ArcticMovieClip, mc2: ArcticMovieClip): Int {
 		if (mc1 == mc2) {
 			return 0;
 		}

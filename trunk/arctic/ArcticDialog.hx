@@ -92,7 +92,7 @@ class ArcticDialog {
 	/// The clip where we will construct our view of the dialog
 	var parentClip : ArcticMovieClip;
 	/// The clip that contains the dialog, and only that
-	var baseClip : ArcticMovieClip;
+	public var baseClip : ArcticMovieClip;
 	/// The root clip of the view, as returned by ArcticView
 	var dialogClip : ArcticMovieClip;
 	var arcticView : ArcticView;
