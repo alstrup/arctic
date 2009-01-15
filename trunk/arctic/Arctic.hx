@@ -596,7 +596,7 @@ class Arctic {
 		}
 		
 		var makeHTML = function (srcText:String, hoverWord:Int) {
-			trace("makeHTML:" + srcText);
+			//trace("makeHTML:" + srcText);
 			var html = "";
 			var word = "";
 			var variant = "";
@@ -624,7 +624,7 @@ class Arctic {
 					}
 					else {
 						state = 0;
-						trace("variant:" + variant + ":");
+						//trace("variant:" + variant + ":");
 						var stylebeg = "";
 						var styleend = "";
 						if (wid == hoverWord) {
@@ -651,19 +651,19 @@ class Arctic {
 					stylebeg = "<b>";
 					styleend = "</b>";
 				}
-				trace("variant:" + variant + ":");
+				//trace("variant:" + variant + ":");
 				if (inVariants(variant)) 
 					html += stylebeg + "<font face=\"_sans\" color='#000000'>" + word + "</font>" + styleend;				
 				else
 					html += stylebeg+"<font face=\"_sans\" color='#ff0000'>" + word + "</font>"+styleend;
 			}
 			
-			trace("makeHTML returns:" + html);
+			//trace("makeHTML returns:" + html);
 			return html;
 		}
 		
 		var changeWord = function(text:String, wid:Int, repl:String) {
-			trace("changeWord:" + text + " " + wid + " " + repl);
+			//trace("changeWord:" + text + " " + wid + " " + repl);
 			
 			var state = 0;
 			var word = "";
