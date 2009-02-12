@@ -17,7 +17,7 @@ import flash.display.DisplayObject;
 import flash.display.Bitmap;
 import flash.display.Loader;
 import flash.display.BitmapData;
-#else flash
+#elseif flash
 import flash.MovieClip;
 import flash.MovieClipLoader;
 import flash.TextField;
@@ -125,7 +125,7 @@ class ArcticView {
 				parent.stage.align = flash.display.StageAlign.TOP_LEFT;
 				var t = this;
 				addStageEventListener(parent, parent.stage, flash.events.Event.RESIZE, function( event : flash.events.Event ) { t.onResize();} ); 
-			#else flash
+			#elseif flash
 				flash.Stage.addListener(this);
 				flash.Stage.scaleMode = "noScale";
 				flash.Stage.align = "TL";
@@ -156,7 +156,7 @@ class ArcticView {
 		#end
 		if (useStageSize) {
 			#if flash9
-			#else flash
+			#elseif flash
 				flash.Stage.removeListener(this);
 			#end
 		}
@@ -202,7 +202,7 @@ class ArcticView {
 				e.obj.removeEventListener(e.event, e.handler);
 			}
 			stageEventHandlers = [];
-			#else flash
+			#elseif flash
 			firstChild = ArcticMC.getNextHighestDepth(parent);
 			mouseWheelListeners = new Array<{ clip: ArcticMovieClip, listener: Dynamic } >();
 			#end
@@ -239,7 +239,7 @@ class ArcticView {
 			return;
 		}
 		#if flash9
-		#else flash
+		#elseif flash
 			// Clean up mouse wheel listeners
 			for (s in mouseWheelListeners) {
 				flash.Mouse.removeListener(s.listener);
@@ -253,7 +253,7 @@ class ArcticView {
 		var result = build(gui, parent, size.width, size.height, Destroy, firstChild);
 		ArcticMC.remove(base);
 		#if flash9
-		#else flash
+		#elseif flash
 		ArcticMC.delete(parent, "c" + firstChild);
 		#end
 		idMovieClip = new Hash<ArcticMovieClip>();
@@ -264,7 +264,7 @@ class ArcticView {
 	private var idMovieClip : Hash<ArcticMovieClip>;
 	
 	#if flash9
-	#else flash
+	#elseif flash
 	private var mouseWheelListeners : Array< { clip: ArcticMovieClip, listener : Dynamic } >;
 	#end
 
@@ -367,8 +367,8 @@ class ArcticView {
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			#if flash6
-			#else flash7
-			#else flash // 8 & 9
+			#elseif flash7
+			#elseif flash // 8 & 9
 			if (mode == Create) {
 				/// We have to fix parameters that are "undefined"
 				/// Since null == undefined, the following functions will change undefined to null
@@ -378,11 +378,27 @@ class ArcticView {
 				var i = function (a) { return if (a == null) null else a; };
 				var b = function (a) { return if (a == null) null else a; };
 				var s = function (a) { return if (a == null) null else a; };
-
+				var blt = function (type) {
+					// make filters always use strings as the bitmap filter type, even
+					// though flash9 changes to use an enum
+					return
+							#if flash9
+								switch (type) {
+									case "full": flash.filters.BitmapFilterType.INNER;
+									case "inner": flash.filters.BitmapFilterType.INNER;
+									case "outer": flash.filters.BitmapFilterType.OUTER;
+									default: null;
+								};
+							#else
+								type;
+							#end
+				}
 				var myFilter : Dynamic;
 				switch(filter) {
 				case Bevel(distance, angle, highlightColor, highlightAlpha, shadowColor, shadowAlpha, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.BevelFilter(f(distance ), f(angle), c(highlightColor), f(highlightAlpha), c(shadowColor), f(shadowAlpha), f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
+					myFilter = new flash.filters.BevelFilter(f(distance ), f(angle), c(highlightColor), f(highlightAlpha),
+															 c(shadowColor), f(shadowAlpha), f(blurX), f(blurY), f(strength),
+															 i(quality), blt(type), b(knockout));
 				case Blur(blurX, blurY, quality):
 					myFilter = new flash.filters.BlurFilter(f(blurX), f(blurY), i(quality));
 				case ColorMatrix(matrix):
@@ -395,9 +411,11 @@ class ArcticView {
 				case Glow(color, alpha, blurX, blurY, strength, quality, inner, knockout):
 					myFilter = new flash.filters.GlowFilter(c(color), f(alpha), f(blurX), f(blurY), f(strength), i(quality), b(inner), b(knockout));
 				case GradientBevel(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.GradientBevelFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
+					myFilter = new flash.filters.GradientBevelFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX),
+																	 f(blurY), f(strength), i(quality), s(type), b(knockout));
 				case GradientGlow(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
-					myFilter = new flash.filters.GradientGlowFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX), f(blurY), f(strength), i(quality), s(type), b(knockout));
+					myFilter = new flash.filters.GradientGlowFilter(f(distance), f(angle), colors, alphas, ratios, f(blurX),
+																	f(blurY), f(strength), i(quality), blt(type), b(knockout));
 				};
 				// TODO: We do not support changing of Filter parameters in an update
 				// We must use a temporary array (see documentation)
@@ -453,9 +471,9 @@ class ArcticView {
 			if (rotation == null) rotation = 0;
 			#if flash6
 			var matrix = {matrixType:"box", x:child.width * xOffset, y:child.height * yOffset, w:child.width , h: child.height , r: rotation};
-			#else flash7
+			#elseif flash7
 			var matrix = {matrixType:"box", x:child.width * xOffset, y:child.height * yOffset, w:child.width , h: child.height , r: rotation};
-			#else flash
+			#elseif flash
 			var matrix = new flash.geom.Matrix();
 			matrix.createGradientBox(child.width, child.height, rotation, child.width * xOffset, child.height * yOffset);
 			#end
@@ -464,7 +482,7 @@ class ArcticView {
 			#if flash9
 				var t = if (type == "linear") { flash.display.GradientType.LINEAR; } else flash.display.GradientType.RADIAL;
 				g.beginGradientFill(t, colors, alphas, ratios, matrix);
-			#else flash
+			#elseif flash
 				g.beginGradientFill(type, colors, alphas, ratios, matrix);
 			#end
 			DrawUtils.drawRect(clip, 0, 0, child.width, child.height, roundRadius);
@@ -484,7 +502,7 @@ class ArcticView {
 				return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };
 			}
 			#if flash9
-				var tf : flash.text.TextField;
+				var tf : flash.text.TextField = null;
 				if (mode == Create || mode == Metrics) {
 					tf = new flash.text.TextField();
 					if (mode == Create) {
@@ -510,7 +528,7 @@ class ArcticView {
 				if (mode == Create) {
 					clip.addChild(tf);
 				}
-			#else flash
+			#elseif flash
 				if (mode == Metrics) {
 					clip = ArcticMC.create(parent);
 				}
@@ -533,7 +551,7 @@ class ArcticView {
 				tf.multiline = true;
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
-			#else neko
+			#elseif neko
 				var tf : neash.text.TextField;
 				if (mode == Create || mode == Metrics) {
 					tf = new neash.text.TextField();
@@ -574,7 +592,7 @@ class ArcticView {
 				#if flash9
 					s.width = tf.width;
 					s.height = tf.height;
-				#else flash
+				#elseif flash
 					clip.removeMovieClip();
 				#end
 				clip = null;
@@ -674,7 +692,7 @@ class ArcticView {
 					clip.scaleX = s;
 					clip.scaleY = s;
 				}
-			#else flash
+			#elseif flash
 				var s = scaling * 100.0;
 				if (resource) {
 					var child;
@@ -820,7 +838,7 @@ class ArcticView {
 						});
 					}
 				}
-			#else flash
+			#elseif flash
 				if (mode == Create) {
 					if (action != null || actionExt != null) {
 						clip.onMouseUp = function () {
@@ -896,7 +914,7 @@ class ArcticView {
 									}
 								});
 						}
-					#else flash
+					#elseif flash
 						if (mode == Create) {
 							sel.clip._visible = initialState;
 							unsel.clip._visible = !initialState;
@@ -961,7 +979,7 @@ class ArcticView {
 			return { clip: clip, width : result.width, height: result.height, growWidth: result.growWidth, growHeight: result.growHeight };
 
 		case Switch(blocks, current, onInit):
-			var cur;
+			var cur = 0;
 			var children : Array<Metrics> = [];
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Create) {
@@ -969,6 +987,8 @@ class ArcticView {
 				ArcticMC.set(clip, "current", cur);
 			} else if (mode == Reuse) {
 				cur = ArcticMC.get(clip, "current");
+			} else if (mode == Destroy) {
+				ArcticMC.delete(clip, "current");
 			}
 			var width = 0.0;
 			var height = 0.0;
@@ -1631,7 +1651,7 @@ class ArcticView {
 				}
 				//trace("explicit call");
 				onMove(null);
-			#else flash
+			#elseif flash
 				
 				var onMove = function() {
 							if (!ArcticMC.isActive(child.clip)) {
@@ -1774,7 +1794,7 @@ class ArcticView {
 							}
 						}
 					);
-				#else flash
+				#elseif flash
 					var mouseWheelListener = { 
 						onMouseDown : function() {},
 						onMouseMove : function() {},
@@ -1802,7 +1822,7 @@ class ArcticView {
 			if (mode == Create) {
 				#if flash9
 					child.clip.mask = mask.clip;
-				#else flash
+				#elseif flash
 					child.clip.setMask(mask.clip);
 				#end
 			}
@@ -1999,7 +2019,7 @@ class ArcticView {
 			if (null != height) {
 				txtInput.height = height;
 			}
-		#else flash
+		#elseif flash
 			var txtInput : flash.TextField;
 			if (mode == Create) {
 				txtInput = ArcticMC.createTextField(clip, 0, 0, width, height);
@@ -2016,7 +2036,11 @@ class ArcticView {
 		txtInput.tabEnabled = true;
 		if (null != width && null != height) {
 		} else {
-			txtInput.autoSize = "left";	
+			#if flash9
+			txtInput.autoSize = flash.text.TextFieldAutoSize.LEFT; // "left";	
+			#else
+			txtInput.autoSize = "left";
+			#end
 			txtInput.wordWrap = (null != width); // wordWrap is the same as fixed width
 			txtInput.multiline = (null == height); // multiline allows growing in height
 		}
@@ -2050,13 +2074,19 @@ class ArcticView {
 			}
 			txtInput.htmlText = html;
 			// Retreive the format of the initial text
-			var txtFormat;
+			var txtFormat = null;
 			if (txtInput.text.length > 0) {
 				txtFormat = txtInput.getTextFormat(0,1);
 			}
 			if (null != numeric && numeric) {
 				txtInput.restrict = "0-9\\-\\.";
-				txtFormat.align = "right";
+				if (txtFormat != null) {
+					#if flash9
+					txtFormat.align = flash.text.TextFormatAlign.RIGHT; // "right";
+					#else
+					txtFormat.align = "right";
+					#end
+				}
 			}
 			var lastWidth = ArcticMC.getTextFieldWidth(txtInput);
 			var lastHeight = ArcticMC.getTextFieldHeight(txtInput);
@@ -2087,7 +2117,7 @@ class ArcticView {
 				txtInput.addEventListener(flash.events.Event.CHANGE, listener);
 				clip.addChild(txtInput);
 				txtInput.type = TextFieldType.INPUT;
-			#else flash
+			#elseif flash
 				txtInput.setNewTextFormat(txtFormat);
 				// Set the text again to enforce the formatting
 				txtInput.htmlText = html;
@@ -2112,7 +2142,7 @@ class ArcticView {
 						txtInput.setSelection(1, 1);
 					}
 				}
-			#else flash
+			#elseif flash
 				if (focus != null && focus) {
 					flash.Selection.setFocus(txtInput);
 				}
@@ -2132,33 +2162,33 @@ class ArcticView {
 								if (null == status.selStart || null == status.selEnd) {
 									txtInput.setSelection(0, txtInput.length);
 								}
-							#else flash
+							#elseif flash
 								flash.Selection.setFocus(txtInput);
 							#end
 						}
 						if (null != status.selStart && null != status.selEnd) {
 							#if (flash9 || neko)
 							txtInput.setSelection(status.selStart, status.selEnd);
-							#else flash
+							#elseif flash
 							flash.Selection.setSelection(status.selStart, status.selEnd);
 							#end
 						} else if (null != status.cursorPos) {
 							#if (flash9 || neko)
 							txtInput.setSelection(status.cursorPos, status.cursorPos);
-							#else flash
+							#elseif flash
 							flash.Selection.setSelection(status.cursorPos, status.cursorPos);
 							#end
 						}
 						if (status.disabled == true) {
 							#if (flash9 || neko)
 							txtInput.type = TextFieldType.DYNAMIC;
-							#else flash
+							#elseif flash
 							txtInput.type = "dynamic";
 							#end
 						} else {
 							#if (flash9 || neko)
 							txtInput.type = TextFieldType.INPUT;
-							#else flash
+							#elseif flash
 							txtInput.type = "input";
 							#end
 						}
@@ -2182,7 +2212,7 @@ class ArcticView {
 						}
 						return { html: txtInput.htmlText, text: txtInput.text, focus: focus, selStart: focus ? selStart : null, selEnd: focus ? selEnd : null, 
 								 cursorPos: focus ? cursorPos : null, disabled: txtInput.type != TextFieldType.INPUT, cursorX: cursorX }
-					#else flash
+					#elseif flash
 						var hasFocus = flash.Selection.getFocus() == txtInput._target;
 						return { html: txtInput.htmlText, text: txtInput.text, focus: hasFocus, selStart: hasFocus ? flash.Selection.getBeginIndex() : null,
 								 selEnd: hasFocus ? flash.Selection.getEndIndex() : null, cursorPos: hasFocus ? flash.Selection.getCaretIndex() : null, 
@@ -2223,7 +2253,7 @@ class ArcticView {
 						}
 					});
 					
-					#else flash
+					#elseif flash
 					var buildhandler = function (handler: Void -> Void) { 
 						return function () {
 							if (clip._xmouse >= txtInput._x && clip._xmouse < txtInput._x + txtInput._width && clip._ymouse >= txtInput._y && clip._ymouse < txtInput._y + txtInput._height) {
@@ -2288,7 +2318,7 @@ class ArcticView {
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 		}
 		
-		var info : BlockInfo;
+		var info : BlockInfo = null;
 		if (mode == Create) {
 			info = {
 				available: { width: availableWidth, height: availableHeight },
@@ -2433,7 +2463,7 @@ class ArcticView {
 					}
 				}
 			);
-		#else flash
+		#elseif flash
 			clip.onMouseDown = function() {
 				if (ActiveClips.get().getActiveClip() == dragClip) {
 					dragX = flash.Lib.current._xmouse;
@@ -2505,15 +2535,15 @@ class ArcticView {
 				p.createEmptyMovieClip("c" + childNo, d);
 				var clip = Reflect.field(p, "c" + childNo);
 				ArcticMC.set(p, "c" + childNo, clip);
-			#else flash7
+			#elseif flash7
 				var d = p.getNextHighestDepth();
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
 				ArcticMC.set(p, "c" + childNo, clip);
-			#else flash8
+			#elseif flash8
 				var d = p.getNextHighestDepth();
 				var clip = p.createEmptyMovieClip("c" + childNo, d);
 				ArcticMC.set(p, "c" + childNo, clip);
-			#else (flash9 || neko)
+			#elseif (flash9 || neko)
 				var clip = new ArcticMovieClip();
 				#if debug
 				if (p.numChildren > childNo) {
@@ -2557,9 +2587,27 @@ class ArcticView {
 				return getOrMakeClip(p, Create, childNo);
 			} else {
 				var d : Dynamic = p.getChildAt(childNo);
+				/*
+				#if debug
+				if (Type.getClassName(Type.getClass(d)).indexOf('text') != -1) {
+					// If you get this trace...
+					trace("Child is not as expected! Probably you have put an ArcticView on the root MovieClip and haXe trace has reordered it away.");
+					/// ...change
+					//    view = new ArcticView(gui, arctic.ArcticMC.getCurrentClip());
+					// to
+					//    var baseclip = arctic.ArcticMC.create(arctic.ArcticMC.getCurrentClip());
+					//    view = new ArcticView(gui, baseclip);
+					if (buildMode == Destroy) {
+						return null;
+					}
+					// We just try our luck here:
+					d = p.getChildAt(childNo - 1);
+				}
+				#end
+				*/
 				return d;
 			}
-		#else flash
+		#elseif flash
 			if (ArcticMC.has(p, "c" + childNo)) {
 				return ArcticMC.get(p, "c" + childNo);
 			}
@@ -2614,13 +2662,13 @@ class ArcticView {
 			}
 		}
 	}
-	#else true
+	#else
 	private function removeStageEventListeners(refObj : Dynamic) {
 	}
 	private function removeStageEventListener(refObj : Dynamic, d : Dynamic, event : String, handler : Dynamic) {
 	}
 	#end
-
+	
 	#if flash9
 	// Hash of all pictures
 	private static var pictureCache: Hash<BitmapData>;
@@ -2645,7 +2693,7 @@ class ActiveClips {
 		#if flash9
 			var x = flash.Lib.current.mouseX;
 			var y = flash.Lib.current.mouseY;
-		#else flash
+		#elseif flash
 			var x = flash.Lib.current._xmouse;
 			var y = flash.Lib.current._ymouse;
 		#end
@@ -2657,7 +2705,7 @@ class ActiveClips {
 				if (clip.hitTestPoint(x, y, false)) {
 					return clip;
 				}
-			#else flash
+			#elseif flash
 				if (clip.hitTest(x, y, false) && ArcticMC.isActive(clip)) {
 					return clip;
 				}
@@ -2676,7 +2724,7 @@ class ActiveClips {
 		var contains = function (clip: ArcticMovieClip) {
 			#if (flash9||neko)
 				return mc == clip || mc.contains(clip);
-			#else flash	
+			#elseif flash	
 				return mc == clip || StringTools.startsWith(clip._target, mc._target + "/");
 			#end
 		}
@@ -2754,7 +2802,7 @@ class ActiveClips {
 	#if (flash9||neko)
 		var path1 = buildPath(mc1);
 		var path2 = buildPath(mc2);
-	#else flash	
+	#elseif flash	
 		var path1 = mc1._target.split("/");
 		var path2 = mc2._target.split("/");
 	#end
@@ -2772,7 +2820,7 @@ class ActiveClips {
 		var lca = path1[diffIndex - 1];
 		var childNo1 = lca.getChildIndex(path1[diffIndex]);
 		var childNo2 = lca.getChildIndex(path2[diffIndex]);
-	#else flash
+	#elseif flash
 		// we use ["c" + childNo] notation
 		// (should be faster than evaluating depth of the 'fork')
 		var childNo1 = Std.parseInt(path1[diffIndex].substr(1));
