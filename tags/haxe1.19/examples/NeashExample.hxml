@@ -1,0 +1,46 @@
+# HelloWorld.n
+-neko HelloWorld.n
+-main HelloWorld
+-debug
+-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+
+
+--next
+# ComponentTour.n
+-neko ComponentTour.n
+-main ComponentTour
+-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+
+
+--next
+# ArcticTest.n
+-neko ArcticTest.n
+-main ArcticTest
+-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+
+
+--next
+# DynamicExample.n
+-neko DynamicExample.n
+-main DynamicExample
+-debug
+-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+
+
+--next
+# Dialogs.n
+-neko Dialogs.n
+-main Dialogs
+-debug
+-cp ..
+-cp c:\flash\neash
+-cp c:\flash\nme
+

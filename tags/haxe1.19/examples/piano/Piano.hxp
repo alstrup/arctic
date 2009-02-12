@@ -1,0 +1,8 @@
+﻿<haxe selected="0">
+  <output name="Piano.swf" mode="swf" out="Piano.swf" class="Piano" lib="" cmd="" main="True" debug="False">-swf-header 230:280:31
+#-lib arctic
+-cp ../../
+-swf-version 7
+-D profile</output>
+  <files path="/" />
+</haxe>

@@ -1,0 +1,29 @@
+# Dialogs flash7
+-swf Dialogs7.swf
+-main Dialogs
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+-swf-version 7
+
+
+--next
+# Dialogs flash8
+-swf Dialogs8.swf
+-main Dialogs
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
+
+--next
+# Dialogs flash9
+-swf Dialogs9.swf
+-swf-version 9
+-main Dialogs
+-debug
+-swf-header 800:600:50
+-cp ..
+--flash-strict
+
