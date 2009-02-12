@@ -47,7 +47,7 @@ class ArcticTest {
 		arcticView = new ArcticView( gui, parent );
 		// And display on the given movieclip
 		var root = arcticView.display(true);
-		#else true
+		#else
 		showHelloWorld1();
 		#end
 	}
@@ -277,8 +277,8 @@ class ArcticTest {
 	public function advancedTextControl() {
 		if (arcticView != null) { arcticView.destroy(); }
 
-		var controlFun: TextInputModel -> TextInputModel;
-		var eventsFun: TextInputEvents -> Void;
+		var controlFun: TextInputModel -> TextInputModel = null;
+		var eventsFun: TextInputEvents -> Void = null;
 		
 		var gui = LineStack([
 				Filler,
@@ -310,7 +310,7 @@ class ArcticTest {
 			#if flash9
 			,onKeyDown: function(k : UInt) { trace("Key down " + k); },
 			onKeyUp: function(k : UInt) { trace("Key up " + k); }
-			#else true
+			#else
 			,onKeyDown: function(k : Int) { trace("Key down " + k); },
 			onKeyUp: function(k : Int) { trace("Key up " + k); }
 			#end
