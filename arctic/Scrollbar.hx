@@ -44,7 +44,7 @@ class Scrollbar {
 			update();
 		};
 
-		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void };
+		var slider : { block : ArcticBlock, setPositionFn : Float -> Float -> Void } = null;
 		// Called when up is clicked
 		var onUp = function() {
 			currentY -= buttonMovement;

@@ -16,7 +16,7 @@ class DrawUtils {
 		} else {
 			g.drawRect(x, y, w, h);
 		}
-		#else true
+		#else
 		var angle, sideSign, cnrSign, strtX, strtY, nextX, nextY, cnrX, cnrY, endX, endY;
 		if (cornerRadius != null && cornerRadius > 0) {
 			strtX = x + cornerRadius;
@@ -67,7 +67,7 @@ static public function drawCircle(mc : ArcticSprite, x : Float, y : Float, radiu
 	}
 	#if flash9
 	g.drawCircle(x, y, radius);
-	#else true
+	#else
 	DrawUtils.drawRect(mc, x-radius, y-radius, radius*2.0, radius*2.0, radius);
 	#end
 	if (null != fillColor) {

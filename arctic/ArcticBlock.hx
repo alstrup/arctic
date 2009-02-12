@@ -3,9 +3,9 @@ package arctic;
 // We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
 	typedef ArcticMovieClip = flash.display.Sprite;
-#else flash
+#elseif flash
 	typedef ArcticMovieClip = flash.MovieClip
-#else neko
+#elseif neko
 	typedef ArcticMovieClip = neash.display.MovieClip
 #end
 
@@ -356,7 +356,7 @@ typedef TextInputEvents = {
 	#if flash9
 	var onKeyDown: UInt -> Void;
 	var onKeyUp: UInt -> Void;
-	#else true
+	#else
 	var onKeyDown: Int -> Void;
 	var onKeyUp: Int -> Void;
 	#end
@@ -374,7 +374,7 @@ enum Filter {
 	Glow(?color : UInt, ?alpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?inner : Bool, ?knockout : Bool);
 	GradientBevel(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
 	GradientGlow(?distance : Float, ?angle : Float, ?colors : Array<Dynamic>, ?alphas : Array<Dynamic>, ?ratios : Array<Dynamic>, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Int, ?type : String, ?knockout : Bool);
-	#else true
+	#else
 	Bevel(?distance : Float, ?angle : Float, ?highlightColor : Float, ?highlightAlpha : Float, ?shadowColor : Float, ?shadowAlpha : Float, ?blurX : Float, ?blurY : Float, ?strength : Float, ?quality : Float, ?type : String, ?knockout : Bool);
 	Blur(?blurX : Float, ?blurY : Float, ?quality : Int);
 	ColorMatrix(?matrix : Array<Float>);
