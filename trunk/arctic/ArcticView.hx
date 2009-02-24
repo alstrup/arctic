@@ -715,176 +715,7 @@ class ArcticView {
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
 		case Button(block, hoverb, action, actionExt):
-			if (mode == Metrics) {
-				var child = build(block, null, availableWidth, availableHeight, Metrics, 0);
-				if (hoverb == null) {
-					return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-				}
-				var hover = build(hoverb, null, availableWidth, availableHeight, Metrics, 1);
-				return { clip: null, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
-			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (child.clip == null && mode != Destroy) {
-				#if debug
-				trace("Can not make button of empty clip");
-				#end
-				return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-			var hover = null;
-			if (hoverb != null) {
-				hover = build(hoverb, clip, availableWidth, availableHeight, mode, 1);
-			}
-			// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
-			// position yet, so we can't do this yet! The parent would have to position us first, which is a change
-			// for another day.
-			
-			var hasHover = hover != null && hover.clip != null;
-			if (mode == Destroy) {
-				removeStageEventListeners(clip);
-				if (!hasHover) {
-					return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-				} else {
-					return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
-				}
-			}
-
-			ArcticMC.setVisible(child.clip, true);
-			if (hasHover) {
-				ArcticMC.setVisible(hover.clip, false);
-			}
-			#if (flash9||neko)
-				child.clip.buttonMode = true;
-				child.clip.mouseChildren = false;
-				if (hasHover) {
-					hover.clip.buttonMode = true;
-					hover.clip.mouseChildren = false;
-				}
-				if (mode == Create) {
-					#if arcticevidence
-					var aem = ArcticEvidenceManager.get();
-					var abId = ArcticEvidenceManager.idFromArctic(block);
-					#end
-					if (action != null) {
-						#if arcticevidence
-						var eventName = "buttonclick";
-						aem.registerReplayer(eventName, abId, action);
-						#end
-						clip.addEventListener(MouseEvent.MOUSE_UP, function(s) { 
-								var m = ArcticMC.getMouseXY();
-								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-								if (ArcticMC.isActive(clip) && clip.hitTestPoint(m.x, m.y, true)) {
-									#if arcticevidence
-									aem.recordEvent(eventName, abId, []);
-									#end
-									action(); 
-								}
-							} ); 
-					}
-					if (actionExt != null) {
-						#if arcticevidence
-						var eventName = "buttonclickxyup";
-						aem.registerReplayer(eventName, abId, actionExt);
-						#end
-						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_UP, function(s) { 
-								if (ArcticMC.isActive(clip)) {
-									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									var m = ArcticMC.getMouseXY();
-									#if arcticevidence
-									aem.recordEvent(eventName, abId, 
-													[clip.mouseX, clip.mouseY, false,
-													 clip.hitTestPoint(m.x, m.y, true)]);
-									#end
-									actionExt(clip.mouseX, clip.mouseY, false,
-											  clip.hitTestPoint(m.x, m.y, true));
-								}
-							} );
-						#if arcticevidence
-						var eventName = "buttonclickxydown";
-						aem.registerReplayer(eventName, abId, actionExt);
-						#end
-						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
-								if (ArcticMC.isActive(clip)) {
-									// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-									// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-									var m = ArcticMC.getMouseXY();
-									#if arcticevidence
-									aem.recordEvent(eventName, abId, 
-													[clip.mouseX, clip.mouseY, true,
-													 clip.hitTestPoint(m.x, m.y, true)]);
-									#end
-									actionExt(clip.mouseX, clip.mouseY, true,
-											  clip.hitTestPoint(m.x, m.y, true));
-								}
-							} );
-					}
-					if (hasHover) {
-						addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
-								var m = ArcticMC.getMouseXY();
-								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								if (clip.hitTestPoint(m.x, m.y, true) && ArcticMC.isActive(clip)) {
-									child.clip.visible = false;
-									hover.clip.visible = true;
-								} else {
-									child.clip.visible = true;
-									hover.clip.visible = false;
-								}
-							} );
-						addStageEventListener( clip, clip.stage, Event.MOUSE_LEAVE, function() {
-							child.clip.visible = true;
-							hover.clip.visible = false;
-						});
-					}
-				}
-			#elseif flash
-				if (mode == Create) {
-					if (action != null || actionExt != null) {
-						clip.onMouseUp = function () {
-							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-							if (ArcticMC.isActive(clip)) {
-								var hit = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true);
-								if (action != null && hit) {
-									action();
-								}
-								if (actionExt != null) {
-									actionExt(clip._xmouse, clip._ymouse, false, hit);
-								}
-							}
-						}
-					}
-					if (actionExt != null) {
-						clip.onMouseDown = function () {
-							if (ArcticMC.isActive(clip)) {
-								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								actionExt(clip._xmouse, clip._ymouse, true, clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true));
-							}
-						}
-					}
-					if (hasHover) {
-						clip.onMouseMove = function() {
-							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-							var mouseInside = child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip);
-							if (mouseInside) {
-								child.clip._visible = false;
-								hover.clip._visible = true;
-							} else {
-								child.clip._visible = true;
-								hover.clip._visible = false;
-							}
-						};
-						hover.clip.onRollOut = function() { 
-							child.clip._visible = true;
-							hover.clip._visible = false;
-						};
-					}
-				}
-			#end
-			if (!hasHover) {
-				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-			return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+			return buildButton(p, childNo, mode, availableWidth, availableHeight, block, hoverb, action, actionExt);
 
 		case ToggleButton(selected, unselected, initialState, onChange, onInit):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
@@ -2277,6 +2108,179 @@ class ArcticView {
 
 		var s = ArcticMC.getSize(clip);
 		return { clip: clip, width: s.width, height: s.height, growWidth: null == width, growHeight: null == height };
+	}
+
+	private function buildButton(p, childNo, mode, availableWidth, availableHeight, block, hoverb, action, actionExt) {
+		if (mode == Metrics) {
+			var child = build(block, null, availableWidth, availableHeight, Metrics, 0);
+			if (hoverb == null) {
+				return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+			var hover = build(hoverb, null, availableWidth, availableHeight, Metrics, 1);
+			return { clip: null, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+		}
+		var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
+		var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+		if (child.clip == null && mode != Destroy) {
+			#if debug
+			trace("Can not make button of empty clip");
+			#end
+			return { clip: null, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		}
+		var hover = null;
+		if (hoverb != null) {
+			hover = build(hoverb, clip, availableWidth, availableHeight, mode, 1);
+		}
+		// TODO: It would be nice if this hovered if the cursor was on this button, but we are not in the correct
+		// position yet, so we can't do this yet! The parent would have to position us first, which is a change
+		// for another day.
+		
+		var hasHover = hover != null && hover.clip != null;
+		if (mode == Destroy) {
+			removeStageEventListeners(clip);
+			if (!hasHover) {
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			} else {
+				return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+		}
+
+		ArcticMC.setVisible(child.clip, true);
+		if (hasHover) {
+			ArcticMC.setVisible(hover.clip, false);
+		}
+		#if (flash9||neko)
+			child.clip.buttonMode = true;
+			child.clip.mouseChildren = false;
+			if (hasHover) {
+				hover.clip.buttonMode = true;
+				hover.clip.mouseChildren = false;
+			}
+			if (mode == Create) {
+				#if arcticevidence
+				var aem = ArcticEvidenceManager.get();
+				var abId = ArcticEvidenceManager.idFromArctic(block);
+				#end
+				if (action != null) {
+					#if arcticevidence
+					var eventName = "buttonclick";
+					aem.registerReplayer(eventName, abId, action);
+					#end
+					clip.addEventListener(MouseEvent.MOUSE_UP, function(s) { 
+							var m = ArcticMC.getMouseXY();
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+							if (ArcticMC.isActive(clip) && clip.hitTestPoint(m.x, m.y, true)) {
+								#if arcticevidence
+								aem.recordEvent(eventName, abId, []);
+								#end
+								action(); 
+							}
+						} ); 
+				}
+				if (actionExt != null) {
+					#if arcticevidence
+					var eventName = "buttonclickxyup";
+					aem.registerReplayer(eventName, abId, actionExt);
+					#end
+					addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_UP, function(s) { 
+							if (ArcticMC.isActive(clip)) {
+								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+								var m = ArcticMC.getMouseXY();
+								#if arcticevidence
+								aem.recordEvent(eventName, abId, 
+												[clip.mouseX, clip.mouseY, false,
+												 clip.hitTestPoint(m.x, m.y, true)]);
+								#end
+								actionExt(clip.mouseX, clip.mouseY, false,
+										  clip.hitTestPoint(m.x, m.y, true));
+							}
+						} );
+					#if arcticevidence
+					var eventName = "buttonclickxydown";
+					aem.registerReplayer(eventName, abId, actionExt);
+					#end
+					addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
+							if (ArcticMC.isActive(clip)) {
+								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+								var m = ArcticMC.getMouseXY();
+								#if arcticevidence
+								aem.recordEvent(eventName, abId, 
+												[clip.mouseX, clip.mouseY, true,
+												 clip.hitTestPoint(m.x, m.y, true)]);
+								#end
+								actionExt(clip.mouseX, clip.mouseY, true,
+										  clip.hitTestPoint(m.x, m.y, true));
+							}
+						} );
+				}
+				if (hasHover) {
+					addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
+							var m = ArcticMC.getMouseXY();
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							if (clip.hitTestPoint(m.x, m.y, true) && ArcticMC.isActive(clip)) {
+								child.clip.visible = false;
+								hover.clip.visible = true;
+							} else {
+								child.clip.visible = true;
+								hover.clip.visible = false;
+							}
+						} );
+					addStageEventListener( clip, clip.stage, Event.MOUSE_LEAVE, function() {
+						child.clip.visible = true;
+						hover.clip.visible = false;
+					});
+				}
+			}
+		#elseif flash
+			if (mode == Create) {
+				if (action != null || actionExt != null) {
+					clip.onMouseUp = function () {
+						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+						if (ArcticMC.isActive(clip)) {
+							var hit = clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true);
+							if (action != null && hit) {
+								action();
+							}
+							if (actionExt != null) {
+								actionExt(clip._xmouse, clip._ymouse, false, hit);
+							}
+						}
+					}
+				}
+				if (actionExt != null) {
+					clip.onMouseDown = function () {
+						if (ArcticMC.isActive(clip)) {
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							actionExt(clip._xmouse, clip._ymouse, true, clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true));
+						}
+					}
+				}
+				if (hasHover) {
+					clip.onMouseMove = function() {
+						// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+						var mouseInside = child.clip.hitTest(flash.Lib.current._xmouse, flash.Lib.current._ymouse, true) && ArcticMC.isActive(clip);
+						if (mouseInside) {
+							child.clip._visible = false;
+							hover.clip._visible = true;
+						} else {
+							child.clip._visible = true;
+							hover.clip._visible = false;
+						}
+					};
+					hover.clip.onRollOut = function() { 
+						child.clip._visible = true;
+						hover.clip._visible = false;
+					};
+				}
+			}
+		#end
+		if (!hasHover) {
+			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
+		}
+		return { clip: clip, width: Math.max(child.width, hover.width), height: Math.max(child.height, hover.height), growWidth: child.growWidth, growHeight: child.growHeight };
 	}
 
 	private function buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag) {
