@@ -148,7 +148,7 @@ class ArcticMC {
 	#if (flash9 || neko)
 		// We have to remove any properties on this clip, to prevent leaks
 		removeProperties(m);
-		m.parent.removeChild(m);
+		if (m.parent != null) m.parent.removeChild(m);
 	#elseif flash
 		m.removeMovieClip();
 	#end
