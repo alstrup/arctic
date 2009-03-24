@@ -1095,11 +1095,19 @@ class ArcticView {
 			var y = 0.0;
 			var i = 0;
             var children = [];
+			
+			var noNeedForNewMetrics = mode == Metrics && availableWidth == maxWidth;
+			
 			for (l in blocks) {
-				var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
-				h = Math.max(0, h);
-                var line = build(l, child, maxWidth, h, mode, i);
-                // var line = build(l, child, availableWidth, h, mode, i);
+				
+				var line;
+				if (noNeedForNewMetrics && !childMetrics[i].growHeight) {
+					line = childMetrics[i];
+				} else {
+					var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
+					h = Math.max(0, h);
+					line = build(l, child, maxWidth, h, mode, i);
+				}
 				if (mode != Metrics && mode != Destroy && line.clip != null) {
 					ArcticMC.setXY(line.clip, null, y);
 				}
