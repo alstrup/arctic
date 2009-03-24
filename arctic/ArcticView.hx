@@ -217,7 +217,7 @@ class ArcticView {
 	}
 	/// What child number is the root block on the parent clip?
 	private var firstChild : Int;
-
+	
 	/**
 	* Get access to the raw movieclip for the named block.
 	* Notice! This movieclip is destroyed on refresh, and thus you have to
@@ -869,8 +869,8 @@ class ArcticView {
 			var width = availableWidth;
 			var height = availableHeight;
             var child = build(block, clip, width, height, mode, 0);
-			width = Math.max(width, child.width);
-			height = Math.max(height, child.height);
+				width = Math.max(width, child.width);
+				height = Math.max(height, child.height);
 			if (mode != Metrics && mode != Destroy && child.clip != null) {
 				var x = 0.0;
 				if (xpos != -1.0 && availableWidth > child.width) {
@@ -943,7 +943,7 @@ class ArcticView {
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// The number of children which wants to grow (including our own fillers)
 			var numberOfWideChildren = 0;
-			var childMetrics = [];
+			var childMetrics = [];			
 			var width = 0.0;
 			var maxHeight = 0.0;
 			for (r in blocks) {
@@ -983,19 +983,23 @@ class ArcticView {
 			} else {
 				freeSpace = 0;
 			}
+			
+			var noNeedForNewMetrics = mode == Metrics && availableHeight == maxHeight;
 
 			var h = 0.0;
 			var x = 0.0;
 			var i = 0;
 			var firstGrowWidthChild = true;
 			for (l in blocks) {
-				var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
-				if (firstGrowWidthChild && childMetrics[i].growWidth) {
-					firstGrowWidthChild = false;
-					w += remainder;
+				var child;
+				if (noNeedForNewMetrics && !childMetrics[i].growWidth) {
+					child = childMetrics[i];
+				} else {
+					var w = childMetrics[i].width + if (childMetrics[i].growWidth) freeSpace else 0;
+					h = Math.max(0, h);
+					child = build(l, clip, w, maxHeight, mode, i);
 				}
-				var child = build(l, clip, w, maxHeight, mode, i);
-                // var child = build(l, clip, w, availableHeight, mode, i);
+				
 				if (mode != Metrics && mode != Destroy && child.clip != null) {
 					ArcticMC.setXY(child.clip, x, null);
 				}
@@ -1128,7 +1132,7 @@ class ArcticView {
 				ensureY = y;
 			}
 			
-			if (disableScrollbar != false) {
+			if (!disableScrollbar) {
 				if (y - availableHeight >= 1 && availableHeight >= 34 && mode != Destroy) {
 					// Scrollbar
 					if (mode != Metrics) {
