@@ -1132,7 +1132,7 @@ class ArcticView {
 				ensureY = y;
 			}
 			
-			if (!disableScrollbar) {
+			if (disableScrollbar != false) {
 				if (y - availableHeight >= 1 && availableHeight >= 34 && mode != Destroy) {
 					// Scrollbar
 					if (mode != Metrics) {
