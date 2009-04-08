@@ -352,10 +352,10 @@ class Arctic {
 	* Make a radio-group to choose between the given texts.
 	* Returns the final block and a function that can be used to change the currently selected item.
 	*/
-	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
+	static public function makeTextChoice(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float, ?lines : Bool) : 
 			{ block: ArcticBlock, selectFn: Int -> Void } {
 		var group = makeTextChoiceBlocks(texts, onSelect, defaultSelected, textSize);
-		return { block: LineStack(group.blocks), selectFn : group.selectFn };
+		return { block: (if (lines == null || lines) LineStack(group.blocks) else ColumnStack(group.blocks)), selectFn : group.selectFn };
 	}
 	
 	
@@ -807,7 +807,7 @@ class Arctic {
 			}
 			
 			var eventListeners = {
-				onChange: function() { if (contentFn != null) { var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} },
+				onChange: function() {if (contentFn != null) { var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} },
 				onSetFocus: function() { if (contentFn != null){ var ti = contentFn(null); onTextChanged(callback(onTextChanged, null), ti.text, ti.cursorPos);} },
 				onKillFocus: function() { delayframe(function() { autoCompleteBlock.block = Fixed(0, 0); }, 5 ); },  //sorry, but I don't know other way to handle autocomplete clicks
 				onPress: null,
