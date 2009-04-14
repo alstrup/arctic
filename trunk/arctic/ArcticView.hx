@@ -278,7 +278,7 @@ class ArcticView {
 	 * feature are involved).
 	 * The algorithm is a simple recursive depth first traversal of the blocks.
 	 */
-    private function build(gui : ArcticBlock, p : ArcticMovieClip, 
+    public function build(gui : ArcticBlock, p : ArcticMovieClip, 
                     availableWidth : Float, availableHeight : Float, mode : BuildMode, childNo : Int) : Metrics {
 #if false
 		if (mode == Destroy) {
@@ -1735,6 +1735,19 @@ class ArcticView {
 				}
 			}
 			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: growWidth, growHeight: growHeight };
+		
+		case Transform(block, scaleX, scaleY):
+			var clip = getOrMakeClip(p, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			if (mode == Create) {
+				ArcticMC.setScaleXY(child.clip, scaleX, scaleY);
+			}
+			if (mode == Metrics || mode == Destroy) {
+				return { clip: clip, width: child.width * scaleX, height: child.height * scaleY, growWidth: child.growWidth, growHeight: child.growHeight };
+			} else {
+				return { clip: clip, width: child.clip.width, height: child.clip.height, growWidth: child.growWidth, growHeight: child.growHeight };
+			}
+		
 		#if flash9
 		case Rotate(block, angle):
 			var childW:Float = 0;

@@ -285,6 +285,11 @@ enum ArcticBlock {
 	 */
 	Scale(block : ArcticBlock, ? maxScale : Float, ? alignX : Float, ? alignY : Float);
 	
+	/**
+	 * Transform a block
+	 */
+	Transform(block : ArcticBlock, scaleX : Float, scaleY : Float);
+	
 	#if flash9
 	/// Rotates a block. The angle is in degrees
 	Rotate(block : ArcticBlock, ?angle : Float);
