@@ -18,7 +18,7 @@ class Layout {
 	 * Does a binary search to find the wrapping point that gives the total least area
 	 * usage.
 	 */
-	static public function makeTextFit(html : String, maxWidth : Float, maxHeight : Float, embeddedFont : Bool, selectable : Bool) : ArcticBlock {
+	static public function makeTextFit(html : String, maxWidth : Float, maxHeight : Float, embeddedFont : Bool, selectable : Bool, ?minWidth : Float) : ArcticBlock {
 		#if flash9
 		var tf : flash.text.TextField = new flash.text.TextField();
 		// Determine singleline or word-wrap based on text size
@@ -53,7 +53,7 @@ class Layout {
 		
 		// First we do word wrapping and aim for the best aspect ratio that fits the requested aspect ratio
 		
-		var lower = 0.0;
+		var lower = minWidth == null ? 0 : minWidth;
 		var upper = 10 * maxWidth;
 		
 		var width = (upper + lower) / 2;
