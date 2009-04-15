@@ -499,7 +499,7 @@ class ArcticView {
 			}
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			if (mode == Destroy) {
-				return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };
+				return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: false };
 			}
 			#if flash9
 				var tf : flash.text.TextField = null;
@@ -511,7 +511,7 @@ class ArcticView {
 				} else if (mode == Reuse) {
 					tf = ArcticMC.get(clip, "tf");
 					if (tf == null) {
-						return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: wordWrap };						
+						return { clip: clip, width: 0.0, height: 0.0, growWidth: wordWrap, growHeight: false };						
 					}
 				}
 				if (embeddedFont) {
@@ -601,7 +601,7 @@ class ArcticView {
 					metricsCache.set(html, s);
 				}
 			}
-			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: wordWrap };
+			return { clip: clip, width: s.width, height: s.height, growWidth: wordWrap, growHeight: false };
 
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
 			return buildTextInput(p, childNo, mode, availableWidth, availableHeight, html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents);
