@@ -1760,10 +1760,10 @@ class ArcticView {
 			
 			var excessWidth = availableWidth * childGrowth;
 			var excessHeight = availableHeight * childGrowth;
-			if (scale >= 1.0 && metricsChild.growWidth) {
+			if (growWidth) {
 				excessWidth = availableWidth / scale;
 			}
-			if (scale >= 1.0 && metricsChild.growHeight) {
+			if (growHeight) {
 				excessHeight = availableHeight / scale;
 			}
 			//trace(availableWidth + "," + availableHeight + " " + metricsChild.width + "," + metricsChild.height + " " + scale + " " + excessWidth + "," + excessHeight);
@@ -1782,7 +1782,7 @@ class ArcticView {
 					ArcticMC.setXY(child.clip, x, y);
 				}
 			}
-			return { clip: clip, width: scale * child.width, height: scale * child.height, growWidth: growWidth, growHeight: growHeight };
+			return { clip: clip, width: if (growWidth) availableWidth else scale * child.width, height: if (growHeight) availableHeight else scale * child.height, growWidth: growWidth, growHeight: growHeight };
 		
 		case Transform(block, scaleX, scaleY):
 			var clip = getOrMakeClip(p, mode, childNo);

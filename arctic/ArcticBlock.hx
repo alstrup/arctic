@@ -131,8 +131,8 @@ enum ArcticBlock {
 
 	/**
 	 * Align a block. 
-	 * xpos: 0=left align, 0.5 = center horizontally, 1=right align, -1 = width to fit
-	 * ypos: 0=top align, 0.5 = center vertically, 1=bottom align, -1 = height o fit
+	 * xpos: 0=left align, 0.5 = center horizontally, 1=right align, -1 = width to fit, -2 = use width of child
+	 * ypos: 0=top align, 0.5 = center vertically, 1=bottom align, -1 = height to fit, -2 = use height of child
 	 */
 	Align(xpos : Float, ypos : Float, block : ArcticBlock);
 	
