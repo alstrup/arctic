@@ -169,8 +169,8 @@ enum ArcticBlock {
 	*/
 	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock);
 
-	/// Wrap the block in a window of the given size, and add a scrollbar if necessary
-    ScrollBar(block : ArcticBlock, fixedWidth : Float, fixedHeight : Float);
+	/// Add a scrollbar if necessary
+    ScrollBar(block : ArcticBlock);
 
 	/**
 	 * Make a block dragable by the mouse in the given directions.
