@@ -228,7 +228,7 @@ enum ArcticBlock {
 	 * See Arctic.makeSwitch for an simple wrapper that helps do this.
 	 */ 
 	Switch(blocks : Array<ArcticBlock>, current : Int, onInit : (Int -> Void) -> Void);
-
+	
 	/**
 	 * Name this block so that we can get to it, and update it using ArcticView.update
 	 * and ArcticView.getRawMovieClip. Has no visual effect besides this.
@@ -282,8 +282,9 @@ enum ArcticBlock {
 
 	/**
 	 * Scale a block - original size is 1.0. The scaling can be constrained to maxScale.
+	 * If childGrowth is 1.0, the child gets all available space for layout. Default is 0.
 	 */
-	Scale(block : ArcticBlock, ? maxScale : Float, ? alignX : Float, ? alignY : Float);
+	Scale(block : ArcticBlock, ? maxScale : Float, ? alignX : Float, ? alignY : Float, ?childGrowth : Float);
 	
 	/**
 	 * Transform a block

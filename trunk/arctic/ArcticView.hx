@@ -1180,37 +1180,70 @@ class ArcticView {
 				children.push({block: block, m: cm});
 			}
 			
-			var newRow = function (): {blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int} { 
-					return {  blocks: [], maxHeight: 0.0, width: 0.0, numberOfWideChildren: 0, numberOfTallChildren: 0 };
+			var newRow = function (): { blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int} { 
+				return { blocks: [], maxHeight: 0.0, width: 0.0, numberOfWideChildren: 0, numberOfTallChildren: 0 };
 			}
 			
-			var rows = [newRow()];
-			for (i in 0...children.length) {
-				var cm = children[i].m;
-				var block = children[i].block;
-				
-				var row = rows[rows.length - 1];
-				row.blocks.push(children[i]);
-				if (cm.growWidth) {
-					row.numberOfWideChildren++;
+			var breakIntoRows = function (maxWidth) : Array<{ blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int}> {
+				// Break the elements into separate rows
+				var rows = [newRow()];
+				for (i in 0...children.length) {
+					var cm = children[i].m;
+					var block = children[i].block;
+					
+					var row = rows[rows.length - 1];
+					row.blocks.push(children[i]);
+					if (cm.growWidth) {
+						row.numberOfWideChildren++;
+					}
+					if (cm.growHeight) {
+						row.numberOfTallChildren++;
+					}
+					// ignore Fillers
+					if (block != Filler) {
+						row.width += ( row.blocks.length > 1 ? xspacing : 0 ) + cm.width;
+						row.maxHeight = Math.max(row.maxHeight, cm.height);
+					}
+					
+					var next = i + 1;
+					while (next < children.length && children[next].block == Filler) {
+						next++;
+					}
+					if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {           
+						rows.push(newRow());
+					}
 				}
-				if (cm.growHeight) {
-					row.numberOfTallChildren++;
-				}
-				// ignore Fillers
-				if (block != Filler) {
-					row.width += ( row.blocks.length > 1 ? xspacing : 0 ) + cm.width;
-					row.maxHeight = Math.max(row.maxHeight, cm.height);
-				}
-				
-				var next = i + 1;
-				while (next < children.length && children[next].block == Filler) {
-					next++;
-				}
-				if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {           
-					rows.push(newRow());
-				}
+//				trace("Last row waste: " + (maxWidth - rows[rows.length - 1].width));
+				return rows;
 			}
+			
+			var bestWidth = 
+				// This does not work well enough yet
+				if (false) {
+					Layout.minimize(maxWidth / 2, maxWidth, 
+						function(f) { 
+							var rows = breakIntoRows(f);
+							var height = 0.0;
+							for (r in rows) {
+								height += r.maxHeight;
+							}
+							var cost = height * f;
+							if (height > availableHeight) {
+								// OK, we give a penalty
+								cost += 1000 * 1000;
+							}
+							
+							trace(f + " -> " + cost);
+							return cost;
+						}
+					);
+				} else {
+					maxWidth;
+				}
+			;
+//			trace(bestWidth);
+
+			var rows = breakIntoRows(bestWidth);
 			
 			// Next, determine how much space children get		
 			var numOfTallRows = 0;
@@ -1233,7 +1266,7 @@ class ArcticView {
 			var y = 0.0;
 			var i = 0;
 			var width = 0.0;
-			availableWidth = Math.min(availableWidth, maxWidth);
+			availableWidth = Math.min(availableWidth, bestWidth);
 			for (row in rows) {
 				var freeWidth = availableWidth - row.width;
 				if (freeWidth < 0) {
@@ -1270,10 +1303,10 @@ class ArcticView {
 			
 			if (mode == Reuse) {
 				// Find and hide any left over fillers from earlier
-				while (ArcticMC.has(clip, "c" + i)) {
+/*				while (ArcticMC.has(clip, "c" + i)) {
 					ArcticMC.setVisible(ArcticMC.get(clip, "c" + i), false);
 					++i;
-				}
+				}*/
 			}
 
 			m.width = width;
@@ -1671,10 +1704,12 @@ class ArcticView {
 			}
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Scale(block, maxScale, alignX, alignY):
+		case Scale(block, maxScale, alignX, alignY, childGrowth):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			
-			var metricsChild = build(block, clip, 0, 0, Metrics, 0);
+			if (childGrowth == null) childGrowth = 0.0;
+			
+			var metricsChild = build(block, clip, availableWidth * childGrowth, availableHeight * childGrowth, Metrics, 0);
 			var growWidth = true;
 			var growHeight = true;
 			
@@ -1710,8 +1745,8 @@ class ArcticView {
 				growHeight = false;
 			}
 			
-			var excessWidth = 0.0;
-			var excessHeight = 0.0;
+			var excessWidth = availableWidth * childGrowth;
+			var excessHeight = availableHeight * childGrowth;
 			if (scale >= 1.0 && metricsChild.growWidth) {
 				excessWidth = availableWidth / scale;
 			}
@@ -1739,15 +1774,11 @@ class ArcticView {
 		case Transform(block, scaleX, scaleY):
 			var clip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
-			if (mode == Create) {
+			if (mode != Metrics && mode != Destroy) {
 				ArcticMC.setScaleXY(child.clip, scaleX, scaleY);
 			}
-			if (mode == Metrics || mode == Destroy) {
-				return { clip: clip, width: child.width * scaleX, height: child.height * scaleY, growWidth: child.growWidth, growHeight: child.growHeight };
-			} else {
-				return { clip: clip, width: child.clip.width, height: child.clip.height, growWidth: child.growWidth, growHeight: child.growHeight };
-			}
-		
+			return { clip: clip, width: child.width * scaleX, height: child.height * scaleY, growWidth: child.growWidth, growHeight: child.growHeight };
+
 		#if flash9
 		case Rotate(block, angle):
 			var childW:Float = 0;
