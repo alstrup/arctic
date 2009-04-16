@@ -139,18 +139,33 @@ class Layout {
 			return value;
 		}
 		
-		while ((upper - lower > 0.9) && count < 20) {
-			var mid = (upper + lower) / 2.0;
-			var value = measure(mid);
-			var down = (mid + lower) / 2.0;
-			var downValue = measure(down);
-			var up = (upper + mid) / 2.0;
-			var upValue = measure(up);
-			if (downValue < upValue) {
-				upper = mid;
-			} else {
-				lower = mid;
+		var n = 9;
+		var dist = 1 / (n - 1);
+		while (count < 5) {
+			// First sample n points uniformly and record the minimum
+			var d : Float = (upper - lower);
+			if (d < 1) return bestWidth;
+			d = d * dist;
+			if (d < 1) d = 1;
+			var vs = [];
+			var min = null;
+			var mini : Null<Int> = null;
+			for (i in 0...n) {
+				var x = lower + i * d;
+				if (x <= maxWidth) {
+					var value = measure(x);
+					vs.push(value);
+					if (min == null || value < min) {
+						min = value;
+						mini = i;
+					}
+				}
 			}
+			var down = if (mini > 0) mini - 1 else mini;
+			var up = if (mini + 1 < n) mini + 1 else mini;
+			upper = lower + up * d;
+			lower = lower + down * d;
+			++count;
 		}
 		return bestWidth;
 	}

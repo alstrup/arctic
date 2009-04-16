@@ -869,20 +869,22 @@ class ArcticView {
 			var width = availableWidth;
 			var height = availableHeight;
             var child = build(block, clip, width, height, mode, 0);
-				width = Math.max(width, child.width);
-				height = Math.max(height, child.height);
+			width = Math.max(width, child.width);
+			if (xpos == -2) width = child.width;
+			height = Math.max(height, child.height);
+			if (ypos == -2) height = child.height;
 			if (mode != Metrics && mode != Destroy && child.clip != null) {
 				var x = 0.0;
-				if (xpos != -1.0 && availableWidth > child.width) {
+				if (xpos >= 0.0 && availableWidth > child.width) {
 					x = (availableWidth - child.width) * xpos;
 				}
 				var y = 0.0;
-				if (ypos != -1.0 && availableHeight > child.height) {
+				if (ypos >= 0.0 && availableHeight > child.height) {
 					y = (availableHeight - child.height) * ypos;
 				}
 				ArcticMC.setXY(child.clip, x, y);
 			}
-			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0 };
+			return { clip: clip, width: width, height: height, growWidth: xpos != -1.0, growHeight: ypos != -1.0};
 
 		case ConstrainWidth(minimumWidth, maximumWidth, block) :
 			// Special case: Nested constraints can be optimised a lot!
@@ -1110,6 +1112,7 @@ class ArcticView {
 				} else {
 					var h = childMetrics[i].height + if (childMetrics[i].growHeight) freeSpacePerChild else 0;
 					h = Math.max(0, h);
+					h = Math.min(availableHeight, h);
 					line = build(l, child, maxWidth, h, mode, i);
 				}
 				if (mode != Metrics && mode != Destroy && line.clip != null) {
@@ -1218,22 +1221,24 @@ class ArcticView {
 			}
 			
 			var bestWidth = 
-				// This does not work well enough yet
-				if (false) {
-					Layout.minimize(maxWidth / 2, maxWidth, 
-						function(f) { 
+				if (true) {
+					Layout.minimize(maxWidth * 0.45, maxWidth, 
+						function(f) {
 							var rows = breakIntoRows(f);
 							var height = 0.0;
 							for (r in rows) {
 								height += r.maxHeight;
 							}
 							var cost = height * f;
-							if (height > availableHeight) {
-								// OK, we give a penalty
-								cost += 1000 * 1000;
+							if (height > availableHeight && availableHeight > 0) {
+								// OK, we give a fixed penalty
+								cost += 3000 * 1000;
+								// and then based on how much we go outside
+								var outside = height - availableHeight;
+								cost += 10 * outside * f;
 							}
 							
-							trace(f + " -> " + cost);
+							// trace(f + " -> " + cost);
 							return cost;
 						}
 					);
@@ -1241,7 +1246,7 @@ class ArcticView {
 					maxWidth;
 				}
 			;
-//			trace(bestWidth);
+			// trace(bestWidth);
 
 			var rows = breakIntoRows(bestWidth);
 			
@@ -1311,6 +1316,8 @@ class ArcticView {
 
 			m.width = width;
 			m.height = y - yspacing;
+			
+			// trace(availableWidth + ',' + availableHeight + ' ' + m.width + ',' + m.height + ' ' + bestWidth);
 			return m;
 		
 		case Grid(cells, disableScrollbar, oddRowColor, evenRowColor, borderSize, borderColor):
@@ -1431,15 +1438,21 @@ class ArcticView {
 		
 			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
 
-		case ScrollBar(block, availableWidth, availableHeight):
+		case ScrollBar(block):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+			var height = child.height;
 			if (mode == Destroy) {
 				Scrollbar.removeScrollbar(clip, child.clip);
 			} else if (mode != Metrics) {
-				Scrollbar.drawScrollBar(clip, child.clip, availableWidth, availableHeight, child.height, 0);
+				if (availableHeight < height) {
+					Scrollbar.drawScrollBar(clip, child.clip, child.width, availableHeight, child.height, 0);
+					height = availableHeight;
+				} else {
+					Scrollbar.removeScrollbar(clip, child.clip);
+				}
 			}
-			return { clip: clip, width: availableWidth, height: availableHeight, growWidth: child.growWidth, growHeight: child.growHeight };
+			return { clip: clip, width: child.width, height: height, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag):
 			return buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag);
