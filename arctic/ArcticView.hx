@@ -1493,7 +1493,7 @@ class ArcticView {
 					);
 				}
 				//trace("explicit call");
-				onMove(null);
+				// onMove(null);
 			#elseif flash
 				
 				var onMove = function() {
@@ -2182,6 +2182,8 @@ class ArcticView {
 				hover.clip.mouseChildren = false;
 			}
 			if (mode == Create) {
+				var mouseDownInsideReceived = false;
+				
 				#if arcticevidence
 				var aem = ArcticEvidenceManager.get();
 				var abId = ArcticEvidenceManager.idFromArctic(block);
@@ -2192,6 +2194,10 @@ class ArcticView {
 					aem.registerReplayer(eventName, abId, action);
 					#end
 					clip.addEventListener(MouseEvent.MOUSE_UP, function(s) { 
+							if (!mouseDownInsideReceived) {
+								// We ignore this
+								return;
+							}
 							var m = ArcticMC.getMouseXY();
 							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
 							// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
@@ -2201,6 +2207,7 @@ class ArcticView {
 								#end
 								action(); 
 							}
+							mouseDownInsideReceived = false;
 						} ); 
 				}
 				if (actionExt != null) {
@@ -2226,21 +2233,23 @@ class ArcticView {
 					var eventName = "buttonclickxydown";
 					aem.registerReplayer(eventName, abId, actionExt);
 					#end
-					addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
-							if (ArcticMC.isActive(clip)) {
-								// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
-								// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
-								var m = ArcticMC.getMouseXY();
-								#if arcticevidence
-								aem.recordEvent(eventName, abId, 
-												[clip.mouseX, clip.mouseY, true,
-												 clip.hitTestPoint(m.x, m.y, true)]);
-								#end
-								actionExt(clip.mouseX, clip.mouseY, true,
-										  clip.hitTestPoint(m.x, m.y, true));
-							}
-						} );
 				}
+				addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_DOWN, function(s) { 
+						if (ArcticMC.isActive(clip)) {
+							var m = ArcticMC.getMouseXY();
+							mouseDownInsideReceived = clip.hitTestPoint(m.x, m.y, true);
+							// TODO: To get pictures with alpha-channels to work correctly, we have to use some BitmapData magic
+							// http://dougmccune.com/blog/2007/02/03/using-hittestpoint-or-hittest-on-transparent-png-images/
+							#if arcticevidence
+							aem.recordEvent(eventName, abId, 
+											[clip.mouseX, clip.mouseY, true,
+											 clip.hitTestPoint(m.x, m.y, true)]);
+							#end
+							if (actionExt != null) {
+								actionExt(clip.mouseX, clip.mouseY, true, mouseDownInsideReceived);
+							}
+						}
+					} );
 				if (hasHover) {
 					addStageEventListener( clip, clip.stage, MouseEvent.MOUSE_MOVE, function (s) {
 							var m = ArcticMC.getMouseXY();
