@@ -114,4 +114,44 @@ class Layout {
 		}
 		return scale;
 	}
+	
+	/// A general minimizer
+	static public function minimize(minWidth : Float, maxWidth : Float, measureFn : Float -> Float) : Float {
+		var lower = minWidth;
+		var upper = maxWidth;
+		var count = 0;
+		var bestValue : Null<Float> = null;
+		var bestWidth : Null<Float> = null;
+		
+		var measureCache = new IntHash<Float>();
+		var measure = function(v) {
+			var iv = Math.round(v);
+			var cached = measureCache.get(iv);
+			if (cached != null) {
+				return cached;
+			}
+			var value = measureFn(iv);
+			measureCache.set(iv, value);
+			if (bestValue == null || value < bestValue) {
+				bestValue = value;
+				bestWidth = iv;
+			}
+			return value;
+		}
+		
+		while ((upper - lower > 0.9) && count < 20) {
+			var mid = (upper + lower) / 2.0;
+			var value = measure(mid);
+			var down = (mid + lower) / 2.0;
+			var downValue = measure(down);
+			var up = (upper + mid) / 2.0;
+			var upValue = measure(up);
+			if (downValue < upValue) {
+				upper = mid;
+			} else {
+				lower = mid;
+			}
+		}
+		return bestWidth;
+	}
 }
