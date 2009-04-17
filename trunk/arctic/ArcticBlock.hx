@@ -151,7 +151,7 @@ enum ArcticBlock {
 	 * no matter how high the LineStack is, then pass false as the last parameter. The default
 	 * is to automatically add a scrollbar if needed.
 	 */
-	LineStack(blocks: Array<ArcticBlock>, ?ensureVisibleIndex: Null<Int>, ?useScrollbar : Bool, ?useIntergerFillings: Bool);
+	LineStack(blocks: Array<ArcticBlock>, ?ensureVisibleIndex: Null<Int>, ?useScrollbar : Bool, ?useIntergerFillings: Bool, ?lineAlign : Float);
 	
 	/**
 	 * A 2-d grid of block. For now, this does not support resizing or horizontal scrollbar.

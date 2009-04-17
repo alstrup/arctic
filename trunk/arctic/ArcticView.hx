@@ -927,7 +927,7 @@ class ArcticView {
 				child.height = maximumHeight;
 			}
 			return { clip: child.clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: false };
-			
+		
 		case Crop(width, height, block):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, p, availableWidth, availableHeight, mode, childNo);
@@ -1015,7 +1015,7 @@ class ArcticView {
 			m.height = h;
 			return m;
 
-		case LineStack(blocks, ensureVisibleIndex, disableScrollbar, useIntegerFillings):
+		case LineStack(blocks, ensureVisibleIndex, disableScrollbar, useIntegerFillings, lineAlign):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// Get child 0
@@ -1050,7 +1050,7 @@ class ArcticView {
 					maxWidth = Math.max(maxWidth, rm.width);
 				}
 			}
-
+			
 			if (m.growWidth) {
 				maxWidth = Math.max(maxWidth, availableWidth);
 			}
@@ -1105,7 +1105,6 @@ class ArcticView {
 			var noNeedForNewMetrics = mode == Metrics && availableWidth == maxWidth;
 			
 			for (l in blocks) {
-				
 				var line;
 				if (noNeedForNewMetrics && !childMetrics[i].growHeight) {
 					line = childMetrics[i];
@@ -1133,6 +1132,16 @@ class ArcticView {
 			}
 			if (i == ensureVisibleIndex) {
 				ensureY = y;
+			}
+			
+			// Do the line alignment
+			if (mode != Metrics && mode != Destroy && lineAlign != null) {
+				for (c in children) {
+					if (c.clip != null) {
+						var xc = (w - c.width) * lineAlign;
+						ArcticMC.setXY(c.clip, xc, null);
+					}
+				}
 			}
 			
 			if (disableScrollbar != false) {
@@ -1216,7 +1225,6 @@ class ArcticView {
 						rows.push(newRow());
 					}
 				}
-//				trace("Last row waste: " + (maxWidth - rows[rows.length - 1].width));
 				return rows;
 			}
 			
@@ -1230,15 +1238,24 @@ class ArcticView {
 								height += r.maxHeight;
 							}
 							var cost = height * f;
-							if (height > availableHeight && availableHeight > 0) {
-								// OK, we give a fixed penalty
-								cost += 3000 * 1000;
-								// and then based on how much we go outside
-								var outside = height - availableHeight;
-								cost += 10 * outside * f;
+							
+							if (availableHeight > 0) {
+								// Try to come up with a measure that gives a penalty for wrong aspect ratios
+								// However, this penalty should not trumpf reduction of waste
+								// Some aspect ratio difference penalty
+								var aspectDiff = Math.min(2.0, 1.0 + Math.abs((availableWidth / availableHeight) - (f / height)));
+								cost += (aspectDiff * 100 * 100);
+							
+								if (height > availableHeight) {
+									// OK, we give a fixed penalty
+									cost += 3000 * 1000;
+									// and then based on how much we go outside
+									var outside = height - availableHeight;
+									cost += 10 * outside * f;
+								}
 							}
 							
-							// trace(f + " -> " + cost);
+							//trace(f + " -> " + cost);
 							return cost;
 						}
 					);
@@ -1246,9 +1263,9 @@ class ArcticView {
 					maxWidth;
 				}
 			;
-			// trace(bestWidth);
 
 			var rows = breakIntoRows(bestWidth);
+			//trace(bestWidth);
 			
 			// Next, determine how much space children get		
 			var numOfTallRows = 0;
