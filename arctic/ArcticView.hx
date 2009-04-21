@@ -2737,6 +2737,7 @@ class ArcticView {
 	
 	#if (flash9||neko)
 	private function addStageEventListener(refObj : Dynamic, d : EventDispatcher, event : String, handler : Dynamic) {
+		if (d == null) return;
 		d.addEventListener(event, handler);
 		stageEventHandlers.push( { obj: d, event: event, handler: handler, ref: refObj });
 	}
