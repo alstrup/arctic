@@ -3,7 +3,7 @@ import arctic.ArcticBlock;
 import arctic.ArcticMC;
 import haxe.Timer;
 
-#if flash9
+#if (flash9||neko)
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.display.DisplayObjectContainer;
@@ -552,7 +552,7 @@ class ArcticView {
 				tf.htmlText = html;
 				tf.wordWrap = wordWrap;
 			#elseif neko
-				var tf : neash.text.TextField;
+				var tf : neash.text.TextField = null;
 				if (mode == Create || mode == Metrics) {
 					tf = new neash.text.TextField();
 				} else if (mode == Reuse) {
@@ -1919,7 +1919,7 @@ class ArcticView {
 			// Should we clear out event handlers as well?
 			return { clip: clip, width: 0.0, height: 0.0, growWidth: false, growHeight: false };
 		}
-		#if flash9
+		#if (flash9 || neko)
 			var txtInput : flash.text.TextField;
 			if (mode == Create) {
 				txtInput = new flash.text.TextField();
