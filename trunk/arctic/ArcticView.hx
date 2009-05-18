@@ -1162,13 +1162,23 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
-		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller):
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
 			if (maxWidth == null) {
 				maxWidth = availableWidth;
 				m.growWidth = true;
+			}
+			
+			if (lowerWidth == null) {
+				lowerWidth = 0.45;
+			}
+			else if (lowerWidth < 0) {
+				lowerWidth = 0;
+			}
+			else if (lowerWidth > 1) {
+				lowerWidth = 1;
 			}
 			
 			if (blocks.length == 0) {
@@ -1230,7 +1240,7 @@ class ArcticView {
 			
 			var bestWidth = 
 				if (true) {
-					Layout.minimize(maxWidth * 0.45, maxWidth, 
+					Layout.minimize(maxWidth * lowerWidth, maxWidth, 
 						function(f) {
 							var rows = breakIntoRows(f);
 							var height = 0.0;
