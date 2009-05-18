@@ -121,7 +121,7 @@ class Layout {
 		var upper = maxWidth;
 		var count = 0;
 		var bestValue : Null<Float> = null;
-		var bestWidth : Null<Float> = null;
+		var bestWidth : Null<Float> = maxWidth;
 		
 		var measureCache = new IntHash<Float>();
 		var measure = function(v) {
