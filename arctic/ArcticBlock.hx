@@ -161,13 +161,15 @@ enum ArcticBlock {
 	
 	/**
 	* Places the first block at the top-left corner, then the next block will be placed to the right. 
-	* The layout continues placing blocks along the x axis until a block reaches the maxWidth, then 
+	* The layout continues placing blocks along the x axis until a block reaches the bestWidth, then 
 	* the layout will begin placing blocks at the next row.
+	* Best width is choosen from [lowerWidth * maxWidth ... maxWidth] by minimizing of block area.
 	* 	eolFiller: optional block, which will be placed into the end of each row if there is some 
 	* 			free space
 	* If maxWidth is null, the block will grow and use all available width.
+	* lowerWidth should be in [0 ... 1] range. By default its value is 0.45
 	*/
-	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock);
+	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float);
 
 	/// Add a scrollbar if necessary
     ScrollBar(block : ArcticBlock);
