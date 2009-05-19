@@ -187,7 +187,7 @@ enum ArcticBlock {
 	/**
 	 * Set the cursor shape to a block when the mouse is within the given block.
 	 * If you want the cursor block to be in ADDITION to the normal cursor, set
-	 * keepNormalCursor to true. This is useful for toolips, see Arctic.makeTooltip.
+	 * keepNormalCursor to true. This is useful for tooltips, see Arctic.makeTooltip.
 	 * Per default, the normal cursor is hidden when the custom cursor is visible.
 	 */
 	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Null<Bool>);
