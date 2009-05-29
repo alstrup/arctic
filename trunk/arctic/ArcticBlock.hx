@@ -116,7 +116,7 @@ enum ArcticBlock {
 	/**
 	 * Clip the block to a certain size
 	 */
-	Crop(width : Null<Float>, height : Null<Float>, block : ArcticBlock);
+	Crop(x : Float, y : Float, width : Null<Float>, height : Null<Float>, block : ArcticBlock);
 	
 	/**
 	 * Filler is greedy empty space, that eats space when put in a LineStack or ColumnStack.
