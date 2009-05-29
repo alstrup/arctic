@@ -930,13 +930,13 @@ class ArcticView {
 		
 		case Crop(x, y, width, height, block):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
-			var child = build(block, p, availableWidth, availableHeight, mode, childNo);
+			var child = build(block, clip, availableWidth, availableHeight, mode, childNo);
 			var w = child.width;
 			var h = child.height;
 			if (width != null) w = width;
 			if (height != null) h = height;
 			if (mode == Create) {
-				ArcticMC.setScrollRect(child.clip, new ArcticRectangle(x, y, width, height));
+				ArcticMC.setScrollRect(clip, new ArcticRectangle(x, y, width, height));
 			}
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
