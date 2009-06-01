@@ -142,7 +142,7 @@ class Layout {
 		var n = 9;
 		var dist = 1 / (n - 1);
 		while (count < 5) {
-			// First sample n points uniformly and record the minimum
+			// Sample n points uniformly and record the minimum interval
 			var d : Float = (upper - lower);
 			if (d < 1) return bestWidth;
 			d = d * dist;
@@ -168,5 +168,38 @@ class Layout {
 			++count;
 		}
 		return bestWidth;
+	}
+	
+	// Finds the value that best fits in the given target area such that downscaling will be minized
+	static public function aspectFit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, valToSize : Float -> { width : Float, height : Float }) : Float {
+		return minimize(minimum, maximum, function(w) {
+			var size = valToSize(w);
+			var xscale = size.width / targetWidth;
+			var yscale = size.height / targetHeight;
+			var scale = Math.max(xscale, yscale);
+			// trace(w + " -> " + size.width + "x" + size.height + " in " + targetWidth + "," + targetHeight + " -> " + xscale + "," + yscale + " -> " + scale);
+			return scale;
+		});
+	}
+	
+	/**
+	 * Optimise a parameter to give the best fit in the given target area, minimizing downscaling.
+	 */ 
+	static public function fit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, getBlock : Float -> ArcticBlock) : ArcticBlock {
+		var size2width = function(w) {
+			return getSize(getBlock(w), { width: targetWidth, height: targetHeight});
+		};
+
+		// Find the best value
+		var w = aspectFit(targetWidth, targetHeight, minimum, maximum, size2width);
+		
+		// Then find the corresponding scaling
+		var size = size2width(w);
+		var scale = targetWidth / size.width;
+		scale = Math.min(targetHeight / size.height, scale);
+		scale = Math.min(1.0, scale);
+
+		// And build the final result
+		return Transform(getBlock(w), scale, scale);
 	}
 }
