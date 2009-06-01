@@ -940,7 +940,7 @@ class ArcticView {
 			}
 			return { clip: clip, width: w, height: h, growWidth: false, growHeight: false };
 
-		case ColumnStack(blocks, useIntegerFillings):
+		case ColumnStack(blocks, useIntegerFillings, rowAlign):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			// The number of children which wants to grow (including our own fillers)
@@ -992,6 +992,7 @@ class ArcticView {
 			var x = 0.0;
 			var i = 0;
 			var firstGrowWidthChild = true;
+			var children = [];
 			for (l in blocks) {
 				var child;
 				if (noNeedForNewMetrics && !childMetrics[i].growWidth) {
@@ -1001,6 +1002,7 @@ class ArcticView {
 					h = Math.max(0, h);
 					child = build(l, clip, w, maxHeight, mode, i);
 				}
+				children.push(child);
 				
 				if (mode != Metrics && mode != Destroy && child.clip != null) {
 					ArcticMC.setXY(child.clip, x, null);
@@ -1011,6 +1013,18 @@ class ArcticView {
 				}
    				++i;
 			}
+			
+			// Do the row alignment
+			if (mode != Metrics && mode != Destroy && rowAlign != null) {
+				for (c in children) {
+					if (c.clip != null) {
+						var yc = (h - c.height) * rowAlign;
+						ArcticMC.setXY(c.clip, null, yc);
+					}
+				}
+			}
+			
+					
 			m.width = x;
 			m.height = h;
 			return m;

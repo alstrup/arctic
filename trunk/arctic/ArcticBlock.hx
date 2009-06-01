@@ -141,7 +141,7 @@ enum ArcticBlock {
 	 * height of the blocks. If there is an unconstrained filler in the column stack (recursively)
 	 * this block will use all available width.
 	 */
-	ColumnStack(columns: Array<ArcticBlock>, ?useIntergerFillings: Bool);
+	ColumnStack(columns: Array<ArcticBlock>, ?useIntegerFillings: Bool, ?rowAlign : Float);
 
 	/**
 	 * A bunch of blocks stacked on top of each other. The width is the maximum width
