@@ -351,7 +351,7 @@ class ArcticView {
 			var x = xspacing + thickness;
 			var y = yspacing + thickness;
 			if (x != 0 || y != 0) {
-				block = Border(x, y, block);
+				block = Border(x + 0.5, y + 0.5, block);
 			}
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if ((mode == Create || mode == Reuse) && thickness != 0) {
