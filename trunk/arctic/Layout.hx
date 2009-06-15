@@ -202,4 +202,32 @@ class Layout {
 		// And build the final result
 		return Transform(getBlock(w), scale, scale);
 	}
+	
+	/**
+	 * Trying to fit text in width/height block. 
+	 * If it is impossible a text block with proportion of given width/height is made, which then is scaled to given sizes.
+	 */ 
+	static public function makeTextWithProportions( text : String, size : Float, color : String, font : String,
+													width : Float, height : Float,
+													?alignX : Float = 0.5, ?alignY : Float = 0.5) : ArcticBlock {
+		var block = Arctic.makeText('<p align="center">' + text + '</p>', size, color, font, true, true, false );
+		
+		var cur_width = width;
+		var testblock = ConstrainWidth(cur_width, cur_width, block);
+		var cur_height = getSize(testblock, { width: 0.0, height: 0.0 } ).height;
+		
+		if (cur_height > height) {
+			var q = width / height;
+			var step = width / 20;
+			while (q > cur_width / cur_height ) {
+				cur_width += step;
+				testblock = ConstrainWidth(cur_width, cur_width, block);
+				cur_height = getSize(testblock, { width: 0.0, height: 0.0 } ).height;
+			}
+		}
+		
+		var htmlText = '<p align="center"><font face="' + font + '" size="' + size + '" color="' + color + '">' + text + '</font></p>';
+		var fitText = ConstrainWidth(cur_width, cur_width, Align(alignX, alignY, makeTextFit(htmlText, cur_width, cur_height, true, false)));
+		return Arctic.fixSize(width, height, Scale(fitText));
+	}
 }
