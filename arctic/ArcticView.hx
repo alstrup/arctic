@@ -634,13 +634,16 @@ class ArcticView {
 							var dis = loader.contentLoaderInfo;
 							var request = new flash.net.URLRequest(Arctic.baseurl + url);
 						
+							var me = this;
 							dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
 								trace("[ERROR] IO Error with " + url + ": " + event.text);
+								if (me.pictureLoadedFn != null) {
+									me.pictureLoadedFn(--me.pendingPictureRequests);
+								}
 							});
 							dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
 								trace("[ERROR] Security Error with " + url + ": " + event.text);						
 							});
-							var me = this;
 												
 							dis.addEventListener(flash.events.Event.COMPLETE, function(event : flash.events.Event) {
 								try {
