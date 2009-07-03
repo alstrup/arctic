@@ -121,7 +121,7 @@ class ArcticEvidenceManager {
 		case Wrap(blocks, maxWidth, xspacing, yspacing, endOfLineFiller, lowerWidth): "wrap";
 		case ScrollBar(block, availableWidth, availableHeight): "scrollbar(" + id(block) + ")";
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag): "drag(" + id(block) + ")";
-		case Cursor(block, cursor, keepNormalCursor): "cursor(" + id(block) + ")";
+		case Cursor(block, cursor, keepNormalCursor, showFullCursor): "cursor(" + id(block) + ")";
 		case Offset(dx, dy, block): "offset(" + id(block) + ")";
 		case OnTop(base, overlay) : "ontop(" + id(base) + "," + id(overlay) + ")";
 		case Id(i, block): "id" + i + "(" + id(block) + ")";

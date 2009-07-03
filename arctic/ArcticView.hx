@@ -1501,7 +1501,7 @@ class ArcticView {
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag):
 			return buildDragable(p, childNo, mode, availableWidth, availableHeight, stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag);
 
-		case Cursor(block, cursor, keepNormalCursor) :
+		case Cursor(block, cursor, keepNormalCursor, showFullCursor) :
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = build(block, clip, availableWidth, availableHeight, mode, 0);
 			if (mode == Metrics) {
@@ -1538,6 +1538,63 @@ class ArcticView {
 			// We need to construct the cursor lazily because we want it to come on top of everything
 			var cursorMcFn = function(n) { return me.build(cursor, me.parent, 0, 0, Create, n);};
 			var keep = if (keepNormalCursor == null) true else keepNormalCursor;
+			
+			if (showFullCursor == null) showFullCursor = false;
+			var shiftX = 0.0;
+			var shiftY = 0.0;
+			// process all top nested Offsets for better calculating cursor position with showFullCursor turned on
+			// e.g. Offset(dx, dy, Offset(ddx, ddy, some_block)) will be replaced with some_block,
+			// shiftX will be equal dx + ddx, shiftY will be equal dy + ddy
+			while (true) {
+				switch (cursor) {
+					case Offset(dx, dy, block) :
+						shiftX += dx;
+						shiftY += dy;
+						cursor = block;
+					default:
+						break;
+				}
+			}
+			
+			var getClipX = function (cursor : arctic.ArcticMovieClip) : Float {
+				var mouseX = 0.0;
+				#if flash9
+					mouseX = me.parent.mouseX;
+				#elseif flash
+					mouseX = me.parent._xmouse;
+				#end
+				
+				var clipX = mouseX + shiftX;
+				// if cursor block should fully be seen and it doesn't fit width of base clip
+				// (i.e. cursor juts out on the right side of base clip) and cursor better fits
+				// base width if it will be placed left to mouse cursor, then
+				// place cursor block left to mouse cursor
+				if (showFullCursor && clipX + cursor.width > me.base.width + me.base.x
+					&& mouseX - cursor.width - shiftX >= - cursor.width / 2) {
+						clipX = mouseX - cursor.width - shiftX;
+				}
+				return clipX;
+			}
+			var getClipY = function (cursor : arctic.ArcticMovieClip) : Float {
+				var mouseY = 0.0;
+				#if flash9
+					mouseY = me.parent.mouseY;
+				#elseif flash
+					mouseY = me.parent._ymouse;
+				#end
+
+				var clipY = mouseY + shiftY;
+				// if cursor block should fully be seen and it doesn't fit height of base clip
+				// (i.e. cursor juts out on the bottom side of base clip) and cursor better fits
+				// base height if it will be placed left to mouse cursor, then
+				// place cursor block above mouse cursor
+				if (showFullCursor && clipY + cursor.height > me.base.height + me.base.y
+					&& mouseY - cursor.height - shiftY >= - cursor.height / 2) {
+						clipY = mouseY - cursor.height - shiftY;
+				}
+				return clipY;
+			}
+
 			#if flash9
 				var onMove = function (s) {
 					//trace("on move");
@@ -1562,8 +1619,8 @@ class ArcticView {
 							return;
 						}
 						cursorMc.clip.visible = true;
-						cursorMc.clip.x = me.parent.mouseX;
-						cursorMc.clip.y = me.parent.mouseY;
+						cursorMc.clip.x = getClipX(cursorMc.clip);
+						cursorMc.clip.y = getClipY(cursorMc.clip);
 						return;
 					} else {
 						if (cursorMc != null && cursorMc.clip != null) {
@@ -1596,8 +1653,8 @@ class ArcticView {
 									cursorMcFn = null;
 								}
 								cursorMc.clip._visible = true;
-								cursorMc.clip._x = me.parent._xmouse;
-								cursorMc.clip._y = me.parent._ymouse;
+								cursorMc.clip._x = getClipX(cursorMc.clip);
+								cursorMc.clip._y = getClipY(cursorMc.clip);
 								ArcticMC.showMouse(keep);
 								return;
 							} else {

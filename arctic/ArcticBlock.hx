@@ -189,8 +189,13 @@ enum ArcticBlock {
 	 * If you want the cursor block to be in ADDITION to the normal cursor, set
 	 * keepNormalCursor to true. This is useful for tooltips, see Arctic.makeTooltip.
 	 * Per default, the normal cursor is hidden when the custom cursor is visible.
+	 * If showFullCursor is true and cursor block doesn't fit the base clip width,
+	 * cursor block will be placed left to mouse cursor (distance to cursor left side will be
+	 * equal shiftX, where shiftX is sum of all top nested Offsets(dx, dy, block) or 0 if
+	 * there is no top Offset. Same for height.
+	 * Be aware of using showFullCursor with negative Offsets! In some cases it will not do any changes.
 	 */
-	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Null<Bool>);
+	Cursor(block : ArcticBlock, cursor : ArcticBlock, ?keepNormalCursor : Null<Bool>, ?showFullCursor : Null<Bool> );
 
 	/**
 	 * Translate a block in some direction - notice layout does not take this offset
