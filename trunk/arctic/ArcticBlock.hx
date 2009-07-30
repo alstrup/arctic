@@ -299,8 +299,8 @@ enum ArcticBlock {
 	Transform(block : ArcticBlock, scaleX : Float, scaleY : Float);
 	
 	#if flash9
-	/// Rotates a block. The angle is in degrees
-	Rotate(block : ArcticBlock, ?angle : Float);
+	/// Rotates a block. The angle is in degrees. If keepOrigin is true, we do not translate or enlarge the result accordingly
+	Rotate(block : ArcticBlock, ?angle : Float, ?keepOrigin : Bool);
 	#end
 
 	/// An animation block

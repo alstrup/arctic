@@ -1894,7 +1894,17 @@ class ArcticView {
 			return { clip: clip, width: child.width * scaleX, height: child.height * scaleY, growWidth: child.growWidth, growHeight: child.growHeight };
 
 		#if flash9
-		case Rotate(block, angle):
+		case Rotate(block, angle, keepOrigin):
+		
+			if (keepOrigin) {
+				var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
+				var child = build(block, clip, availableWidth, availableHeight, mode, 0);
+				if (mode != Destroy && child.clip != null) {
+					child.clip.rotation = angle;
+				}
+				return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight};
+			}
+				
 			var childW:Float = 0;
 			var childH:Float = 0;
 			var minx:Float = 0;
