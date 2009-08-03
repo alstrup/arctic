@@ -202,6 +202,23 @@ class Layout {
 		// And build the final result
 		return Transform(getBlock(w), scale, scale);
 	}
+
+	/**
+	 * Find the width of the largest single word.
+	 */
+	static public function maxWordWidth(text : String, size : Float, font : String, ?isEmbedded : Bool) : Float {
+		var length = 0.0;
+		for (word in ~/[^a-zA-Z0-9']+/g.split(text)) {
+			if (word != "") {
+				// Pad the word to provide a small safety area:
+				var block = Arctic.makeText("X"+word, size, null, font, isEmbedded, false, false);
+				var cur_width = getSize(block, { width: 0.0, height: 0.0 }).width;
+				if (cur_width > length)
+					length = cur_width;
+			}
+		}
+		return length;
+	}
 	
 	/**
 	 * Trying to fit text in width/height block. 
@@ -212,7 +229,8 @@ class Layout {
 													?alignX : Float = 0.5, ?alignY : Float = 0.5) : ArcticBlock {
 		var block = Arctic.makeText('<p align="center">' + text + '</p>', size, color, font, true, true, false );
 		
-		var cur_width = width;
+		var min_width = maxWordWidth(text, size, font, true);
+		var cur_width = (min_width < width ? width : min_width);
 		var testblock = ConstrainWidth(cur_width, cur_width, block);
 		var cur_height = getSize(testblock, { width: 0.0, height: 0.0 } ).height;
 		
@@ -227,7 +245,7 @@ class Layout {
 		}
 		
 		var htmlText = '<p align="center"><font face="' + font + '" size="' + size + '" color="' + color + '">' + text + '</font></p>';
-		var fitText = ConstrainWidth(cur_width, cur_width, Align(alignX, alignY, makeTextFit(htmlText, cur_width, cur_height, true, false)));
+		var fitText = ConstrainWidth(cur_width, cur_width, Align(alignX, alignY, makeTextFit(htmlText, cur_width, cur_height, true, false, min_width)));
 		return Arctic.fixSize(width, height, Scale(fitText));
 	}
 }
