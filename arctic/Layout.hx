@@ -226,8 +226,9 @@ class Layout {
 	 */ 
 	static public function makeTextWithProportions( text : String, size : Float, color : String, font : String,
 													width : Float, height : Float,
-													?alignX : Float = 0.5, ?alignY : Float = 0.5) : ArcticBlock {
-		var block = Arctic.makeText('<p align="center">' + text + '</p>', size, color, font, true, true, false );
+													?alignX : Float = 0.5, ?alignY : Float = 0.5,
+													?textAlign : String = "center") : ArcticBlock {
+		var block = Arctic.makeText('<p align="' + textAlign + '">' + text + '</p>', size, color, font, true, true, false );
 		
 		var min_width = maxWordWidth(text, size, font, true);
 		var cur_width = (min_width < width ? width : min_width);
@@ -244,7 +245,7 @@ class Layout {
 			}
 		}
 		
-		var htmlText = '<p align="center"><font face="' + font + '" size="' + size + '" color="' + color + '">' + text + '</font></p>';
+		var htmlText = '<p align="' + textAlign + '"><font face="' + font + '" size="' + size + '" color="' + color + '">' + text + '</font></p>';
 		var fitText = ConstrainWidth(cur_width, cur_width, Align(alignX, alignY, makeTextFit(htmlText, cur_width, cur_height, true, false, min_width)));
 		return Arctic.fixSize(width, height, Scale(fitText));
 	}
