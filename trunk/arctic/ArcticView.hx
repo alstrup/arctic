@@ -805,6 +805,7 @@ class ArcticView {
 			} else if (mode == Destroy) {
 				// Get rid of the old stuff
 				mutableBlock.destroy();
+				mutableBlock.arcticUpdater = null;
 				// And then we stop!
 				return { clip: clip, width : 0.0, height: 0.0, growWidth: false, growHeight: false };
 			}
