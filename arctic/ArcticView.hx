@@ -823,6 +823,7 @@ class ArcticView {
 			} else if (mode == Reuse) {
 				cur = ArcticMC.get(clip, "current");
 			} else if (mode == Destroy) {
+				onInit(function(current : Int) {});
 				ArcticMC.delete(clip, "current");
 			}
 			var width = 0.0;
