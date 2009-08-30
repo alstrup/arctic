@@ -13,7 +13,7 @@ class Scrollbar {
     public static function drawScrollBar(parent : ArcticMovieClip, clip : ArcticMovieClip, availableWidth : Float,
 			 availableHeight : Float, realHeight : Float, ensureYVisible : Float) {
 		//trace("Make scrollbar");
-		var scrollbarWidth = 17; // How wide the scrollbar is
+		var scrollbarWidth = 13; // How wide the scrollbar is
 		var buttonMovement = 15; // How many pixels we move when a scrollbar button is clicked
 		
 		var currentY = ensureYVisible;
@@ -66,8 +66,8 @@ class Scrollbar {
 		}
 		
 		// Metrics
-		var buttonHeight = scrollbarWidth - 4;
-		var sliderHeight = availableHeight - 2 * scrollbarWidth + 4;
+		var buttonHeight = scrollbarWidth;
+		var sliderHeight = availableHeight - 2 * scrollbarWidth;
 		var handleSize = Math.max(buttonHeight, sliderHeight * (availableHeight / realHeight));
 		
 		// Design the slider part
@@ -113,15 +113,11 @@ class Scrollbar {
 			OnTop(
 				// The buttons
 				Offset(availableWidth, 0, 
-					Frame(1, 0xeeede5,
-						Frame(1, 0xffffff, 
-							LineStack( [
-								makeButton(buttonHeight, true, onUp),
-								sliderBlock,
-								makeButton(buttonHeight, false, onDown)
-							] ) 
-						)
-					)
+					LineStack( [
+						makeButton(buttonHeight, true, onUp),
+						sliderBlock,
+						makeButton(buttonHeight, false, onDown)
+					] ) 
 				),
 				MouseWheel(
 					Fixed(availableWidth, availableHeight),
