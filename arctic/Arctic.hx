@@ -25,6 +25,8 @@ class Arctic {
 
 	/// For redirecting all net requests
 	static public var baseurl = "";
+	
+	static public var scrollbarWidth = 13;
 
 	/// Make a text using the given parameters. Default color is black. If font is omitted, the default font is used
 	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>) {

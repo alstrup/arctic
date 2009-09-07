@@ -1169,7 +1169,7 @@ class ArcticView {
 					if (mode != Metrics) {
 						Scrollbar.drawScrollBar(clip, child, w, availableHeight, y, ensureY);
 					}
-					w += 13;
+					w += Arctic.scrollbarWidth;
 					y = availableHeight;
 				} else {
 					if (mode != Metrics) {
