@@ -2627,7 +2627,15 @@ class ArcticView {
 				}
 				var dx = clip.stage.mouseX - dragX;
 				var dy = clip.stage.mouseY - dragY;
-				doDrag(dx, dy);
+				
+				// Make a correction for scaling
+				var zero = new Point(0, 0);
+				zero = clip.localToGlobal(zero);
+				var p = new Point(1, 1);
+				p = clip.localToGlobal(p);
+				p = p.subtract(zero);
+				
+				doDrag(dx / p.x, dy / p.y);
 				dragX = clip.stage.mouseX;
 				dragY = clip.stage.mouseY;
 			}
