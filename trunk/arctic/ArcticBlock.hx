@@ -168,8 +168,9 @@ enum ArcticBlock {
 	* 			free space
 	* If maxWidth is null, the block will grow and use all available width.
 	* lowerWidth should be in [0 ... 1] range. By default its value is 0.45
+	* verticalAlignment and defines blocks alignment in the row. Could be: Top, Bottom, Center
 	*/
-	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float);
+	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : FloatWrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float, ?verticalAlignment : VerticalAlignment ););
 
 	/// Add a scrollbar if necessary
     ScrollBar(block : ArcticBlock);
@@ -543,4 +544,10 @@ enum AnimateComponent {
 	ScaleX( f : Float -> Float);
 	ScaleY( f : Float -> Float);
 	Rotation( f : Float -> Float);
+}
+
+enum VerticalAlignment {
+	Top;
+	Bottom;
+	Center;
 }

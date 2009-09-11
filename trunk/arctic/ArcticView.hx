@@ -1181,7 +1181,7 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
-		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth):
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
@@ -1209,6 +1209,10 @@ class ArcticView {
 			}
 			if (yspacing == null) {
 				yspacing = 0;
+			}
+			
+			if (verticalAlignment == null) {
+				verticalAlignment = Top;
 			}
 			
 			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
@@ -1338,7 +1342,12 @@ class ArcticView {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
 					var child = build(entry.block, clip, w, h, mode, i);
 					if (mode != Metrics && mode != Destroy && child.clip != null) {
-						ArcticMC.setXY(child.clip, x, y);
+						var alignedY = switch (verticalAlignment) {
+							case Top: y;
+							case Bottom: y + (h-entry.m.height);
+							case Center: y + (h-entry.m.height);
+						}
+						ArcticMC.setXY(child.clip, x, alignedY);
 						if (mode == Reuse) {
 							ArcticMC.setVisible(child.clip, true);
 						}
