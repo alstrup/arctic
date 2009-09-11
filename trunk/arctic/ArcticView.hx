@@ -1212,7 +1212,7 @@ class ArcticView {
 			}
 			
 			if (verticalAlignment == null) {
-				verticalAlignment = Top;
+				verticalAlignment = 0;
 			}
 			
 			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
@@ -1342,12 +1342,8 @@ class ArcticView {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
 					var child = build(entry.block, clip, w, h, mode, i);
 					if (mode != Metrics && mode != Destroy && child.clip != null) {
-						var alignedY = switch (verticalAlignment) {
-							case Top: y;
-							case Bottom: y + (h-entry.m.height);
-							case Center: y + (h-entry.m.height);
-						}
-						ArcticMC.setXY(child.clip, x, alignedY);
+						var dy = (h - entry.m.height) * verticalAlignment;
+						ArcticMC.setXY(child.clip, x, y + dy);
 						if (mode == Reuse) {
 							ArcticMC.setVisible(child.clip, true);
 						}
