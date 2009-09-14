@@ -1181,7 +1181,7 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
-		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment):
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment, indent, firstIndent):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
@@ -1215,6 +1215,13 @@ class ArcticView {
 				verticalAlignment = 0;
 			}
 			
+			if (indent == null) {
+				indent = 10;
+			}
+			if (firstIndent == null) {
+				firstIndent = indent;
+			}
+			
 			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
 			for (block in blocks) {
 				// We want the minimum size, so do not give any extra width and height to this	
@@ -1225,13 +1232,13 @@ class ArcticView {
 				children.push({block: block, m: cm});
 			}
 			
-			var newRow = function (): { blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int} { 
-				return { blocks: [], maxHeight: 0.0, width: 0.0, numberOfWideChildren: 0, numberOfTallChildren: 0 };
+			var newRow = function (indent : Float): { blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, indent: Float, numberOfWideChildren: Int, numberOfTallChildren: Int} { 
+				return { blocks: [], maxHeight: 0.0, width: 0.0, indent : indent, numberOfWideChildren: 0, numberOfTallChildren: 0 };
 			}
 			
-			var breakIntoRows = function (maxWidth) : Array<{ blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, numberOfWideChildren: Int, numberOfTallChildren: Int}> {
+			var breakIntoRows = function (maxWidth) : Array<{ blocks: Array<{block: ArcticBlock, m: Metrics}>, maxHeight: Float, width: Float, indent: Float, numberOfWideChildren: Int, numberOfTallChildren: Int}> {
 				// Break the elements into separate rows
-				var rows = [newRow()];
+				var rows = [newRow(firstIndent)];
 				for (i in 0...children.length) {
 					var cm = children[i].m;
 					var block = children[i].block;
@@ -1246,7 +1253,7 @@ class ArcticView {
 					}
 					// ignore Fillers
 					if (block != Filler) {
-						row.width += ( row.blocks.length > 1 ? xspacing : 0 ) + cm.width;
+						row.width += ( row.blocks.length > 1 ? xspacing : row.indent ) + cm.width;
 						row.maxHeight = Math.max(row.maxHeight, cm.height);
 					}
 					
@@ -1254,8 +1261,8 @@ class ArcticView {
 					while (next < children.length && children[next].block == Filler) {
 						next++;
 					}
-					if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {           
-						rows.push(newRow());
+					if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {
+						rows.push(newRow(indent));
 					}
 				}
 				return rows;
@@ -1337,7 +1344,7 @@ class ArcticView {
 				}
 			
 				var h = row.maxHeight + (row.numberOfTallChildren > 0 ? freeHeight : 0); 
-				var x = 0.0;
+				var x = row.indent;
 				for (entry in row.blocks) {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
 					var child = build(entry.block, clip, w, h, mode, i);
