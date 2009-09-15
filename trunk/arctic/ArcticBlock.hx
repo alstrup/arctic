@@ -151,7 +151,7 @@ enum ArcticBlock {
 	 * no matter how high the LineStack is, then pass false as the last parameter. The default
 	 * is to automatically add a scrollbar if needed.
 	 */
-	LineStack(blocks: Array<ArcticBlock>, ?ensureVisibleIndex: Null<Int>, ?useScrollbar : Bool, ?useIntergerFillings: Bool, ?lineAlign : Float);
+	LineStack(blocks: Array<ArcticBlock>, ?ensureVisibleIndex: Null<Int>, ?useScrollbar : Bool, ?useIntegerFillings: Bool, ?lineAlign : Float);
 	
 	/**
 	 * A 2-d grid of block. For now, this does not support resizing or horizontal scrollbar.
@@ -169,9 +169,9 @@ enum ArcticBlock {
 	* If maxWidth is null, the block will grow and use all available width.
 	* lowerWidth should be in [0 ... 1] range. By default its value is 0.45
 	* verticalAlignment defines blocks alignment in the row. [Top ... Bottom] corresponds to [0 ... 1] range.
-	* indent and firstIndent defines block indentation for every/first line correspondingly.
+	* indent defines first line indentation. Negative value indents subsequent lines.
 	*/
-	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float, ?verticalAlignment : Float, ?indent : Float, ?firstIndent : Float );
+	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float, ?verticalAlignment : Float, ?indent : Float );
 
 	/// Add a scrollbar if necessary
     ScrollBar(block : ArcticBlock);
