@@ -1216,7 +1216,7 @@ class ArcticView {
 			}
 			
 			if (indent == null) {
-				indent = 10;
+				indent = 0;
 			}
 			if (firstIndent == null) {
 				firstIndent = indent;
