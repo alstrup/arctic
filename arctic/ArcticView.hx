@@ -1181,7 +1181,7 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
-		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment, indent, firstIndent):
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment, indent):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
@@ -1218,8 +1218,13 @@ class ArcticView {
 			if (indent == null) {
 				indent = 0;
 			}
-			if (firstIndent == null) {
+			
+			var firstIndent = 0.0; // first line indentation
+			var subsequentIndent = 0.0; // subsequent lines indentation
+			if (indent >= 0) {
 				firstIndent = indent;
+			} else {
+				subsequentIndent = indent;
 			}
 			
 			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
@@ -1262,7 +1267,7 @@ class ArcticView {
 						next++;
 					}
 					if ( next < children.length && (row.width + xspacing + children[next].m.width) > maxWidth ) {
-						rows.push(newRow(indent));
+						rows.push(newRow(subsequentIndent));
 					}
 				}
 				return rows;
