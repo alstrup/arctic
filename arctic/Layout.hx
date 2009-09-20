@@ -171,7 +171,11 @@ class Layout {
 	}
 	
 	// Finds the value that best fits in the given target area such that downscaling will be minized
-	static public function aspectFit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, valToSize : Float -> { width : Float, height : Float }) : Float {
+	static public function aspectFit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, valToSize : Float -> { width : Float, height : Float } ) : Float {
+		if (targetWidth == 0 || targetHeight == 0) {
+			// OK, we have to give up and choose some arbitrary value in between
+			return (maximum - minimum) / 2.0;
+		}
 		return minimize(minimum, maximum, function(w) {
 			var size = valToSize(w);
 			var xscale = size.width / targetWidth;
@@ -195,12 +199,15 @@ class Layout {
 		
 		// Then find the corresponding scaling
 		var size = size2width(w);
-		var scale = targetWidth / size.width;
-		scale = Math.min(targetHeight / size.height, scale);
-		scale = Math.min(1.0, scale);
-
-		// And build the final result
-		return Transform(getBlock(w), scale, scale);
+		if (size.width == 0 || size.height == 0) {
+			return getBlock(w);
+		} else {
+			var scale = targetWidth / size.width;
+			scale = Math.min(targetHeight / size.height, scale);
+			scale = Math.min(1.0, scale);
+			// And build the final result
+			return Transform(getBlock(w), scale, scale);
+		}
 	}
 
 	/**
