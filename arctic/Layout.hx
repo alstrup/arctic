@@ -174,7 +174,7 @@ class Layout {
 	static public function aspectFit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, valToSize : Float -> { width : Float, height : Float } ) : Float {
 		if (targetWidth == 0 || targetHeight == 0) {
 			// OK, we have to give up and choose some arbitrary value in between
-			return (maximum - minimum) / 2.0;
+			return (maximum + minimum) / 2.0;
 		}
 		return minimize(minimum, maximum, function(w) {
 			var size = valToSize(w);
