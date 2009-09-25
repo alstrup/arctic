@@ -2788,7 +2788,9 @@ class ArcticView {
 					return ArcticMC.get(p, "c" + childNo);
 				}
 				if (buildMode == Destroy) {
+					#if debug
 					trace("Crap! Can leak active clips");
+					#end
 					return null;
 				}
 #if debug
