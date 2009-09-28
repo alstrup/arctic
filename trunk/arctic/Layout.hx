@@ -117,6 +117,7 @@ class Layout {
 	
 	/// A general minimizer
 	static public function minimize(minWidth : Float, maxWidth : Float, measureFn : Float -> Float) : Float {
+		crashCase = 14;
 		var lower = minWidth;
 		var upper = maxWidth;
 		var count = 0;
@@ -138,10 +139,12 @@ class Layout {
 			}
 			return value;
 		}
+		crashCase = 15;
 		
 		var n = 9;
 		var dist = 1 / (n - 1);
 		while (count < 5) {
+			crashCase = 16;
 			// Sample n points uniformly and record the minimum interval
 			var d : Float = (upper - lower);
 			if (d < 1) return bestWidth;
@@ -161,6 +164,7 @@ class Layout {
 					}
 				}
 			}
+			crashCase = 17;
 			var down = if (mini > 0) mini - 1 else mini;
 			var up = if (mini + 1 < n) mini + 1 else mini;
 			upper = lower + up * d;
@@ -172,11 +176,14 @@ class Layout {
 	
 	// Finds the value that best fits in the given target area such that downscaling will be minized
 	static public function aspectFit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, valToSize : Float -> { width : Float, height : Float } ) : Float {
+		crashCase = 10;
 		if (targetWidth == 0 || targetHeight == 0) {
 			// OK, we have to give up and choose some arbitrary value in between
 			return (maximum + minimum) / 2.0;
 		}
+		crashCase = 11;
 		return minimize(minimum, maximum, function(w) {
+			crashCase = 12;
 			var size = valToSize(w);
 			var xscale = size.width / targetWidth;
 			var yscale = size.height / targetHeight;
@@ -190,18 +197,23 @@ class Layout {
 	 * Optimise a parameter to give the best fit in the given target area, minimizing downscaling.
 	 */ 
 	static public function fit(targetWidth : Float, targetHeight : Float, minimum : Float, maximum : Float, getBlock : Float -> ArcticBlock) : ArcticBlock {
+		crashCase = 1;
 		var size2width = function(w) {
 			return getSize(getBlock(w), { width: targetWidth, height: targetHeight});
 		};
 
+		crashCase = 2;
 		// Find the best value
 		var w = aspectFit(targetWidth, targetHeight, minimum, maximum, size2width);
+		crashCase = 3;
 		
 		// Then find the corresponding scaling
 		var size = size2width(w);
 		if (size.width == 0 || size.height == 0) {
+			crashCase = 4;
 			return getBlock(w);
 		} else {
+			crashCase = 5;
 			var scale = targetWidth / size.width;
 			scale = Math.min(targetHeight / size.height, scale);
 			scale = Math.min(1.0, scale);
@@ -209,6 +221,8 @@ class Layout {
 			return Transform(getBlock(w), scale, scale);
 		}
 	}
+	
+	static public var crashCase : Int;
 
 	/**
 	 * Find the width of the largest single word.
