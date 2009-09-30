@@ -168,10 +168,11 @@ enum ArcticBlock {
 	* 			free space
 	* If maxWidth is null, the block will grow and use all available width.
 	* lowerWidth should be in [0 ... 1] range. By default its value is 0.45
-	* verticalAlignment defines blocks alignment in the row. [Top ... Bottom] corresponds to [0 ... 1] range.
-	* indent defines first line indentation. Negative value indents subsequent lines.
+	* lineAlign defines blocks alignment in the row. [Top ... Bottom] corresponds to [0 ... 1] range.
+	* rowAlign defines left-to-right justification of each row. Should be in [0 ... 1] range.
+	* rowIndent defines first line indentation. Negative value indents subsequent lines.
 	*/
-	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float, ?verticalAlignment : Float, ?indent : Float );
+	Wrap(blocks: Array<ArcticBlock>, ?maxWidth: Float, ?xspacing: Null<Float>, ?yspacing: Null<Float>, ?eolFiller: ArcticBlock, ?lowerWidth : Float, ?lineAlign : Float, ?rowAlign : Float, ?rowIndent : Float );
 
 	/// Add a scrollbar if necessary
     ScrollBar(block : ArcticBlock);
