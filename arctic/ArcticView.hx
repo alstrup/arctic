@@ -1181,7 +1181,7 @@ class ArcticView {
 			m.height = y;
 			return m;
 		
-		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, verticalAlignment, indent):
+		case Wrap(blocks, maxWidth, xspacing, yspacing, eolFiller, lowerWidth, lineAlign, rowAlign, rowIndent):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var m = { clip: clip, width : 0.0, height : 0.0, growWidth : false, growHeight : false };
 			
@@ -1211,20 +1211,24 @@ class ArcticView {
 				yspacing = 0;
 			}
 			
-			if (verticalAlignment == null) {
-				verticalAlignment = 0;
+			if (lineAlign == null) {
+				lineAlign = 0;
 			}
 			
-			if (indent == null) {
-				indent = 0;
+			if (rowAlign == null) {
+				rowAlign = 0;
+			}
+			
+			if (rowIndent == null) {
+				rowIndent = 0;
 			}
 			
 			var firstIndent = 0.0; // first line indentation
 			var subsequentIndent = 0.0; // subsequent lines indentation
-			if (indent >= 0) {
-				firstIndent = indent;
+			if (rowIndent >= 0) {
+				firstIndent = rowIndent;
 			} else {
-				subsequentIndent = indent;
+				subsequentIndent = rowIndent;
 			}
 			
 			var children: Array<{block: ArcticBlock, m: Metrics}> = [];
@@ -1330,6 +1334,8 @@ class ArcticView {
 				freeHeight = 0;
 			}
 			
+			var needShift = mode != Metrics && mode != Destroy && rowAlign > 0;
+			var shiftRows : List<Float -> Void> = new List<Float -> Void>();
 			var y = 0.0;
 			var i = 0;
 			var width = 0.0;
@@ -1348,16 +1354,20 @@ class ArcticView {
 					row.blocks.push({block: eolFiller, m: cm});
 				}
 			
+				var shiftRow : List<Float -> Void> = new List<Float -> Void>();
 				var h = row.maxHeight + (row.numberOfTallChildren > 0 ? freeHeight : 0); 
 				var x = row.indent;
 				for (entry in row.blocks) {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
 					var child = build(entry.block, clip, w, h, mode, i);
 					if (mode != Metrics && mode != Destroy && child.clip != null) {
-						var dy = (h - entry.m.height) * verticalAlignment;
+						var dy = (h - entry.m.height) * lineAlign;
 						ArcticMC.setXY(child.clip, x, y + dy);
 						if (mode == Reuse) {
 							ArcticMC.setVisible(child.clip, true);
+						}
+						if (needShift) {
+							shiftRow.add(function (dx) { ArcticMC.moveClip(child.clip, dx, 0); });
 						}
 					}
 					if (entry.block != Filler) {
@@ -1367,6 +1377,19 @@ class ArcticView {
 				}
 				y += h + yspacing;
 				width = Math.max(width, x);
+				if (needShift) {
+					shiftRows.add(function (maxwidth) {
+						for (shift in shiftRow) {
+							shift((maxwidth - x)*rowAlign);
+						}
+					});
+				}
+			}
+			
+			if (needShift) {
+				for (shift in shiftRows) {
+					shift(width);
+				}
 			}
 			
 			if (mode == Reuse) {
