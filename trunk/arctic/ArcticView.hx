@@ -1895,10 +1895,17 @@ class ArcticView {
 				scale = 1.0;
 			}
 			
-			if (maxScale != null && scale > maxScale) {
-				scale = maxScale;
-				growWidth = false;
-				growHeight = false;
+			if (maxScale != null) {
+				if (scale > maxScale) {
+					scale = maxScale;
+					growWidth = false;
+					growHeight = false;
+				} else {
+					if (availableWidth >= metricsChild.width*maxScale && !metricsChild.growWidth)
+						growWidth = false;
+					if (availableHeight >= metricsChild.height*maxScale && !metricsChild.growHeight)
+						growHeight = false;
+				}
 			}
 			
 			var excessWidth = availableWidth * childGrowth;
