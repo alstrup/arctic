@@ -84,7 +84,11 @@ class ArcticDialog {
 	public function hitTest(x : Float, y : Float) : Bool {
 		return dialogClip != null && ArcticMC.hitTest(dialogClip, x, y);
 	}
-
+	
+	public function getArcticClip(id: String) : ArcticMovieClip {
+		return arcticView.getRawMovieClip(id);
+	}
+	
 	var contentBlock : ArcticBlock;
 	var xPosition : Float;
 	var yPosition : Float;
