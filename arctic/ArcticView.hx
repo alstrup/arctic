@@ -1605,15 +1605,19 @@ class ArcticView {
 				#elseif flash
 					mouseX = me.parent._xmouse;
 				#end
+
+				var cursorSize = ArcticMC.getSize(cursor);
+				var baseSize = ArcticMC.getSize(me.base);
+				var baseXY = ArcticMC.getXY(me.base);
 				
 				var clipX = mouseX + shiftX;
 				// if cursor block should fully be seen and it doesn't fit width of base clip
 				// (i.e. cursor juts out on the right side of base clip) and cursor better fits
 				// base width if it will be placed left to mouse cursor, then
 				// place cursor block left to mouse cursor
-				if (showFullCursor && clipX + cursor.width > me.base.width + me.base.x
-					&& mouseX - cursor.width - shiftX >= - cursor.width / 2) {
-						clipX = mouseX - cursor.width - shiftX;
+				if (showFullCursor && clipX + cursorSize.width > baseSize.width + baseXY.x
+					&& mouseX - cursorSize.width - shiftX >= - cursorSize.width / 2) {
+						clipX = mouseX - cursorSize.width - shiftX;
 				}
 				return clipX;
 			}
@@ -1625,14 +1629,18 @@ class ArcticView {
 					mouseY = me.parent._ymouse;
 				#end
 
+				var cursorSize = ArcticMC.getSize(cursor);
+				var baseSize = ArcticMC.getSize(me.base);
+				var baseXY = ArcticMC.getXY(me.base);
+
 				var clipY = mouseY + shiftY;
 				// if cursor block should fully be seen and it doesn't fit height of base clip
 				// (i.e. cursor juts out on the bottom side of base clip) and cursor better fits
 				// base height if it will be placed left to mouse cursor, then
 				// place cursor block above mouse cursor
-				if (showFullCursor && clipY + cursor.height > me.base.height + me.base.y
-					&& mouseY - cursor.height - shiftY >= - cursor.height / 2) {
-						clipY = mouseY - cursor.height - shiftY;
+				if (showFullCursor && clipY + cursorSize.height > baseSize.height + baseXY.y
+					&& mouseY - cursorSize.height - shiftY >= - cursorSize.height / 2) {
+						clipY = mouseY - cursorSize.height - shiftY;
 				}
 				return clipY;
 			}
