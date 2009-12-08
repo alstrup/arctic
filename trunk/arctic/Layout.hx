@@ -1,6 +1,7 @@
 package arctic;
 
 import arctic.ArcticBlock;
+import arctic.ArcticMC;
 
 class Layout {
 	// This gives the size of a block when displayed in the given area
@@ -101,16 +102,21 @@ class Layout {
 		scale = getScaling(tf, maxWidth, maxHeight);
 		// trace("Winner: " + bestWidth + " with scale " + scale + " and area " + tf.height * tf.width);
 		return Transform(ConstrainWidth(0, bestWidth, Text(html, embeddedFont, true, selectable)), scale, scale);
+		#else
+		throw "Not implemented!";
+		return null;
 		#end
 	}
 	
-	static function getScaling(tf : flash.text.TextField, width : Float, height : Float) : Float {
+	static function getScaling(tf : ArcticTextField, width : Float, height : Float) : Float {
 		var scale = 1.0;
-		if (tf.height > height) {
-			scale = height / tf.height;
+		var tfheight = ArcticMC.getTextFieldHeight(tf);
+		var tfwidth = ArcticMC.getTextFieldWidth(tf);
+		if (tfheight > height) {
+			scale = height / tfheight;
 		}
-		if (tf.width > width) {
-			scale = Math.min(scale, width / tf.width);
+		if (tfwidth > width) {
+			scale = Math.min(scale, width / tfwidth);
 		}
 		return scale;
 	}
