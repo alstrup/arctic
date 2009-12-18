@@ -2962,6 +2962,11 @@ class ActiveClips {
 		var i = activeClips.length - 1;
 		while (i >= 0) {
 			var clip = activeClips[i];
+            
+            if (!ArcticMC.isActive(clip)) {
+                i--;
+                continue;
+            }
 			#if flash9
 				if (clip.hitTestPoint(x, y, false)) {
 					return clip;
