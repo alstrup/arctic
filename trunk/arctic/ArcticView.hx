@@ -37,6 +37,19 @@ typedef BlockInfo = {
 	childHeight : Float
 }
 
+typedef CellProperty = {
+	width : Float,
+	height : Float,
+	x : Int,
+	y : Int,
+	rowSpan : Int,
+	colSpan : Int, 
+	topBorder : Int,
+	rightBorder : Int,
+	bottomBorder : Int,
+	leftBorder : Int
+}
+
 /**
  * The main class in Arctic which builds a user interface from an ArcticBlock.
  * Construct the ArcticBlock representing your user interface and call
@@ -1524,6 +1537,179 @@ class ArcticView {
 		
 			return { clip: clip, width: width, height: height, growWidth: false, growHeight: false };
 
+		case TableCell(block, rowSpan, colSpan, topBorder, rightBorder, bottomBorder, leftBorder): 
+			//it shouldn't be called, may be it shouldn't be ArcticBlock at all
+			return build(block, p, availableWidth, availableHeight, mode, childNo);
+		
+		case Table(cells, nRows, nCols, borderColor):
+			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
+			var child = getOrMakeClip(clip, mode, 0);
+			
+			var cellIsEmpty = new Array<Array<Bool>>();
+			for (i in 0...nRows) {
+				var line = [];
+				for (j in 0...nCols) {
+					line.push(true);
+				}
+				cellIsEmpty.push(line);
+			}
+			
+			var findUpperLeftEmptyCell = function() : { x : Int, y : Int } {
+				for (i in 0...nRows) {
+					for (j in 0...nCols) {
+						if (cellIsEmpty[j][i]) {
+							return { x : j, y : i };
+						}
+					}
+				}
+				return { x : -1, y : -1 };
+			}
+			
+			var takeEmptyCells = function(x, y, rs, cs) {
+				for (i in y...y+rs) {
+					for (j in x...x+cs) {
+						if (cellIsEmpty[j][i]) {
+							cellIsEmpty[j][i] = false;
+						}
+						// else: cells will be overlapped, but this is caused by bad input
+					}
+				}
+			}
+			
+			var cellProperties = new Array<CellProperty>();
+			
+			for (i in 0...cells.length) {
+				var cell = cells[i];
+				var pos = findUpperLeftEmptyCell();
+				//TODO: check for correctness
+				
+				var block = null;
+				var cp : CellProperty = 
+					  { width : 0.0, height : 0.0, x : pos.x, y : pos.y, rowSpan : 1, colSpan : 1,
+						topBorder : 1, rightBorder : 1, bottomBorder : 1, leftBorder : 1 };
+				
+				switch (cell) {
+					case TableCell(bl, rs, cs, tb, rb, bb, lb):
+						block = bl;
+						cp.rowSpan = (rs == null) ? cp.rowSpan : rs;
+						cp.colSpan = (cs == null) ? cp.colSpan : cs;
+						cp.topBorder = (tb == null) ? cp.topBorder : tb;
+						cp.rightBorder = (rb == null) ? cp.rightBorder : rb;
+						cp.bottomBorder = (bb == null) ? cp.bottomBorder : bb;
+						cp.leftBorder = (lb == null) ? cp.leftBorder : lb;
+					
+					default:
+						block = cell;
+				}
+				
+				var m = build(block, clip, 0, 0, Metrics, 0);
+				cp.width  = m.width;
+				cp.height = m.height;
+				cellProperties.push(cp);
+				
+				takeEmptyCells(cp.x, cp.y, cp.rowSpan, cp.colSpan);
+			}
+			
+			var columnWidths = [0.0];
+			for (i in 1...nCols+1) {
+				var width = 0.0;
+				for (cp in cellProperties) { 
+					if (cp.x + cp.colSpan == i) { // if block ends in i-th column
+						var previous = i - cp.colSpan; // in 0...i range
+						previous = (previous < 0) ? 0 : previous; // just to be sure crash wouldn't happen
+						var w = cp.width + columnWidths[previous];
+						width = (w > width) ? w : width;
+					}
+				}
+				columnWidths.push(width);
+			}
+			
+			var lineHeights = [0.0];
+			for (j in 1...nRows+1) {
+				var height = 0.0;
+				for (cp in cellProperties) { 
+					if (cp.y + cp.rowSpan == j) { // if block ends in j-th row
+						var previous = j - cp.rowSpan; // in 0...j range
+						previous = (previous < 0 || previous >= j) ? 0 : previous; // just to be sure crash wouldn't happen
+						var h = cp.height + lineHeights[previous];
+						height = (h > height) ? h : height;
+					}
+				}
+				lineHeights.push(height);
+			}
+			
+			for (i in 0...cells.length) {
+				var cell = cells[i];
+				var cp = cellProperties[i];
+				
+				var block = null;
+				//TODO: remove this?
+				switch (cell) {
+					case TableCell(bl, rs, cs, tb, rb, bb, lb):
+						block = bl;
+					default:
+						block = cell;
+				}
+				
+				var w = columnWidths[cp.x + cp.colSpan] - columnWidths[cp.x];
+				var h = lineHeights[cp.y + cp.rowSpan] - lineHeights[cp.y];
+				var b = build(block, child, w, h, mode, i);
+				if (mode != Metrics && mode != Destroy && b.clip != null) {
+					ArcticMC.setXY(b.clip, columnWidths[cp.x], lineHeights[cp.y]);
+				}
+				// extra height check (important for text fields with wordWrap=true)
+				//TODO: do smth with it
+				//if (b.height > lineHeights[y]) {
+				//	lineHeights[y] = b.height;
+				//}
+			}
+			
+			#if flash9
+			if (borderColor!=null) {
+				if ((mode == Create) || (mode == Reuse)) {
+					var g:flash.display.Graphics = child.graphics;
+					g.clear();
+					
+					var drawLine = function(x1, y1, x2, y2, type) {
+						switch (type) {
+							case 0: 
+								return;
+							case 1: 
+								g.moveTo(x1, y1);
+								g.lineTo(x2, y2);
+							case 2:
+								var dx = (y1 != y2) ? 1 : 0;
+								var dy = (x1 != x2) ? 1 : 0;
+								g.moveTo(x1 - dx, y1 - dy);
+								g.lineTo(x2 - dx, y2 - dy);
+								g.moveTo(x1 + dx, y1 + dy);
+								g.lineTo(x2 + dx, y2 + dy);
+							default:
+								return;
+						}
+					}
+					
+					g.lineStyle(1, borderColor, 1.0);
+					
+					for (i in 0...cellProperties.length) {
+						var cp = cellProperties[i];
+						
+						var x1 = columnWidths[cp.x];
+						var y1 = lineHeights[cp.y];
+						var x2 = columnWidths[cp.x + cp.colSpan];
+						var y2 = lineHeights[cp.y + cp.rowSpan];
+						
+						drawLine(x1, y1, x2, y1, cp.topBorder);
+						drawLine(x2, y1, x2, y2, cp.rightBorder);
+						drawLine(x2, y2, x1, y2, cp.bottomBorder);
+						drawLine(x1, y2, x1, y1, cp.leftBorder);
+					}
+				}
+			}
+			#end
+			
+			return { clip: clip, width: columnWidths[nCols], height: lineHeights[nRows], growWidth: false, growHeight: false };
+		
 		case ScrollBar(block):
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
             var child = build(block, clip, availableWidth, availableHeight, mode, 0);
