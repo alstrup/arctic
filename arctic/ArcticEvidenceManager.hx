@@ -118,6 +118,8 @@ class ArcticEvidenceManager {
 		case ColumnStack(blocks): "cols(" + Util.map(id, blocks).join(",") + ")";
 		case LineStack(blocks, ensureVisibleIndex, disableScrollbar): "lines(" + Util.map(id, blocks).join(",") + ")";
 		case Grid(cells, disableScrollbar, oddRowColor, evenRowColor): "grid";
+		case TableCell(block, rowSpan, colSpan, topBorder, rightBorder, bottomBorder, leftBorder) : "cell";
+		case Table(cells, nRows, nCols, borderColor): "table";
 		case Wrap(blocks, maxWidth, xspacing, yspacing, endOfLineFiller, lowerWidth, alignment): "wrap";
 		case ScrollBar(block, availableWidth, availableHeight): "scrollbar(" + id(block) + ")";
 		case Dragable(stayWithin, sideMotion, upDownMotion, block, onDrag, onInit, onStopDrag): "drag(" + id(block) + ")";

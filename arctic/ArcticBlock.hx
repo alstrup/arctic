@@ -158,6 +158,10 @@ enum ArcticBlock {
 	 * Vertical scrollbar will be added automatically if the opposite is not specified
 	 */
 	Grid(blocks: Array<Array<ArcticBlock>>, ?disableScrollbar: Bool, ?oddRowColor: Int, ?evenRowColor: Int, ?borderSize : Float, ?borderColor : Float);
+
+	//TODO: may be it should be removed from ArcticBlock enum? 
+	TableCell(block : ArcticBlock, ?rowSpan : Int, ?colSpan : Int, ?topBorder : Int, ?rightBorder : Int, ?bottomBorder : Int, ?leftBorder : Int);
+	Table(cells : Array<ArcticBlock>, nRows : Int, nCols : Int, borderColor : Null<Int>);
 	
 	/**
 	* Places the first block at the top-left corner, then the next block will be placed to the right. 
