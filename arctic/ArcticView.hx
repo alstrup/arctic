@@ -502,7 +502,7 @@ class ArcticView {
 			g.endFill();
 			return { clip: clip, width: child.width, height: child.height, growWidth: child.growWidth, growHeight: child.growHeight };
 
-		case Text(html, embeddedFont, wordWrap, selectable):
+		case Text(html, embeddedFont, wordWrap, selectable, format):
 			if (wordWrap == null) {
 				wordWrap = false;
 			}
@@ -538,6 +538,8 @@ class ArcticView {
 				tf.selectable = (true == selectable);
 				tf.multiline = true;
 				tf.htmlText = html;
+				if (format != null)
+					tf.setTextFormat(format);
 				if (mode == Create) {
 					clip.addChild(tf);
 				}

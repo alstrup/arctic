@@ -29,19 +29,20 @@ class Arctic {
 	static public var scrollbarWidth = 13;
 
 	/// Make a text using the given parameters. Default color is black. If font is omitted, the default font is used
-	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>) {
-		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap, selectable);
+	static public function makeText(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>, ?format : ArcticTextFormat) {
+		return Text(wrapWithDefaultFont(text, size, color, font), if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded, wordWrap, selectable, format);
 	}
 	#if flash9
-	static public function getStringWidth(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null < Bool > , ?selectable: Null < Bool > ) {
+	static public function getStringWidth(text : String, ?size : Float, ?color : String, ?font : String, ?isEmbedded : Bool, ?wordWrap : Null < Bool > , ?selectable: Null < Bool >, ?format ) {
 		var tf:TextField = new TextField();
 		tf.visible = false;
 		Lib.current.addChild(tf);
-		tf.htmlText = wrapWithDefaultFont(text, size, color, font);
 		tf.embedFonts = if (isEmbedded == null) isDefaultFontEmbedded else isEmbedded;
 		tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
 		tf.multiline = true;
 		tf.htmlText = wrapWithDefaultFont(text, size, color, font);
+		if (format != null)
+			tf.setTextFormat(format);
 		var res = tf.width;
 		Lib.current.removeChild(tf);
 		return res;

@@ -1,4 +1,5 @@
 package arctic;
+import arctic.ArcticMC;
 
 // We introduce an alias for MovieClip which works in both Flash 8 & 9. See also ArcticMC.hx
 #if flash9
@@ -52,7 +53,7 @@ enum ArcticBlock {
 	 * if <br/> tags exist in the text.
 	 * selectable defines whether user can select & copy contents.
 	 */
-	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>);
+	Text(html : String, ?embeddedFont : Null<Bool>, ?wordWrap : Null<Bool>, ?selectable: Null<Bool>, ?format : ArcticTextFormat);
 
 	/**
 	 * An input text.  Text Font/Size/Color can be specified along with initial text content in the subset of HTML which Flash understands.
