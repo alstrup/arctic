@@ -1548,9 +1548,9 @@ class ArcticView {
 			var child = getOrMakeClip(clip, mode, 0);
 			
 			var cellIsEmpty = new Array<Array<Bool>>();
-			for (i in 0...nRows) {
+			for (j in 0...nCols) {
 				var line = [];
-				for (j in 0...nCols) {
+				for (i in 0...nRows) {
 					line.push(true);
 				}
 				cellIsEmpty.push(line);
