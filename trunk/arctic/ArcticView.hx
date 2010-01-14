@@ -588,7 +588,8 @@ class ArcticView {
 					clip.addChild(tf);
 				}
 			#end
-			if (Arctic.textSharpness != null && mode == Create) {
+			if (Arctic.textSharpness != null && (mode == Create || mode == Metrics)) {
+				// we really need this in Metrics mode because it can make text wider
 				ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit);
 			}
 			var s = ArcticMC.getSize(clip);
