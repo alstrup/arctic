@@ -307,7 +307,7 @@ class Arctic {
 	 *   myCheckbox.state = true;
 	 * Notice that the boxes in front of the text are fairly slow to draw on the screen!
 	 */
-	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool, ?color : Int) : ArcticState<Bool> {
+	static public function makeCheckbox(block : ArcticBlock, ?onCheck : Bool -> Void, ?defaultSelected : Bool, ?color : Int, ?disabled : Bool) : ArcticState<Bool> {
 		// Local closured variables to remember state
 		var selected = defaultSelected;
 		if (selected == null) {
@@ -339,10 +339,16 @@ class Arctic {
 				onCheck(selected);
 			}
 			if (selected) {
+				if (disabled != null && disabled)
+					return selectedBlock;
+				else
 				return Button(selectedBlock, selectedBlock, function() {
 					checkBox.state = false;
 				});
 			} else {
+				if (disabled != null && disabled)
+					return notSelectedBlock;
+				else
 				return Button(notSelectedBlock, notSelectedBlock, function() {
 					checkBox.state = true;
 				});
