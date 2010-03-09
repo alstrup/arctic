@@ -674,7 +674,7 @@ class ArcticMC {
 		}
 	}
 
-	static private inline function getOrCreateProps(mc: ArcticMovieClip): Hash<Dynamic> {
+	static private function getOrCreateProps(mc: ArcticMovieClip): Hash<Dynamic> {
 		var h = hash.get(mc.name);
 		if (null == h) {
 			h = new Hash<Dynamic>();
@@ -684,7 +684,7 @@ class ArcticMC {
 		return h;
 	}
 
-	static private inline function getProps(mc: ArcticMovieClip): Hash<Dynamic> {
+	static private function getProps(mc: ArcticMovieClip): Hash<Dynamic> {
 		return mc == null ? null : (StringUtils.emptyString(mc.name) ? null : hash.get(mc.name));
 	}
 	#end
