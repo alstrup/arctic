@@ -197,7 +197,7 @@ class Arctic {
 	 * The default is true.
 	 */
 	static public function makeSlider(minimumX : Float, maximumX : Float, minimumY : Float, maximumY : Float, handleBlock : ArcticBlock,
-							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?useClickHandler : Bool) {
+							onDrag : Float -> Float -> Void, ?initialX : Float, ?initialY : Float, ?useClickHandler : Bool, ?onStopDrag: Void -> Void) {
 		// The current position in slider coordinate system
 		var currentX = if (initialX == null) minimumX else initialX;
 		var currentY = if (initialY == null) minimumY else initialY;
@@ -287,7 +287,7 @@ class Arctic {
 		
 		var block = OnTop(
 			Button( Background(0x000000, Fixed(0,0)), Background(0x000000, Fixed(0,0)), null, clickHandler),
-			Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit)
+			Dragable(true, minimumX != maximumX, minimumY != maximumY, handleBlock, ourOnDrag, ourOnInit, onStopDrag)
 		);
 		return { 
 			block: block, 
