@@ -3054,6 +3054,12 @@ class ArcticView {
 				}
 				#end
 				*/
+
+				#if flash9
+				if (Type.getClassName(Type.getClass(d)) == 'flash.text.TextField') {
+					d = d.parent;
+				}
+				#end
 				return d;
 			}
 		#elseif flash
