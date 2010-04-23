@@ -21,6 +21,7 @@ class Arctic {
 
 	/// For controlling text: Should it be advanced rendered?
 	static public var textSharpness : Null<Float> = null;
+	static public var textThickness: Null<Int> = null;
 	static public var textGridFit = 0;
 
 	/// For redirecting all net requests

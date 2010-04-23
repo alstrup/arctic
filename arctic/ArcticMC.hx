@@ -566,18 +566,20 @@ class ArcticMC {
 	}
 
 	/// Set the text rendering quality. If sharpness is null, normal rendering is used. gridFit parameter: 0 is none, 1 is pixel, 2 is subpixel
-	static public function setTextRenderingQuality(tf : ArcticTextField, sharpness : Null<Float>, ?gridFit : Int) {
+	static public function setTextRenderingQuality(tf : ArcticTextField, sharpness : Null<Float>, ?gridFit : Int, ?thickness: Int) {
 		#if flash8
-		if (sharpness != null) {
-			tf.sharpness = sharpness;
+		if (sharpness != null || thickness != null) {
+			if (null != sharpness) tf.sharpness = sharpness;
+			if (null != thickness) tf.thickness = thickness;
 			tf.antiAliasType = "advanced";
 			tf.gridFitType = if (gridFit == 1) { "pixel"; } else if (gridFit == 2) { "subpixel"; } else { "none"; };
 		} else {
 			tf.antiAliasType = "normal";
 		}
 		#elseif flash9
-		if (sharpness != null) {
-			tf.sharpness = sharpness;
+		if (sharpness != null || thickness != null) {
+			if (null != sharpness) tf.sharpness = sharpness;
+			if (null != thickness) tf.thickness = thickness;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
 			tf.gridFitType = if (gridFit == 1) { flash.text.GridFitType.PIXEL; } 
 							else if (gridFit == 2) { flash.text.GridFitType.SUBPIXEL; } else { flash.text.GridFitType.NONE; };

@@ -32,8 +32,8 @@ class Layout {
 		tf.htmlText = html;
 		tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
 
-		if (Arctic.textSharpness != null) {
-			ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit);
+		if (Arctic.textSharpness != null || Arctic.textThickness != null) {
+			ArcticMC.setTextRenderingQuality(tf, Arctic.textSharpness, Arctic.textGridFit, Arctic.textThickness);
 		}
 		
 		var widthFits = tf.width < maxWidth;
