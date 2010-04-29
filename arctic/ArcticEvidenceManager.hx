@@ -104,7 +104,7 @@ class ArcticEvidenceManager {
 		case Text(html, embeddedFont, wordWrap, selectable): StringUtils.stripHtml(html);
 		case TextInput(html, width, height, validator, style, maxChars,
 					   numeric, bgColor, focus, embeddedFont, onInit, onEventInit): "input";
-		case Picture(url, w, h, scaling, resource, crop): url;
+		case Picture(url, w, h, scaling, resource, crop, cbSizeDiff): url;
 		case Button(block, hover, action, actionExt): "button(" + id(block) + ")";
 		case ToggleButton(selected, unselected, initialState, onChange, onInit): "toggle(" + id(selected) + ")";
 		case Mutable(mutableBlock): "mutator(" + id(mutableBlock.block) + ")";
