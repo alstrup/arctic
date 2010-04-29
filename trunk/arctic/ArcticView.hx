@@ -622,11 +622,17 @@ class ArcticView {
 		case TextInput(html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents) :
 			return buildTextInput(p, childNo, mode, availableWidth, availableHeight, html, width, height, validator, style, maxChars, numeric, bgColor, focus, embeddedFont, onInit, onInitEvents);
 		
-		case Picture(url, w, h, scaling, resource, crop, cache):
+		case Picture(url, w, h, scaling, resource, crop, cache, cbSizeDiff):
 			if (mode == Metrics) {
 				return { clip: null, width : w, height : h, growWidth : false, growHeight : false };
 			}
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
+			
+			var checkSizes = function (realWidth : Float, realHeight : Float) {
+				if (cbSizeDiff != null && (realWidth != w || realHeight != h)) {
+					cbSizeDiff(realWidth, realHeight);
+				}
+			}
 			#if flash9
 				if (mode == Create) {
 					if (Type.resolveClass(url) != null) {
@@ -641,6 +647,7 @@ class ArcticView {
 							bmp.smoothing = true;
 							
 							clip.addChild(bmp);
+							checkSizes(bmp.width, bmp.height);
 						}
 						else {
 							// Count how many pictures we are loading
@@ -674,6 +681,7 @@ class ArcticView {
 										if (cache == true) {
 											pictureCache.set(url, image.bitmapData);
 										}
+										checkSizes(image.width, image.height);
 									} else {
 										var className:String = untyped __global__["flash.utils.getQualifiedClassName"](content);
 										if (className == "flash.display::AVM1Movie") {
@@ -686,6 +694,7 @@ class ArcticView {
 											if (cache == true){
 												pictureCache.set(url, bmpData);
 											}
+											checkSizes(width, height);
 										}
 										//else {
 											//trace("url:" + url + " is:" + className + " ignore", 0);

@@ -73,7 +73,7 @@ enum ArcticBlock {
 	* Notice that the width & height should be the size of this block, not the original size of the picture. If crop is true,
 	* the picture will be cropped the number of pixels in all edges.
 	*/
-	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>, ?crop : Int, ?cache : Bool);
+	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>, ?crop : Int, ?cache : Bool, ?cbSizeDiff : Float -> Float -> Void);
 
 	/**
 	 * A button - when mouse is above, we change to hover look. Notice block and hover should have the exact same size.
