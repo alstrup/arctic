@@ -3137,6 +3137,52 @@ class ArcticView {
 	#if flash9
 	// Hash of all pictures
 	private static var pictureCache: Hash<BitmapData>;
+	
+	// returns image sizes as parameters for cb function
+	public static function getImageSizes(url : String, cb : Float -> Float -> Void) {
+		var cachedPicture:Dynamic = pictureCache.get(url);
+		if (cachedPicture != null) {
+			var clone : BitmapData = cachedPicture.clone(); 
+			var bmp:Bitmap = new Bitmap(clone);
+			bmp.smoothing = true;
+			cb(bmp.width, bmp.height);
+		} else {
+			var loader = new flash.display.Loader();
+			var dis = loader.contentLoaderInfo;
+			var request = new flash.net.URLRequest(Arctic.baseurl + url);
+			
+			dis.addEventListener(
+				flash.events.Event.COMPLETE,
+				function(event : flash.events.Event) {
+					try {
+						var loader : flash.display.Loader = event.target.loader;
+						var content:Dynamic = loader.content;
+						if (Std.is(content, flash.display.Bitmap)) {
+							var image : flash.display.Bitmap = cast loader.content;
+							image.smoothing = true;
+							pictureCache.set(url, image.bitmapData);
+							cb(image.width, image.height);
+						} else {
+							var className:String = untyped __global__["flash.utils.getQualifiedClassName"](content);
+							if (className == "flash.display::AVM1Movie") {
+								var width = content.width;
+								var height = content.height;
+								var transparent = true;
+								var bmpData:BitmapData = new BitmapData(width, height, transparent, 0);
+								bmpData.draw(content);
+								pictureCache.set(url, bmpData);
+								cb(width, height);
+							}
+						}
+					} catch (e : Dynamic) {
+						// When running locally, security errors can be called when we access the content
+						// of loaded files, so in that case, we have lost, and can not use nice smoothing
+					}
+				}
+			);
+			loader.load(request);
+		}
+	}
 	#end
 }
 
