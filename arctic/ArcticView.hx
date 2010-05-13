@@ -642,12 +642,16 @@ class ArcticView {
 						var cachedPicture:Dynamic = pictureCache.get(url);
 						if (cachedPicture != null) {
 							//trace("in cache:" + url, 0);
-							var clone : BitmapData = cachedPicture.clone(); 
-							var bmp:Bitmap = new Bitmap(clone);
-							bmp.smoothing = true;
-							
-							clip.addChild(bmp);
-							checkSizes(bmp.width, bmp.height);
+							try {
+								var clone : BitmapData = cachedPicture.clone(); 
+								var bmp:Bitmap = new Bitmap(clone);
+								bmp.smoothing = true;
+								
+								clip.addChild(bmp);
+								checkSizes(bmp.width, bmp.height);
+							} catch( unknown : Dynamic ) {
+								trace("Error during restoring image from cache : " + Std.string(unknown));
+							}
 						}
 						else {
 							// Count how many pictures we are loading
@@ -3142,10 +3146,14 @@ class ArcticView {
 	public static function getImageSizes(url : String, cb : Float -> Float -> Void) {
 		var cachedPicture:Dynamic = pictureCache.get(url);
 		if (cachedPicture != null) {
-			var clone : BitmapData = cachedPicture.clone(); 
-			var bmp:Bitmap = new Bitmap(clone);
-			bmp.smoothing = true;
-			cb(bmp.width, bmp.height);
+			try {
+				var clone : BitmapData = cachedPicture.clone(); 
+				var bmp:Bitmap = new Bitmap(clone);
+				bmp.smoothing = true;
+				cb(bmp.width, bmp.height);
+			} catch( unknown : Dynamic ) {
+				trace("Error during restoring image from cache : " + Std.string(unknown));
+			}
 		} else {
 			var loader = new flash.display.Loader();
 			var dis = loader.contentLoaderInfo;
