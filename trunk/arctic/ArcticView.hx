@@ -3188,6 +3188,12 @@ class ArcticView {
 					}
 				}
 			);
+			dis.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function (event : flash.events.IOErrorEvent) {
+				trace("[ERROR] IO Error with " + url + ": " + event.text);
+			});
+			dis.addEventListener(flash.events.SecurityErrorEvent.SECURITY_ERROR, function (event : flash.events.SecurityErrorEvent) {
+				trace("[ERROR] Security Error with " + url + ": " + event.text);						
+			});
 			loader.load(request);
 		}
 	}
