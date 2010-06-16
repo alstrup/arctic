@@ -376,7 +376,7 @@ class Arctic {
 	 * Caller's problem to arrange the layout of blocks - see makeTextChoice above for an example.
 	 * Notice that the circles are fairly slow to draw on the screen!
 	 */
-	static public function makeTextChoiceBlocks(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float) : 
+	static public function makeTextChoiceBlocks(texts : Array<String>, onSelect : Int -> String -> Void, ?defaultSelected : Int, ?textSize: Float, ?color:String) : 
 		{ blocks: Array<ArcticBlock>, selectFn: Int -> Void } {
 			
 		if (textSize == null) {
@@ -398,9 +398,9 @@ class Arctic {
 		var i = 0;
 		for (text in texts) {
 			var selected = Border(1, 1, ColumnStack([CustomBlock(true, build),
-													 makeText(text, textSize)]));
+													 makeText(text, textSize, color)]));
 			var unselected = Border(1, 1, ColumnStack([CustomBlock(false, build),
-													   makeText(text, textSize)]));
+													   makeText(text, textSize, color)]));
 			entries.push( { selected: selected, unselected: unselected, value: text } );
 		}
 		var group = makeRadioButtonGroup(entries, onSelect, defaultSelected);
