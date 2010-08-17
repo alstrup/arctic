@@ -1855,6 +1855,10 @@ class ArcticView {
 				var onMove = function (s) {
 					//trace("on move");
 					if (!ArcticMC.isActive(child.clip)) {
+						// disable cursor if base block is not active
+						if (cursorMc != null && cursorMc.clip != null) {
+							cursorMc.clip.visible = false;
+						}
 						return;
 					}
 					
