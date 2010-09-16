@@ -631,7 +631,8 @@ class ArcticView {
 				return { clip: null, width : w, height : h, growWidth : false, growHeight : false };
 			}
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
-			
+			var width = w;
+			var height = h;
 			var checkSizes = function (realWidth : Float, realHeight : Float) {
 				if (cbSizeDiff != null && (realWidth != w || realHeight != h)) {
 					cbSizeDiff(realWidth, realHeight);
@@ -685,24 +686,38 @@ class ArcticView {
 										//trace("isbmp", 0);
 										// Bitmaps are not smoothed per default when loading. We take care of that here
 										var image : flash.display.Bitmap = cast loader.content;
+										width = image.width;
+										height = image.height;
 										image.smoothing = true;
 										if (cache == true) {
 											pictureCache.set(url, image.bitmapData);
 										}
-										checkSizes(image.width, image.height);
+										if (scaling < 0) {
+											var s = Math.min(w / width, h / height);
+											clip.scaleX = s;
+											clip.scaleY = s;
+										} else {
+											checkSizes(image.width, image.height);
+										}
 									} else {
 										var className:String = untyped __global__["flash.utils.getQualifiedClassName"](content);
 										if (className == "flash.display::AVM1Movie") {
 											//trace("url:" + url + " is AVM1. Caching", 0);
-											var width = content.width;
-											var height = content.height;
+											width = content.width;
+											height = content.height;
 											var transparent = true;
-											var bmpData:BitmapData = new BitmapData(width, height, transparent, 0);
+											var bmpData:BitmapData = new BitmapData(Std.int(width), Std.int(height), transparent, 0);
 											bmpData.draw(content);
 											if (cache == true){
 												pictureCache.set(url, bmpData);
 											}
-											checkSizes(width, height);
+											if (scaling < 0) {
+												var s = Math.min(w / width, h / height);
+												clip.scaleX = s;
+												clip.scaleY = s;
+											} else {
+												checkSizes(width, height);
+											}
 										}
 										//else {
 											//trace("url:" + url + " is:" + className + " ignore", 0);
@@ -725,8 +740,10 @@ class ArcticView {
 						}
 					}
 					var s = scaling;
-					clip.scaleX = s;
-					clip.scaleY = s;
+					if (s >= 0) {
+						clip.scaleX = s;
+						clip.scaleY = s;
+					}
 				}
 			#elseif flash
 				var s = scaling * 100.0;

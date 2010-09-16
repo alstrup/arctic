@@ -72,6 +72,7 @@ enum ArcticBlock {
 	* A static picture loaded from a URL. It is your responsibility to set the scaling such that the picture has the stated size.
 	* Notice that the width & height should be the size of this block, not the original size of the picture. If crop is true,
 	* the picture will be cropped the number of pixels in all edges.
+	* A negative value for scaling enabled automatic scaling to fit an image into (width, height) specified
 	*/
 	Picture(url : String, width : Float, height : Float, scaling : Float, ?resource : Null<Bool>, ?crop : Int, ?cache : Bool, ?cbSizeDiff : Float -> Float -> Void);
 
