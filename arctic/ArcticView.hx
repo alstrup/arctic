@@ -1565,6 +1565,9 @@ class ArcticView {
 			var clip : ArcticMovieClip = getOrMakeClip(p, mode, childNo);
 			var child = getOrMakeClip(clip, mode, 0);
 			
+			var spacing = 2; //spacing between left/right border and cell block
+			var totalSpacing = spacing * nCols;
+			
 			var cellIsEmpty = new Array<Array<Bool>>();
 			for (j in 0...nCols) {
 				var line = [];
@@ -1598,6 +1601,9 @@ class ArcticView {
 			
 			var cellProperties = new Array<CellProperty>();
 			
+			var minWidths = new Array<Float>(); 
+			var maxWidths = new Array<Float>(); 
+			
 			for (i in 0...cells.length) {
 				var cell = cells[i];
 				var pos = findUpperLeftEmptyCell();
@@ -1621,15 +1627,148 @@ class ArcticView {
 					default:
 						block = cell;
 				}
-				
-				var m = build(block, clip, 0, 0, Metrics, 0);
-				cp.width  = m.width;
-				cp.height = m.height;
-				cellProperties.push(cp);
-				
+
 				takeEmptyCells(cp.x, cp.y, cp.rowSpan, cp.colSpan);
+				
+				var min = build(block, clip, 0, 0, Metrics, 0);
+				var max = build(block, clip, 10000, 0, Metrics, 0);
+				
+				minWidths.push(min.width);
+				maxWidths.push(max.width);
+				
+				cellProperties.push(cp);
+			}
+
+			var calcWidths = function (columnWidths: Array<Float>) : Array<Float> {
+				var widths = [0.0];
+				
+				for (i in 1...nCols+1) {
+					var width = 0.0;
+					for (j in 0...cellProperties.length) { 
+						var cp = cellProperties[j];
+						
+						if (cp.x + cp.colSpan == i) { // if block ends in i-th column
+							var previous = i - cp.colSpan; // in 0...i range
+							previous = (previous < 0) ? 0 : previous; // just to be sure crash wouldn't happen
+							var w = columnWidths[j] + widths[previous];
+							width = (w > width) ? w : width;
+						}
+					}
+					
+					widths.push(width);
+				}
+				
+				return widths;
 			}
 			
+			//array of the min widths of table columns
+			var columnMinWidths = calcWidths(minWidths); 
+			var tableMinWidth = columnMinWidths[columnMinWidths.length - 1];
+			
+			var columnMaxWidths = calcWidths(maxWidths);
+			var tableMaxWidth = columnMaxWidths[columnMaxWidths.length - 1];
+			
+			var freeWidth = availableWidth - totalSpacing - tableMinWidth;
+						
+			var coefficients : Array<Float> = [];
+			
+			if ( tableMaxWidth > ( availableWidth - totalSpacing ) )
+			{
+				var tableMaxWidths : Array<Float> = []; //two-dimential array of the max widths of table cells
+				for ( i in 1...nRows + 1 ) {
+					tableMaxWidths.push(0.0);
+					
+					var rowIdx = (i - 1) * (nCols + 1);
+					
+					//calc widths for row
+					for ( j in 1...nCols + 1 ) {
+						var width = 0.0;
+						for ( k in 0...cellProperties.length ) {
+							var cp = cellProperties[k];
+							
+							if ( cp.y + cp.rowSpan == i && cp.x + cp.colSpan == j ) {
+								var previous = j - cp.colSpan; // in 0...i range
+								previous = (previous < 0) ? 0 : previous; // just to be sure crash wouldn't happen
+								width = ( maxWidths[k] - minWidths[k] ) + tableMaxWidths[rowIdx + previous];
+							}
+						}
+						
+						tableMaxWidths.push(width);
+					}
+					
+					//if colSpan > 1 distribute sum widths between the cells
+					for ( j in 1...nCols + 1 ) {
+						for ( k in 0...cellProperties.length ) {
+							var cp = cellProperties[k];
+
+							if ( cp.colSpan > 1 && j >= cp.x && j <= cp.x + cp.colSpan ) {
+								var cellWidths = tableMaxWidths[rowIdx + cp.x + cp.colSpan];
+								
+								tableMaxWidths[rowIdx + j] = (j - cp.x) * cellWidths / cp.colSpan;
+							}
+						}
+					}
+				}
+
+				var sum = 0.0;
+				for ( j in 1...nCols + 1) {
+					var max = 0.0;
+					
+					for ( i in 0...nRows ) {
+						var idx = i * (nCols + 1) + j;
+						var width = tableMaxWidths[idx] - tableMaxWidths[idx - 1];
+						
+						max = Math.max(max, width);
+					}
+					
+					coefficients.push(max);
+					sum += max;
+				}
+							
+				//normalize
+				for ( i in 0...coefficients.length ) {
+					if ( sum != 0 )
+						coefficients[i] = coefficients[i] / sum;
+				}
+				
+			}
+
+			//calculate actual widths for columns and calculate new Metrics for this widths
+			for (i in 0...cells.length) {
+				var cell = cells[i];
+				var cp = cellProperties[i];
+				
+				var block = null;
+				//TODO: remove this?
+				switch (cell) {
+					case TableCell(bl, rs, cs, tb, rb, bb, lb):
+						block = bl;
+					default:
+						block = cell;
+				}
+				
+				var minWidth = columnMinWidths[cp.x + cp.colSpan] - columnMinWidths[cp.x];
+				
+				var width = 0.0;
+				if ( tableMaxWidth > (availableWidth - totalSpacing) ) {
+					var k = 0.0;
+					for ( j in (cp.x)...(cp.x + cp.colSpan) ) {
+						k += coefficients[j];
+					}
+					
+					width = minWidth + k * freeWidth;
+				} else {
+					width = columnMaxWidths[cp.x + cp.colSpan] - columnMaxWidths[cp.x] + 
+								columnMinWidths[cp.x + cp.colSpan] - columnMinWidths[cp.x];
+				}
+				
+				var m = build(block, clip, width, 0, Metrics, 0);
+				
+				cp.width  = m.width;
+				cp.height = m.height;
+			}
+						
+			//cals column widths
 			var columnWidths = [0.0];
 			for (i in 1...nCols+1) {
 				var width = 0.0;
@@ -1639,11 +1778,13 @@ class ArcticView {
 						previous = (previous < 0) ? 0 : previous; // just to be sure crash wouldn't happen
 						var w = cp.width + columnWidths[previous];
 						width = (w > width) ? w : width;
+						width += 2 * spacing; //left and right spacing
 					}
 				}
 				columnWidths.push(width);
 			}
 			
+			//calc row heights
 			var lineHeights = [0.0];
 			for (j in 1...nRows+1) {
 				var height = 0.0;
@@ -1671,11 +1812,11 @@ class ArcticView {
 						block = cell;
 				}
 				
-				var w = columnWidths[cp.x + cp.colSpan] - columnWidths[cp.x];
+				var w = columnWidths[cp.x + cp.colSpan] - columnWidths[cp.x] - 2 * spacing; //width - leftSpacing - rightSpacing
 				var h = lineHeights[cp.y + cp.rowSpan] - lineHeights[cp.y];
 				var b = build(block, child, w, h, mode, i);
 				if (mode != Metrics && mode != Destroy && b.clip != null) {
-					ArcticMC.setXY(b.clip, columnWidths[cp.x], lineHeights[cp.y]);
+					ArcticMC.setXY(b.clip, columnWidths[cp.x] + spacing, lineHeights[cp.y]);
 				}
 				// extra height check (important for text fields with wordWrap=true)
 				//TODO: do smth with it
