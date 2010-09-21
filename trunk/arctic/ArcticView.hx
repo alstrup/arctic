@@ -1644,18 +1644,22 @@ class ArcticView {
 					default:
 						block = cell;
 				}
-
+				
 				takeEmptyCells(cp.x, cp.y, cp.rowSpan, cp.colSpan);
 				
+				var infWidth = 10000.0;
 				var min = build(block, clip, 0, 0, Metrics, 0);
-				var max = build(block, clip, 10000, 0, Metrics, 0);
+				var max = build(block, clip, infWidth, 0, Metrics, 0);
+				
+				if ( max.width == infWidth ) //do not allow Fillers take full available width, i.e. in right alignment: block = ColumnStack([Filler, innerBlock])
+					max.width = (max.height < 1e-6) ? min.width : min.width * min.height / max.height; //try to estimate the approximate width of the block
 				
 				minWidths.push(min.width);
 				maxWidths.push(max.width);
 				
 				cellProperties.push(cp);
 			}
-
+			
 			var calcWidths = function (columnWidths: Array<Float>) : Array<Float> {
 				var widths = [0.0];
 				
