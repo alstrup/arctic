@@ -1690,7 +1690,7 @@ class ArcticView {
 			var tableMaxWidth = columnMaxWidths[columnMaxWidths.length - 1];
 			
 			var freeWidth = availableWidth - totalSpacing - tableMinWidth;
-						
+									
 			var coefficients : Array<Float> = [];
 			
 			if ( tableMaxWidth > ( availableWidth - totalSpacing ) )
@@ -1779,8 +1779,7 @@ class ArcticView {
 					
 					width = minWidth + k * freeWidth;
 				} else {
-					width = columnMaxWidths[cp.x + cp.colSpan] - columnMaxWidths[cp.x] + 
-								columnMinWidths[cp.x + cp.colSpan] - columnMinWidths[cp.x];
+					width = columnMaxWidths[cp.x + cp.colSpan] - columnMaxWidths[cp.x];
 				}
 				
 				var m = build(block, clip, width, 0, Metrics, 0);
