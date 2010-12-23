@@ -1583,7 +1583,7 @@ class ArcticView {
 			var child = getOrMakeClip(clip, mode, 0);
 			
 			var spacing = 2; //spacing between left/right border and cell block
-			var totalSpacing = spacing * nCols;
+			var totalSpacing = spacing * nCols + nCols;
 			
 			var cellIsEmpty = new Array<Array<Bool>>();
 			for (j in 0...nCols) {
@@ -1798,7 +1798,7 @@ class ArcticView {
 						previous = (previous < 0) ? 0 : previous; // just to be sure crash wouldn't happen
 						var w = cp.width + columnWidths[previous];
 						width = (w > width) ? w : width;
-						width += 2 * spacing; //left and right spacing
+						width += 2 * spacing + 1; //left, right spacing and border
 					}
 				}
 				columnWidths.push(width);
