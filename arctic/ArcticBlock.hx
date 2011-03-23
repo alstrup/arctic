@@ -159,7 +159,7 @@ enum ArcticBlock {
 	 * A 2-d grid of block. For now, this does not support resizing or horizontal scrollbar.
 	 * Vertical scrollbar will be added automatically if the opposite is not specified
 	 */
-	Grid(blocks: Array<Array<ArcticBlock>>, ?disableScrollbar: Bool, ?oddRowColor: Int, ?evenRowColor: Int, ?borderSize : Float, ?borderColor : Float);
+	Grid(blocks: Array<Array<ArcticBlock>>, ?disableScrollbar: Bool, ?oddRowColor: Int, ?evenRowColor: Int, ?borderSize : Float, ?borderColor : Null<Int>);
 
 	//TODO: may be it should be removed from ArcticBlock enum? 
 	TableCell(block : ArcticBlock, ?rowSpan : Int, ?colSpan : Int, ?topBorder : Int, ?rightBorder : Int, ?bottomBorder : Int, ?leftBorder : Int);
