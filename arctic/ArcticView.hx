@@ -1409,19 +1409,19 @@ class ArcticView {
 				var x = row.indent;
 				for (entry in row.blocks) {
 					var w = entry.m.width + (entry.m.growWidth ? freeWidth : 0);
-					var child = build(entry.block, clip, w, h, mode, i);
-					if (mode != Metrics && mode != Destroy && child.clip != null) {
+					var childmetrics : Metrics = build(entry.block, clip, w, h, mode, i);
+					if (mode != Metrics && mode != Destroy && childmetrics.clip != null) {
 						var dy = (h - entry.m.height) * lineAlign;
-						ArcticMC.setXY(child.clip, x, y + dy);
+						ArcticMC.setXY(childmetrics.clip, x, y + dy);
 						if (mode == Reuse) {
-							ArcticMC.setVisible(child.clip, true);
+							ArcticMC.setVisible(childmetrics.clip, true);
 						}
 						if (needShift) {
-							shiftRow.add(function (dx) { ArcticMC.moveClip(child.clip, dx, 0); });
+							shiftRow.add(function (dx) { ArcticMC.moveClip(childmetrics.clip, dx, 0); });
 						}
 					}
 					if (entry.block != Filler) {
-						x += child.width + (entry != row.blocks[row.blocks.length - 1] ? xspacing : 0);
+						x += childmetrics.width + (entry != row.blocks[row.blocks.length - 1] ? xspacing : 0);
 					}
 					++i;
 				}
