@@ -26,11 +26,9 @@ to try it.
 
 
 
-The code is also available as a Google project:
+The code is also available on Github:
 
-http://code.google.com/p/arctic/
-
-Send me your google id if you would like to have access to Google project.
+https://github.com/alstrup/arctic
 
 
 If you'd like to extend Arctic, there are three different approaches possible:
@@ -48,9 +46,3 @@ MovieClips you might have, and mix them into Arctic.
 
 The final approach is to make new basic blocks. This is done by extending the ArcticBlock
 enum, and modify build accordingly in Arctic.hx.
-
-
-Regards,
-
-Asger Ottar Alstrup
-asger@area9.dk
